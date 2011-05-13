@@ -1,12 +1,27 @@
 <?php
 /*
-Plugin Name: humanmade Nuclear Core
+Plugin Name: HM Core
 Plugin URI: http://humanmade.co.uk/
 Description: A set of helpful frameworks, functions, classes.
-Version: 0.1
+Version: 0.1.1
 Author: humanmade limited, Tom Willmot, Joe Hoyle, Matthew Haines-Young
 Author URI: http://humanmade.co.uk/
 */
+
+
+/*
+ *	Deactivate conflicting plugins.
+ */
+
+function hm_deactivate_conflicts() {
+	$plugins = get_option('active_plugins' );
+	$plugin_deactivate = array_keys( $plugins, 'WPThumb/wpthumb.php' );
+	unset( $plugins[$plugin_deactivate[0]]);
+	update_option( 'active_plugins', $plugins );
+}
+add_action('init', 'hm_deactivate_conflicts');
+
+
 
 if ( !defined( 'HELPERPATH' ) ) :
 
@@ -23,7 +38,10 @@ if ( !defined( 'HELPERPATH' ) ) :
 
 	if( !defined( 'HM_ENABLE_PHPTHUMB' ) || HM_ENABLE_PHPTHUMB == true ) {
 	// Load phpThumb
-	include_once( HELPERPATH . 'phpthumb.php' );
+	
+	if( !function_exists( 'wpthumb' ) )
+		include_once( HELPERPATH . 'WPThumb/wpthumb.php' );
+		
 	}
 
 	// Load the Accounts module
