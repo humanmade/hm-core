@@ -1,0 +1,1 @@
+jQuery(document).ready( function($) {	var noSyncChecks = false, syncChecks, catAddAfter, stamp = $('#timestamp').html(), visibility = $('#post-visibility-display').html(), sticky = '';	// postboxes	cwp_postboxes.add_postbox_toggles( $("#cwp_panel_id").val() );});
