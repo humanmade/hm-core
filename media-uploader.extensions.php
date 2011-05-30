@@ -235,6 +235,8 @@ function hm_add_image_html_custom( $button_id, $title, $post_id, $image_ids, $cl
 	?>
 
 	<style>
+		#additional-images .inside { position: relative; }
+		#hmp_gallery_images_container { clear: both; }
 		.image-wrapper { text-align: center; display: block; padding: 5px; border: 1px solid #DFDFDF; float: left; margin-right: 7px; margin-bottom: 7px; background-color: #F1F1F1; -moz-border-radius: 4px; border-radius: 4px; }
 		.sortable .image-wrapper { cursor: move; }
 		.sortable .image-wrapper:hover { border-style: dashed; }
@@ -242,7 +244,7 @@ function hm_add_image_html_custom( $button_id, $title, $post_id, $image_ids, $cl
 		.image-wrapper img { display: block; }
 		.image-wrapper a { display: block; cursor: pointer; margin: 10px; }
 		#<?php echo $button_id; ?>_container { display: block; overflow: hidden; }
-		#normal-sortables .postbox .<?php echo $button_id; ?>_submit { padding: 0; margin: 6px 6px 8px; display: block; }
+		#normal-sortables .postbox .<?php echo $button_id; ?>_submit { padding: 0; margin: 9px 6px 12px; display: block; }
 	</style>
 
 	<p class="submit <?php echo $button_id; ?>_submit">
