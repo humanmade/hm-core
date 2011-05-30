@@ -4,17 +4,21 @@ jQuery(document).ready(function($) {
 		delete_custom_image(this);
 	});
 
+	$('.image-wrapper:first').addClass('first');
 	
 	if ( typeof( $.fn.sortable ) != 'undefined' ) {
    		$( '.sortable' ).sortable( {
 		containment : 'parent',
    			update: function( event, ui ) {
-   				write_image_ids_to_input( jQuery(this).attr( 'rel' ) ) 
+   				write_image_ids_to_input( jQuery(this).attr( 'rel' ) );
+				$('.image-wrapper').removeClass('first');
+ 				$('.image-wrapper:first').addClass('first');
    			}
-	} );
+		} );
 	}
 
 });
+
 
 // Part of media-uploader extensions, inserts the img into html on save
 function save_custom_image( button_id, id, src, is_multiple ) {
