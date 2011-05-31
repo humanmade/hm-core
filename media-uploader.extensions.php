@@ -242,6 +242,8 @@ function hm_add_image_html_custom( $button_id, $title, $post_id, $image_ids, $cl
 		.sortable .image-wrapper:hover { border-style: dashed; }
 		.ui-sortable-placeholder { visibility: visible !important; background-color: transparent; border-style: dashed; }
 		.image-wrapper img { display: block; }
+		#side-sortables  .image-wrapper { padding: 4px; margin-right: 3px; margin-left: 3px;  }
+		#side-sortables  .image-wrapper img { width: 113px; height: auto; }
 		.image-wrapper a { display: block; cursor: pointer; margin: 10px; }
 		#<?php echo $button_id; ?>_container { display: block; overflow: hidden; }
 		#normal-sortables .postbox .<?php echo $button_id; ?>_submit { padding: 0; margin: 9px 6px 12px; display: block; }
