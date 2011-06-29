@@ -56,7 +56,6 @@ add_filter( 'query_vars', 'hm_add_custom_page_variables' );
 function hm_set_custom_rewrite_rule_current_page( $request ) {
 
 	global $hm_rewrite_rules, $hm_current_rewrite_rule, $wp_rewrite;
-		
 	if( isset( $hm_rewrite_rules ) && array_key_exists( $request->matched_rule, (array) $hm_rewrite_rules ) ) {
 		$hm_current_rewrite_rule = $hm_rewrite_rules[$request->matched_rule];
 

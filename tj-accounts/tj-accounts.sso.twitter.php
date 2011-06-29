@@ -417,7 +417,7 @@ class tja_Twitter_Avatar_Option extends tja_SSO_Avatar_Option {
 			update_user_meta( $this->user->ID, '_twitter_avatar', $this->avatar_path );
 		}
 		
-		return hm_phpthumb_it( $this->avatar_path, $size );
+		return wpthumb( $this->avatar_path, $size );
 	}
 	
 	function remove_local_avatar() {

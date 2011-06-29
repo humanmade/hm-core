@@ -249,7 +249,7 @@ class tja_Uploaded_Avatar_Option extends tja_SSO_Avatar_Option {
 		if( empty( $this->user->user_avatar_path ) )
 			return null;
 		
-		return hm_phpthumb_it( $this->user->user_avatar_path, $size );
+		return wpthumb( $this->user->user_avatar_path, $size );
 	}
 }
 

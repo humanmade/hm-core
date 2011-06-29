@@ -461,7 +461,7 @@ class tja_Facebook_Avatar_Option extends tja_SSO_Avatar_Option {
 		}
 		
 		
-		return hm_phpthumb_it( $this->avatar_path, $size );
+		return wpthumb( $this->avatar_path, $size );
 	}
 	
 	function remove_local_avatar() {
