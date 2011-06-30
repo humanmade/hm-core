@@ -155,21 +155,21 @@ function recursive_in_array($needle, $haystack) {
 
 /**
  * Teh same as array_filter(), but will recursilvy traverse arrays.
- * 
+ *
  * @param array $input
  * @param function $callback. (default: null)
  * @return array
  */
-function hm_array_filter_recursive($input, $callback = null) { 
-	foreach ($input as &$value) { 
-		if (is_array($value)) { 
-			$value = hm_array_filter_recursive($value, $callback); 
-		} 
-	} 
-	
+function hm_array_filter_recursive($input, $callback = null) {
+	foreach ($input as &$value) {
+		if (is_array($value)) {
+			$value = hm_array_filter_recursive($value, $callback);
+		}
+	}
+
 	if( $callback )
-		return array_filter($input, $callback); 
-		
+		return array_filter($input, $callback);
+
 	return array_filter($input);
 }
 
@@ -319,16 +319,16 @@ function is_odd( $int ) {
  * @return array - found results
  */
 function in_array_multi( $needle, $haystack ) {
-	
+
 	foreach( (array) $haystack as $key => $stack ) {
-		
+
 		if( is_array( $stack ) && in_array_multi( $needle, $stack ) )
 			return true;
-		
+
 		if( $stack === $needle )
 			return true;
 	}
-	
+
 	return false;
 }
 
@@ -340,7 +340,7 @@ function in_array_multi( $needle, $haystack ) {
  * @return bool
  */
 function multi_array_key_exists( $needle, $haystack ) {
-	
+
 	foreach ( $haystack as $key => $value ) :
 
 		if ( $needle === $key ) {
@@ -453,7 +453,7 @@ function hm_get_messages( $context = null, $clear_cookie = true ) {
 function hm_get_the_messages( $context = null, $classes = null ) {
 
 	$messages = hm_get_messages( $context );
-	
+
 	$output = '';
 
 	if ( is_array( $messages ) ) {
@@ -487,23 +487,19 @@ function get_term_meta_by( $field = 'term_id', $value ) {
 
 }
 
-function get_metadata_by( $field = 'post', $value, $type ) {
+function get_metadata_by( $fields, $value, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
 
-	if ( $field === 'object_id' || $field === $type . '_id' ) {
-		$get_type_custom = 'get_' . $type . '_custom';
-		return $get_type_custom( $value );
+	if ( !is_array( $fields ) && !empty( $fields ) && !empty( $value ) )
+		$fields = array( $fields => $value );
 
-	}
+	foreach ( $fields as $field => $value )
+		$where[] = "" . $field . " = '" . $value . "'";
 
 	$table = $wpdb->prefix . $type . 'meta';
 
-	if ( $field === 'key' )
-		return $wpdb->get_results( "SELECT DISTINCT meta_value FROM $table WHERE $table.meta_key = '$value'" );
-
-	if ( $field === 'value' )
-		return $wpdb->get_results( "SELECT DISTINCT meta_value FROM $table WHERE $table.meta_value = '$value'" );
+	return $wpdb->get_results( "SELECT $col FROM $table WHERE " . implode( ' AND ' , (array) $where ) );
 }
 
 /**
@@ -694,11 +690,11 @@ function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = n
 	$id = $id ? $id : hm_get_post_image_id( $post );
 
 	if( $id )
-		return hm_phpthumb_it( get_attached_file( $id ), $w, $h, $crop, true, wm_get_options( $id ) );
+		return wpthumb( get_attached_file( $id ), $w, $h, $crop, true, wm_get_options( $id ) );
 
 	$att_id = hm_get_post_attached_image_id( $post );
 	if( $att_id )
-		return hm_phpthumb_it( get_attached_file( $att_id ), $w, $h, $crop, true, wm_get_options( $id ) );
+		return wpthumb( get_attached_file( $att_id ), $w, $h, $crop, true, wm_get_options( $id ) );
 	//if there is no id, then try search the content for an image
 	if( $return = hm_phpthumb_it(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
 		return $return;
@@ -798,7 +794,7 @@ function hm_get_post_external_image( $post = null ) {
 }
 
 function hm_remote_get_file( $url, $cache = true ) {
-		
+
 	//check for stuff
 	$upload_dir = wp_upload_dir();
 	$dest_folder = $upload_dir['basedir'] . '/remote_files/';
@@ -824,8 +820,8 @@ function hm_remote_get_file( $url, $cache = true ) {
    		while ($line = fread($fp, 1024)) {
    		   $content .= $line;
  		}
-   	} 
-   	
+   	}
+
    	if( empty( $content ) ) {
    		$file_404s[$url] = time();
 		update_option( 'remote_404s', $file_404s );
@@ -833,11 +829,11 @@ function hm_remote_get_file( $url, $cache = true ) {
    	}
 
 	preg_match('/Content-Length: ([0-9]+)/', $content, $parts);
-	
-	$image_data = substr($content, - $parts[1]);
-	
 
-	
+	$image_data = substr($content, - $parts[1]);
+
+
+
 	$ptr = fopen($dest_file, 'wb');
 
 	fwrite($ptr, $image_data);
@@ -1170,7 +1166,7 @@ function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 	$taxonomy__in = array_filter( (array) $taxonomy__in );
 	$taxonomy__and = array_filter( (array) $taxonomy__and );
 	$taxonomy__and_in = array_filter( (array) $taxonomy__and_in );
-	
+
 	if ( !empty( $taxonomy__in ) ) {
 
 		$where .= " AND ( 1 = 1 ";
@@ -1189,7 +1185,7 @@ function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 		$where .= " ) ";
 
 	}
-	
+
 	if ( !empty( $taxonomy__and ) ) {
 
 		$where .= " AND ( 1 = 1 ";
@@ -1199,9 +1195,9 @@ function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 			// Allow for comma sepped lists and arrays
 			if ( is_string( $terms ) )
 				$terms = explode( ',', $terms );
-			
+
 			$where__and = array();
-			
+
 			foreach( $terms as $key => $term )
 				$where__and[] = " $wpdb->posts.ID IN ( SELECT hm_{$taxonomy}_tr.object_id FROM $wpdb->term_relationships AS hm_{$taxonomy}_tr INNER JOIN $wpdb->term_taxonomy AS hm_{$taxonomy}_tt ON hm_{$taxonomy}_tr.term_taxonomy_id = hm_{$taxonomy}_tt.term_taxonomy_id WHERE hm_{$taxonomy}_tt.taxonomy = '$taxonomy' AND hm_{$taxonomy}_tt.term_id = $term )";
 
@@ -1213,22 +1209,22 @@ function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 		$where .= " ) ";
 
 	}
-	
+
 	if ( !empty( $taxonomy__and_in ) ) {
 
 		$where .= " AND ( 1 = 1 ";
 
 		foreach ( $taxonomy__and_in as $taxonomy => $taxonomy_groups ) {
 			foreach( $taxonomy_groups as $terms ) {
-				
+
 				$where__and_in = array();
-				
+
 				foreach( $terms as $key => $term )
 					$where__and_in[] = " $wpdb->posts.ID IN ( SELECT hm_{$taxonomy}_tr.object_id FROM $wpdb->term_relationships AS hm_{$taxonomy}_tr INNER JOIN $wpdb->term_taxonomy AS hm_{$taxonomy}_tt ON hm_{$taxonomy}_tr.term_taxonomy_id = hm_{$taxonomy}_tt.term_taxonomy_id WHERE hm_{$taxonomy}_tt.taxonomy = '$taxonomy' AND hm_{$taxonomy}_tt.term_id = $term )";
-				
+
 				if ( !empty( $where__and_in ) )
 					$where .= ' AND ' . implode( ' OR ', $where__and_in );
-			}	
+			}
 		}
 
 		$where .= " ) ";
@@ -1296,26 +1292,26 @@ function hm_local_to_time( $local_time ) {
 }
 
 function hm_time_to_dst_offset( $time ) {
-	
+
 	// Set TZ so localtime works.
 	date_default_timezone_set( get_option('timezone_string') );
-	
+
 	if( date( 'I', $time ) !== date( 'I', time() ) ) {
 		if( date( 'I', $time ) > date( 'I', time() ) ) {
-			
+
 			//post was created in DST (+1 hour)
 			$time += 3600;
-		
+
 		} else {
-			
+
 			//post was created in standard time (-1 Hour)
 			$time -= 3600;
 		}
 	}
-	
+
 	// Set back to UTC.
 	date_default_timezone_set('UTC');
-	
+
 	return $time;
 }
 
@@ -1384,21 +1380,21 @@ function hm_multi_implode( $array, $separator = ', ', $last_separator = ' &amp; 
 
 /**
  * r_implode function. a recursive version of implode
- * 
+ *
  * @access public
  * @param string $glue
  * @param array $pieces
  * @return string
  */
-function r_implode( $glue, $pieces ) { 
-	
-	foreach ( $pieces as $piece ) 
-	    if ( is_array( $piece ) ) 
-			$return[] = r_implode( $glue, $piece ); 
-    	else 
-			$return[] = $piece; 
-  
-	return implode( $glue, $return ); 
+function r_implode( $glue, $pieces ) {
+
+	foreach ( $pieces as $piece )
+	    if ( is_array( $piece ) )
+			$return[] = r_implode( $glue, $piece );
+    	else
+			$return[] = $piece;
+
+	return implode( $glue, $return );
 
 }
 

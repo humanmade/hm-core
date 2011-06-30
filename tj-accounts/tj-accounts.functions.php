@@ -555,7 +555,7 @@ function tja_get_avatar( $user, $width, $height, $crop = true, $try_normal = tru
 
 function tja_get_avatar_upload( $user, $w, $h, $c ) {
 	if( !empty( $user->user_avatar_path ) )
-		return hm_phpthumb_it( $user->user_avatar_path, $w, $h, $c );
+		return wpthumb( $user->user_avatar_path, $w, $h, $c );
 }
 
 /**

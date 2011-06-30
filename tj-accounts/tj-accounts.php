@@ -11,6 +11,6 @@ add_action( 'init', 'tja_init' );
 function tja_init() {
 	//inlucde facebook if the plugin is activated
 	if( function_exists( 'fbc_get_fbconnect_user' ) ) {
-		include_once( 'tj-accounts.facebook.php' );  
+		include_once( 'tj-accounts.sso.facebook.php' );  
 	}
 }
