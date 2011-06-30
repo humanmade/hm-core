@@ -18,7 +18,7 @@ function tja_blogfilter( $arg, $arg2 ) {
 	switch( $arg2 ) :
 							
 		case 'login_url' :
-			return get_bloginfo( 'url' ) . '/login/';
+			return apply_filters( 'tja_login_url', get_bloginfo( 'url' ) . '/login/' );
 			break;
 				
 		case 'register_url' :
@@ -34,7 +34,7 @@ function tja_blogfilter( $arg, $arg2 ) {
 			break;
 
 		case 'lost_password_url' :
-			return get_bloginfo( 'url' ) . '/login/lost-password/';
+			return apply_filters( 'tja_lost_password_url', get_bloginfo( 'url' ) . '/login/lost-password/' );
 			break;
 
 		case 'lost_password_inline_url' :
