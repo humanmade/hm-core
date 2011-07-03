@@ -675,7 +675,7 @@ function tja_get_profile_user() {
  * @return string
  */
 function tja_get_login_url( $redirect = null, $message = null ) {
-	$url = trailingslashit( get_bloginfo( 'url' ) ) . 'login/';
+	$url = get_bloginfo( 'login_url', 'display' );
 
 	if( $redirect )
 		$url = add_query_arg( 'redirect_to', urlencode($redirect), $url );
