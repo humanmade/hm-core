@@ -42,7 +42,7 @@ function tja_blogfilter( $arg, $arg2 ) {
 			break;
 
 		case 'my_profile_url' :
-			return get_bloginfo( 'url' ) . '/profile/';
+			return apply_filters( 'tja_my_profile_url', get_bloginfo( 'url' ) . '/profile/' );
 			break;
 		case 'logout_url' :
 			return add_query_arg( 'action', 'logout', get_bloginfo('url') );
