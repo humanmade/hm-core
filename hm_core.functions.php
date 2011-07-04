@@ -1,5 +1,8 @@
 <?php
 
+if( !isset( $_SESSION ) )
+	session_start();
+
 /**
  * hm_debug function.
  *
