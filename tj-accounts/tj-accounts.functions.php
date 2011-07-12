@@ -215,6 +215,8 @@ function tja_email_registration_success( $user, $user_pass ) {
  			105: success
 **/
 function tja_log_user_in( $args ) {
+	
+	$args = apply_filters( 'tja_log_user_in_args', $args );
 
 	if ( empty( $args['username'] ) ) :
 		hm_error_message( apply_filters( 'tja_login_no_username_error_message', 'Please enter your username' ), 'login' );
