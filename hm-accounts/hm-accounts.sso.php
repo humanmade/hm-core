@@ -1,17 +1,17 @@
 <?php
 
-require_once( 'tj-accounts.sso.facebook.php' );
-require_once( 'tj-accounts.sso.twitter.php' );
+require_once( 'hm-accounts.sso.facebook.php' );
+require_once( 'hm-accounts.sso.twitter.php' );
 
 /**
  * Returns an array of all avatar options.
  * 
  * @return array
  */
-function tja_get_avatar_options() {
+function hma_get_avatar_options() {
 
-	global $tja_sso_avatar_options;
-	return $tja_sso_avatar_options->avatar_options;
+	global $hma_sso_avatar_options;
+	return $hma_sso_avatar_options->avatar_options;
 
 }
 
@@ -20,10 +20,10 @@ function tja_get_avatar_options() {
  * 
  * @return array
  */
-function tja_get_user_avatar_options() {
-	global $tja_sso_avatar_options;
+function hma_get_user_avatar_options() {
+	global $hma_sso_avatar_options;
 	
-	$array = $tja_sso_avatar_options->avatar_options;
+	$array = $hma_sso_avatar_options->avatar_options;
 	
 	foreach( $array as $key => $value ) {
 		if( isset( $value->sso_provider ) && method_exists( $value->sso_provider, 'is_authenticated_for_current_user' ) && !$value->sso_provider->is_authenticated_for_current_user() )
@@ -39,9 +39,9 @@ function tja_get_user_avatar_options() {
  * @param string $service_id
  * @return object | null on not found
  */
-function tja_get_avatar_option( $service_id ) {
+function hma_get_avatar_option( $service_id ) {
 	
-	foreach( tja_get_avatar_options() as $option )
+	foreach( hma_get_avatar_options() as $option )
 		if( $option->service_id == $service_id )
 			return $option;
 	
@@ -52,10 +52,10 @@ function tja_get_avatar_option( $service_id ) {
  * 
  * @return array
  */
-function tja_get_sso_providers() {
+function hma_get_sso_providers() {
 	
-	global $tja_sso_providers;
-	return (array) $tja_sso_providers;
+	global $hma_sso_providers;
+	return (array) $hma_sso_providers;
 	
 }
 
@@ -65,9 +65,9 @@ function tja_get_sso_providers() {
  * @param int $sso_provider_id
  * @return object | null on not found
  */
-function tja_get_sso_provider( $sso_provider_id ) {
+function hma_get_sso_provider( $sso_provider_id ) {
 	
-	foreach( tja_get_sso_providers() as $sso_provider )
+	foreach( hma_get_sso_providers() as $sso_provider )
 		if( $sso_provider->id == $sso_provider_id )
 			return $sso_provider;
 	
@@ -76,18 +76,18 @@ function tja_get_sso_provider( $sso_provider_id ) {
 /**
  * Checks if a user logged in with a given SSO provider.
  * 
- * @param object $sso_provider. (default: tja_get_logged_in_sso_provider())
+ * @param object $sso_provider. (default: hma_get_logged_in_sso_provider())
  * @return bool
  */
-function tja_is_logged_in_with_sso_provider( $sso_provider = null ) {
+function hma_is_logged_in_with_sso_provider( $sso_provider = null ) {
 	
 	if( $sso_provider ) {
 		
-		return $sso_provider == tja_get_logged_in_sso_provider();
+		return $sso_provider == hma_get_logged_in_sso_provider();
 		
 	} else {
 		
-		return (bool) tja_get_logged_in_sso_provider();
+		return (bool) hma_get_logged_in_sso_provider();
 		
 	}
 }
@@ -97,9 +97,9 @@ function tja_is_logged_in_with_sso_provider( $sso_provider = null ) {
  * 
  * @return SSO object | null
  */
-function tja_get_logged_in_sso_provider() {
+function hma_get_logged_in_sso_provider() {
 
-	foreach( tja_get_sso_providers() as $sso_provider ) {
+	foreach( hma_get_sso_providers() as $sso_provider ) {
 
 		if( $sso_provider->check_for_provider_logged_in() )
 			return $sso_provider;
@@ -111,11 +111,11 @@ function tja_get_logged_in_sso_provider() {
  * 
  * @return array
  */
-function tja_get_sso_providers_for_current_user() {
+function hma_get_sso_providers_for_current_user() {
 	
 	$user_providers = array();
 	
-	foreach( tja_get_sso_providers() as $sso_provider ) {
+	foreach( hma_get_sso_providers() as $sso_provider ) {
 		if( $sso_provider->is_authenticated_for_current_user() )
 			$user_providers[] = $sso_provider;
 	}
@@ -128,12 +128,12 @@ function tja_get_sso_providers_for_current_user() {
  * 
  * @return array
  */
-function tja_get_sso_providers_not_authenticated_for_current_user() {
+function hma_get_sso_providers_not_authenticated_for_current_user() {
 
-	$authenticated_providers = tja_get_sso_providers_for_current_user();
+	$authenticated_providers = hma_get_sso_providers_for_current_user();
 	$unauthenticated_providers = array();
 	
-	foreach( tja_get_sso_providers() as $p ) {
+	foreach( hma_get_sso_providers() as $p ) {
 		if( !in_array( $p, $authenticated_providers ) )
 			$unauthenticated_providers[] = $p;
 	}
@@ -145,24 +145,24 @@ function tja_get_sso_providers_not_authenticated_for_current_user() {
  * Loads the avatar options and sso classes.
  * 
  */
-function tja_init_avatar_options() {
+function hma_init_avatar_options() {
 	
 	//only show "Uploaded" if they have one
 	if( !empty( wp_get_current_user()->user_avatar_path ) )
-		new tja_Uploaded_Avatar_Option();
+		new hma_Uploaded_Avatar_Option();
 		
-	new tja_Gravatar_Avatar_Option();
+	new hma_Gravatar_Avatar_Option();
 	
-	new tja_SSO_Facebook();
-	new tja_SSO_Twitter();
+	new hma_SSO_Facebook();
+	new hma_SSO_Twitter();
 }
-add_action( 'init', 'tja_init_avatar_options', 1 );
+add_action( 'init', 'hma_init_avatar_options', 1 );
 
 /**
- * tja_SSO_Avatar_Options class.
+ * hma_SSO_Avatar_Options class.
  * 
  */
-class tja_SSO_Avatar_Options {
+class hma_SSO_Avatar_Options {
 	
 	public $avatar_options;
 	
@@ -170,21 +170,21 @@ class tja_SSO_Avatar_Options {
 		$this->avatar_options = array();
 	}
 	
-	function register_avatar_option( $tja_SSO_Avatar ) {
-		$this->avatar_options[] = $tja_SSO_Avatar;
+	function register_avatar_option( $hma_SSO_Avatar ) {
+		$this->avatar_options[] = $hma_SSO_Avatar;
 	}
 
 }
-global $tja_sso_avatar_options;
-$tja_sso_avatar_options = new tja_SSO_Avatar_Options();
+global $hma_sso_avatar_options;
+$hma_sso_avatar_options = new hma_SSO_Avatar_Options();
 
 
 /**
- * tja_SSO_Avatar_Option class.
+ * hma_SSO_Avatar_Option class.
  * Used as an abstract class, must be subclassed
  * 
  */
-class tja_SSO_Avatar_Option {
+class hma_SSO_Avatar_Option {
 
 	public $service_name;
 	public $service_id;
@@ -192,8 +192,8 @@ class tja_SSO_Avatar_Option {
 	public $user;
 	
 	function __construct() {
-		global $tja_sso_avatar_options;
-		$tja_sso_avatar_options->register_avatar_option( &$this );
+		global $hma_sso_avatar_options;
+		$hma_sso_avatar_options->register_avatar_option( &$this );
 		$this->user = wp_get_current_user();
 	}
 	
@@ -235,7 +235,7 @@ class tja_SSO_Avatar_Option {
 	}
 }
 
-class tja_Uploaded_Avatar_Option extends tja_SSO_Avatar_Option {
+class hma_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 
 	function __construct() {
 		
@@ -254,7 +254,7 @@ class tja_Uploaded_Avatar_Option extends tja_SSO_Avatar_Option {
 }
 
 
-class tja_Gravatar_Avatar_Option extends tja_SSO_Avatar_Option {
+class hma_Gravatar_Avatar_Option extends hma_SSO_Avatar_Option {
 
 	function __construct() {
 		
@@ -274,15 +274,15 @@ class tja_Gravatar_Avatar_Option extends tja_SSO_Avatar_Option {
  * Absstract class for new SSO provider (e.g. Facebook, Twitter etc)
  * 
  */
-class tja_SSO_Provider {
+class hma_SSO_Provider {
 	
 	public $id;
 	public $name;
 	
 	function __construct() {
 		
-		global $tja_sso_providers;
-		$tja_sso_providers[] = &$this;
+		global $hma_sso_providers;
+		$hma_sso_providers[] = &$this;
 		add_action( 'wp_footer', array( &$this, '_run_logged_out_js' ) );
 		
 		add_action( 'init', array( &$this, '_check_sso_registrar_submitted' ) );
@@ -395,7 +395,7 @@ class tja_SSO_Provider {
 				
 		$wp_login_details = array( 'username' => $_POST['user_login'], 'password' => $_POST['user_pass'], 'remember' => ( !empty( $_POST['remember'] ) ? true : false ) );
 		
-		$login_status = tja_log_user_in( $wp_login_details );
+		$login_status = hma_log_user_in( $wp_login_details );
 		
 		if( is_wp_error( $login_status ) || !$login_status ) {
 			return $login_status;
@@ -428,7 +428,7 @@ class tja_SSO_Provider {
 	 * @return void
 	 */
 	function logout_from_provider() {
-		setcookie( "tja_sso_logged_out", $this->id, 0, COOKIEPATH );
+		setcookie( "hma_sso_logged_out", $this->id, 0, COOKIEPATH );
 	}
 	
 	
@@ -472,8 +472,8 @@ class tja_SSO_Provider {
 		
 	//internal
 	function _run_logged_out_js() {
-		if( isset( $_COOKIE['tja_sso_logged_out'] ) && $_COOKIE['tja_sso_logged_out'] == $this->id ) {
-			setcookie( 'tja_sso_logged_out', '', time() - 3600, COOKIEPATH );
+		if( isset( $_COOKIE['hma_sso_logged_out'] ) && $_COOKIE['hma_sso_logged_out'] == $this->id ) {
+			setcookie( 'hma_sso_logged_out', '', time() - 3600, COOKIEPATH );
 			$this->logged_out_js();
 		}
 	}
@@ -484,9 +484,9 @@ class tja_SSO_Provider {
 			$result = $this->provider_authentication_register_completed();
 			
 			//show the register step 2 page
-			add_action( 'tja_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
-			add_action( 'tja_sso_register_form', array( &$this, 'register_form_fields' ) );
-			do_action( 'tja_sso_provider_register_submitted_with_erroneous_details', &$this, $result );
+			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
+			add_action( 'hma_sso_register_form', array( &$this, 'register_form_fields' ) );
+			do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$this, $result );
 			
 			exit;
 		}
@@ -495,9 +495,9 @@ class tja_SSO_Provider {
 	function login_link_submitted() {
 		$return = $this->perform_wordpress_login_from_provider();
 
-		do_action( 'tja_sso_login_attempt_completed', &$this, $return );
+		do_action( 'hma_sso_login_attempt_completed', &$this, $return );
 		
-		tja_do_login_redirect( $return );
+		hma_do_login_redirect( $return );
 	}
 	
 	function _check_sso_login_submitted() {
@@ -510,7 +510,7 @@ class tja_SSO_Provider {
 	
 		if( isset( $_GET['sso_connect_with_account'] ) && $_GET['sso_connect_with_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_connect_with_account_' . $this->id ) ) {
 			$result = $this->provider_authentication_connect_with_account_completed();
-			do_action( 'tja_sso_connect_with_account_completed', &$this, $result );
+			do_action( 'hma_sso_connect_with_account_completed', &$this, $result );
 		}
 	}
 	
@@ -518,7 +518,7 @@ class tja_SSO_Provider {
 		
 		if( isset( $_GET['sso_unlink_from_account'] ) && $_GET['sso_unlink_from_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_unlink_from_account_' . $this->id ) ) {
 			$result = $this->unlink_provider_from_current_user();
-			do_action( 'tja_sso_unlink_from_account_completed', &$this, $result );
+			do_action( 'hma_sso_unlink_from_account_completed', &$this, $result );
 		}
 	}
 	
@@ -528,7 +528,7 @@ class tja_SSO_Provider {
 	}
 	
 	function _check_wordpress_login_and_connect_provider_with_account_submitted() {
-		if( isset( $_POST['sso_wordpress_login_connect_provider_with_account'] ) && $_POST['sso_wordpress_login_connect_provider_with_account'] == $this->id && check_admin_referer( 'tja_login_form_connect_with_sso_' . $this->id ) ) {
+		if( isset( $_POST['sso_wordpress_login_connect_provider_with_account'] ) && $_POST['sso_wordpress_login_connect_provider_with_account'] == $this->id && check_admin_referer( 'hma_login_form_connect_with_sso_' . $this->id ) ) {
 			
 			$result = $this->perform_wordpress_login_from_site_and_connect_provider_with_account();
 						
@@ -537,10 +537,10 @@ class tja_SSO_Provider {
 				//set the access token for the hooks below
 				$this->access_token = $this->get_access_token_from_string( $_POST['access_token'] );
 				
-				add_action( 'tja_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
-				add_action( 'tja_sso_register_form', array( &$this, 'register_form_fields' ) );
+				add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
+				add_action( 'hma_sso_register_form', array( &$this, 'register_form_fields' ) );
 				
-			    do_action( 'tja_sso_provider_register_submitted_with_erroneous_details', &$this, $result );
+			    do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$this, $result );
 			    
 			    if( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
 				    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' );	    
@@ -550,7 +550,7 @@ class tja_SSO_Provider {
 			}
 			else {
 				
-				do_action( 'tja_sso_register_completed', &$this, $result );
+				do_action( 'hma_sso_register_completed', &$this, $result );
 				
 			    if( $_POST['redirect_to'] )
 			    	$redirect = $_POST['redirect_to'];
@@ -599,7 +599,7 @@ class tja_SSO_Provider {
 		<input type="hidden" name="sso_wordpress_login_connect_provider_with_account" value="<?php echo $this->id ?>" />
 		<input type="hidden" name="sso_provider_authorized" value="<?php echo $this->id ?>" />
 		<input type="hidden" name="access_token" value="<?php echo $this->get_access_token_string() ?>" />
-		<?php wp_nonce_field( 'tja_login_form_connect_with_sso_' . $this->id ) ?>
+		<?php wp_nonce_field( 'hma_login_form_connect_with_sso_' . $this->id ) ?>
 		<?php
 	}
 

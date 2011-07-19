@@ -1,19 +1,19 @@
 <?php
 
-class tja_SSO_Facebook extends tja_SSO_Provider {
+class hma_SSO_Facebook extends hma_SSO_Provider {
 
 	function __construct() {
 	
 		parent::__construct();
 		
-		if( !defined( 'tja_SSO_FACEBOOK_APP_ID' ) || !defined( 'tja_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'tja_SSO_FACEBOOK_API_KEY' ) )
+		if( !defined( 'hma_SSO_FACEBOOK_APP_ID' ) || !defined( 'hma_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'hma_SSO_FACEBOOK_API_KEY' ) )
 			return new WP_Error( 'constants-not-defined' );
 		
 		$this->id = 'facebook';
 		$this->name = 'Facebook';
-		$this->app_id = tja_SSO_FACEBOOK_APP_ID;
-		$this->application_secret = tja_SSO_FACEBOOK_APPLICATION_SECRET;
-		$this->api_key = tja_SSO_FACEBOOK_API_KEY;
+		$this->app_id = hma_SSO_FACEBOOK_APP_ID;
+		$this->application_secret = hma_SSO_FACEBOOK_APPLICATION_SECRET;
+		$this->api_key = hma_SSO_FACEBOOK_API_KEY;
 		
 		require_once( 'facebook-sdk/facebook.php' );
 		
@@ -27,7 +27,7 @@ class tja_SSO_Facebook extends tja_SSO_Provider {
 			$this->access_token = get_user_meta( get_current_user_id(), '_fb_access_token', true );
 		}
 		
-		$this->avatar_option = new tja_Facebook_Avatar_Option( &$this );
+		$this->avatar_option = new hma_Facebook_Avatar_Option( &$this );
 							
 	}
 	
@@ -167,7 +167,7 @@ class tja_SSO_Facebook extends tja_SSO_Provider {
 		if( !empty( $info['_fb_uid'] ) && $this->_get_user_id_from_sso_id( $info['_fb_uid'] ) ) {
 
 			$result = $this->perform_wordpress_login_from_provider();
-			do_action( 'tja_sso_register_completed', &$this );
+			do_action( 'hma_sso_register_completed', &$this );
 		} elseif( empty( $info['_fb_uid'] ) ) {
 			
 			hm_error_message( 'There was a problem communication with Facebook, please try again.', 'register' );
@@ -369,8 +369,8 @@ class tja_SSO_Facebook extends tja_SSO_Provider {
 		wp_set_auth_cookie( $user_id, false );
 		set_current_user( $user_id );
 		
-		do_action( 'tja_log_user_in', $user_id);
-		do_action( 'tja_login_submitted_success' );
+		do_action( 'hma_log_user_in', $user_id);
+		do_action( 'hma_login_submitted_success' );
 		
 		return true;
 		
@@ -380,7 +380,7 @@ class tja_SSO_Facebook extends tja_SSO_Provider {
 					
 		$fb_profile_data = $this->get_user_info();
 		
-		$userdata = apply_filters( 'tja_register_user_data_from_sso', $fb_profile_data, &$this );
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, &$this );
 		
 		if( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
@@ -395,15 +395,15 @@ class tja_SSO_Facebook extends tja_SSO_Provider {
 		$userdata['unique_email'] = true;
 		$userdata['send_email'] = true;
 				
-	 	$result = tja_new_user( $userdata );
+	 	$result = hma_new_user( $userdata );
 	 	
 	 	if( is_wp_error( $result ) )
-			add_action( 'tja_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
+			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 	 	
 	 	//set the avatar to their twitter avatar if registration completed
 		if( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated_for_current_user() ) {
 			
-			$this->avatar_option = new tja_Facebook_Avatar_Option( &$this );
+			$this->avatar_option = new hma_Facebook_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 
@@ -433,7 +433,7 @@ class tja_SSO_Facebook extends tja_SSO_Provider {
 	
 }
 
-class tja_Facebook_Avatar_Option extends tja_SSO_Avatar_Option {
+class hma_Facebook_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	public $sso_provider;
 	

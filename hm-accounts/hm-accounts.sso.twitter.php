@@ -1,12 +1,12 @@
 <?php
 
-class tja_SSO_Twitter extends tja_SSO_Provider {
+class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	public $usingSession;
 	
 	function __construct() {
 		
-		if( !defined( 'tja_SSO_TWITTER_API_KEY' ) || !defined( 'tja_SSO_TWITTER_CONSUMER_SECRET' ) )
+		if( !defined( 'hma_SSO_TWITTER_API_KEY' ) || !defined( 'hma_SSO_TWITTER_CONSUMER_SECRET' ) )
 			return new WP_Error( 'constants-not-defined' );
 			
 		require_once( 'twitterauth/config.php' );
@@ -16,8 +16,8 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 		
 		$this->id = 'twitter';
 		$this->name = 'Twitter';
-		$this->api_key = tja_SSO_TWITTER_API_KEY;
-		$this->consumer_secret = tja_SSO_TWITTER_CONSUMER_SECRET;
+		$this->api_key = hma_SSO_TWITTER_API_KEY;
+		$this->consumer_secret = hma_SSO_TWITTER_CONSUMER_SECRET;
 		$this->sign_in_client = null;
 		
 		$this->usingSession = true;
@@ -34,7 +34,7 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 			$this->client = new TwitterOAuth( $this->api_key, $this->consumer_secret );
 		}
 		
-		$this->avatar_option = new tja_Twitter_Avatar_Option( &$this );
+		$this->avatar_option = new hma_Twitter_Avatar_Option( &$this );
 	}
 	
 	function get_login_button() {
@@ -176,8 +176,8 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 		wp_set_auth_cookie( $user_id, false );
 		set_current_user( $user_id );
 		
-		do_action( 'tja_log_user_in', $user_id);
-		do_action( 'tja_login_submitted_success' );
+		do_action( 'hma_log_user_in', $user_id);
+		do_action( 'hma_login_submitted_success' );
 
 		
 		return true;
@@ -190,7 +190,7 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 		$result = $this->perform_wordpress_register_from_provider();
 		
 		if( is_wp_error( $result ) )
-			add_action( 'tja_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
+			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 		
 		return $result;
 	}
@@ -204,7 +204,7 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 			return new WP_Error( 'twitter-connection-error' );
 		}
 		
-		$userdata = apply_filters( 'tja_register_user_data_from_sso', $info, &$this );
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', $info, &$this );
 		
 		if( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
@@ -219,11 +219,11 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 		$userdata['unique_email'] = true;
 		$userdata['send_email'] = true;
 		
-	 	$result = tja_new_user( $userdata );
+	 	$result = hma_new_user( $userdata );
 		
 		//set the avatar to their twitter avatar if registration completed
 		if( !is_wp_error( $result ) && is_numeric( $result ) ) {
-			$this->avatar_option = new tja_Twitter_Avatar_Option( &$this );
+			$this->avatar_option = new hma_Twitter_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 		
@@ -258,7 +258,7 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 		if( !empty( $info['_twitter_uid'] ) && $this->_get_user_id_from_sso_id( $info['_twitter_uid'] ) ) {
 
 			$result = $this->perform_wordpress_login_from_provider();
-			do_action( 'tja_sso_register_completed', &$this );
+			do_action( 'hma_sso_register_completed', &$this );
 		} elseif( empty( $info['_twitter_uid'] ) ) {
 			
 			hm_error_message( 'There was a problem communication with Twitter, please try again.', 'register' );
@@ -387,7 +387,7 @@ class tja_SSO_Twitter extends tja_SSO_Provider {
 	
 }
 
-class tja_Twitter_Avatar_Option extends tja_SSO_Avatar_Option {
+class hma_Twitter_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	public $sso_provider;
 	
@@ -545,7 +545,7 @@ class Twitter_Sign_in {
 function _twitter_sign_in_completed_hook() {
 	if( isset( $_GET['sign_in_with_twitter_authorized'] ) && $_GET['sign_in_with_twitter_authorized'] === '1' ) {
 			
-		$twitter_sso = new tja_SSO_Twitter();
+		$twitter_sso = new hma_SSO_Twitter();
 		$twitter_sign_in = new Twitter_Sign_in( $twitter_sso->client );
 		
 		if( isset( $_GET['session'] ) ) {
@@ -562,7 +562,7 @@ add_action( 'init', '_twitter_sign_in_completed_hook', 0 );
 function _twitter_sign_in_start_hook() {
 	if( isset( $_GET['sign_in_with_twitter_started'] ) ) {
 			
-		$twitter_sso = new tja_SSO_Twitter();
+		$twitter_sso = new hma_SSO_Twitter();
 		
 		//generate a new access token
 		$twitter_sso->get_sign_in_client()->access_token = $twitter_sso->get_sign_in_client()->twitterOAuth->getRequestToken( $twitter_sso->get_sign_in_client()->_get_oauth_redirect_url() );

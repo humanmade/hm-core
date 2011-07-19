@@ -24,7 +24,7 @@
  * @author: Joe Hoyle
  * @version 1.0
  **/
-function tja_new_user( $args ) {
+function hma_new_user( $args ) {
 
 	if( is_user_logged_in() ) {
 		hm_error_message( 'You are already logged in', 'register' );
@@ -60,7 +60,7 @@ function tja_new_user( $args ) {
 	$args = wp_parse_args( $args, $default_args );
 	extract( $args, EXTR_SKIP );
 	
-	$validation = apply_filters( 'tja_registration_info', $args );
+	$validation = apply_filters( 'hma_registration_info', $args );
 
 	unset( $args['user_pass2'] );
 	unset( $original_args['user_pass2'] );
@@ -118,7 +118,7 @@ function tja_new_user( $args ) {
 
 	//Send Notifcation email if specified
 	if ( $send_email == true )
-		$email = tja_email_registration_success( $user, $user_pass );
+		$email = hma_email_registration_success( $user, $user_pass );
 
 	//If they chose a password, login them in
 	if ( ( $use_password == 'true' || $do_login == true ) && $user->ID > 0 ) :
@@ -132,20 +132,20 @@ function tja_new_user( $args ) {
 	//Redirect the user if is set
 	if ( $redirect !== '' && $user->ID && $do_redirect == true ) wp_redirect( $redirect );
 	
-	do_action( 'tja_registered_user', $user );
+	do_action( 'hma_registered_user', $user );
 
 	return $user_id;
 
 }
 
 /**
- * tja_validate_registration function.
+ * hma_validate_registration function.
  *
  * @access public
  * @param mixed $args
  * @return void
  */
-function tja_validate_registration( $args ) {
+function hma_validate_registration( $args ) {
 	//Username
 	if( ($user = get_user_by('login', $args['user_login'])) && $user->ID ) {
 		hm_error_message( 'Sorry, the username: ' . $args['user_login'] . ' already exists.', 'register' );
@@ -171,9 +171,9 @@ function tja_validate_registration( $args ) {
 	
 	
 }
-add_filter( 'tja_registration_info', 'tja_validate_registration' );
+add_filter( 'hma_registration_info', 'hma_validate_registration' );
 
-function tja_email_registration_success( $user, $user_pass ) {
+function hma_email_registration_success( $user, $user_pass ) {
 
 	if( file_exists( $file = get_stylesheet_directory() . '/email.register.php' ) ) {
 		ob_start();
@@ -192,7 +192,7 @@ function tja_email_registration_success( $user, $user_pass ) {
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
-	return wp_mail( $user->user_email, apply_filters( 'tja_register_email_subject', 'New account registered for ' . get_bloginfo() ), $message, 'content-type=text/html' );
+	return wp_mail( $user->user_email, apply_filters( 'hma_register_email_subject', 'New account registered for ' . get_bloginfo() ), $message, 'content-type=text/html' );
 
 }
 
@@ -214,16 +214,16 @@ function tja_email_registration_success( $user, $user_pass ) {
  			104: incorrect password
  			105: success
 **/
-function tja_log_user_in( $args ) {
+function hma_log_user_in( $args ) {
 	
-	$args = apply_filters( 'tja_log_user_in_args', $args );
+	$args = apply_filters( 'hma_log_user_in_args', $args );
 
 	if ( empty( $args['username'] ) ) :
-		hm_error_message( apply_filters( 'tja_login_no_username_error_message', 'Please enter your username' ), 'login' );
+		hm_error_message( apply_filters( 'hma_login_no_username_error_message', 'Please enter your username' ), 'login' );
 		return new WP_Error( 'no-username', 'Please enter your username' );
 	endif;
 
-	$user = tja_parse_user( $args['username'] );
+	$user = hma_parse_user( $args['username'] );
 
 	$defaults = array(
 		'remember' => false,
@@ -241,18 +241,18 @@ function tja_log_user_in( $args ) {
 	extract( $args, EXTR_SKIP );
 
 	if ( !is_numeric( $user->ID ) ) :
-		hm_error_message(  apply_filters( 'tja_login_unrecognized_username_error_message', 'The username you entered was not recognized' ), 'login' );
+		hm_error_message(  apply_filters( 'hma_login_unrecognized_username_error_message', 'The username you entered was not recognized' ), 'login' );
 		return new WP_Error( 'unrecognized-username', 'The username you entered was not recognized');
 	endif;
 
 	if ( $password_hashed != true ) :
 		if ( !wp_check_password( $password, $user->user_pass ) ) :
-			hm_error_message( apply_filters( 'tja_login_incorrect_password_error_message', 'The password you entered is incorrect' ), 'login' );
+			hm_error_message( apply_filters( 'hma_login_incorrect_password_error_message', 'The password you entered is incorrect' ), 'login' );
 			return new WP_Error('incorrect-password', 'The password you entered is incorrect');
 		endif;
 	else :
 		if ( $password != $user->user_pass ) :
-			hm_error_message( apply_filters( 'tja_login_incorrect_password_error_message', 'The password you entered is incorrect' ), 'login' );
+			hm_error_message( apply_filters( 'hma_login_incorrect_password_error_message', 'The password you entered is incorrect' ), 'login' );
 			return new WP_Error('incorrect-password', 'The password you entered is incorrect');
 		endif;
 	endif;
@@ -261,19 +261,19 @@ function tja_log_user_in( $args ) {
 	set_current_user( $user->ID );
 
 	do_action( 'wp_login', $user->user_login );
-	do_action( 'tja_log_user_in', $user);
+	do_action( 'hma_log_user_in', $user);
 
 	if ( $redirect_to == 'referer' )
 		$redirect_to = wp_get_referer();
 
 	if ( $redirect_to )
-		wp_redirect( hm_parse_redirect( apply_filters( 'tja_login_redirect', $redirect_to, $user ) ) );
+		wp_redirect( hm_parse_redirect( apply_filters( 'hma_login_redirect', $redirect_to, $user ) ) );
 	return true;
 }
 
-function tja_lost_password( $email ) {
+function hma_lost_password( $email ) {
 	if( !get_user_by_email( $email ) && !get_userdatabylogin( $email ) ) {
-		hm_error_message( apply_filters( 'tja_login_unrocognized_email_error_message', 'The email address you entered was not recognised'), 'lost-password' );
+		hm_error_message( apply_filters( 'hma_login_unrocognized_email_error_message', 'The email address you entered was not recognised'), 'lost-password' );
 		return new WP_Error('unrecognized-email');
 	}
 
@@ -285,7 +285,7 @@ function tja_lost_password( $email ) {
 	include_once( trailingslashit(ABSPATH) . 'wp-login.php' );
 	ob_end_clean();
 
-	add_filter( 'retrieve_password_message', 'tja_lost_password_email', 10, 2 );
+	add_filter( 'retrieve_password_message', 'hma_lost_password_email', 10, 2 );
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
@@ -300,7 +300,7 @@ function tja_lost_password( $email ) {
 	return new WP_Error('unknown');
 }
 
-function tja_lost_password_email( $message, $key ) {
+function hma_lost_password_email( $message, $key ) {
 
 	$user = get_user_by_email(trim($_POST['user_login']));
 	$reset_url = get_bloginfo( 'lost_password_url', 'display' ) . '?action=rp&key=' . $key . '&login=' . $user->user_login;
@@ -317,14 +317,14 @@ function tja_lost_password_email( $message, $key ) {
 
 }
 
-function tja_reset_password( $user_login, $key ) {
+function hma_reset_password( $user_login, $key ) {
 	
-	add_filter( 'password_reset_message', 'tja_reset_password_email', 10, 2 );
+	add_filter( 'password_reset_message', 'hma_reset_password_email', 10, 2 );
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
 	
-	$status = tja_override_reset_password( $key, $user_login );
+	$status = hma_override_reset_password( $key, $user_login );
 	
 	if( !is_wp_error($status) ) {
 		hm_success_message( 'You have been sent an email with your new randomly generated password', 'lost-password' );
@@ -336,7 +336,7 @@ function tja_reset_password( $user_login, $key ) {
 
 }
 
-function tja_reset_password_email( $message, $new_pass ) {
+function hma_reset_password_email( $message, $new_pass ) {
 	
 	$user = get_userdatabylogin( $_GET['login'] );
 	
@@ -366,7 +366,7 @@ function tja_reset_password_email( $message, $new_pass ) {
  * @AUTHOR: Tom Willmot
  * @VERSION: 1.0
  **/
-function tja_update_user_info( $info ) {
+function hma_update_user_info( $info ) {
 
 	// If an email was passed, check that it is valid
 	if ( !preg_match( "/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/", strtolower( $info['user_email'] ) ) && is_string( $info['user_email'] ) && strpos( $info['user_email'], 'apps+' ) !== 0 ) {
@@ -429,13 +429,13 @@ function tja_update_user_info( $info ) {
 }
 
 /**
- * tja_parse_user function.
+ * hma_parse_user function.
  *
  * @access public
  * @param mixed $user. (default: null)
  * @return void
  */
-function tja_parse_user( $user = null ) {
+function hma_parse_user( $user = null ) {
 
 	if ( is_object( $user ) && isset( $user->ID ) && is_numeric( $user->ID ) )
 		return get_userdata( $user->ID );
@@ -461,34 +461,34 @@ function tja_parse_user( $user = null ) {
 	endif;
 }
 
-function tja_login_message() {
+function hma_login_message() {
 	if( !$_GET['message'] )
 		return;
 
-	echo '<p class="message error">' . tja_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
+	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
 }
 
-function tja_register_message() {
+function hma_register_message() {
 	if( !$_GET['message'] )
 		return;
 
-	echo '<p class="message error">' . tja_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
+	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
 }
 
-function tja_get_message( $code = null ) {
+function hma_get_message( $code = null ) {
 	if( $code === null ) $code = (int) $_GET['message'];
-	$codes = tja_message_codes();
+	$codes = hma_message_codes();
 	return $codes[$code];
 }
 
-function tja_get_the_message() {
+function hma_get_the_message() {
 	if( !$_GET['message'] )
 		return;
 
-	echo '<p class="message error">' . tja_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
+	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
 }
 
-function tja_message_codes() {
+function hma_message_codes() {
 	$codes = array();
 	$codes[101] = 'You are already logged in.';
 	$codes[102] = 'Please enter a username.';
@@ -510,41 +510,41 @@ function tja_message_codes() {
 
 	$codes[400] = 'Successfully updated your profile.';
 
-	return apply_filters( 'tja_message_codes', $codes );
+	return apply_filters( 'hma_message_codes', $codes );
 }
 
 
 //url functions
-function tja_get_user_url( $authordata = null ) {
+function hma_get_user_url( $authordata = null ) {
 	if( !$authordata ) global $authordata;
-	$authordata = tja_parse_user( $authordata );
+	$authordata = hma_parse_user( $authordata );
 	return get_bloginfo('url') . '/users/' . $authordata->user_nicename . '/';
 }
 
 
 //get user functions
-function tja_get_avatar( $user, $width, $height, $crop = true, $try_normal = true ) {
+function hma_get_avatar( $user, $width, $height, $crop = true, $try_normal = true ) {
 	
-	$user = tja_parse_user( $user );
+	$user = hma_parse_user( $user );
 
 	//try to use avatar option classes	
 	if( !empty( $user->user_avatar_option ) ) {
-		$tja_avatar_option = tja_get_avatar_option( $user->user_avatar_option );
-		$tja_avatar_option->user = $user;
+		$hma_avatar_option = hma_get_avatar_option( $user->user_avatar_option );
+		$hma_avatar_option->user = $user;
 		
-		if( is_a( $tja_avatar_option, 'tja_SSO_Avatar_Option' ) ) {
+		if( is_a( $hma_avatar_option, 'hma_SSO_Avatar_Option' ) ) {
 		
-			$avatar = $tja_avatar_option->get_avatar( "width=$width&height=$height&crop=$crop" );
+			$avatar = $hma_avatar_option->get_avatar( "width=$width&height=$height&crop=$crop" );
 			
 			if( $avatar )
 				return $avatar;
 		}
 	}
 	
-	if( $avatar = tja_get_avatar_upload( $user, $width, $height, $crop ) ) {
+	if( $avatar = hma_get_avatar_upload( $user, $width, $height, $crop ) ) {
 		return $avatar;
 	}
-	elseif( $avatar = apply_filters( 'tja_get_avatar_fallback', null, $user, $width, $height, $crop ) ) {
+	elseif( $avatar = apply_filters( 'hma_get_avatar_fallback', null, $user, $width, $height, $crop ) ) {
 		return $avatar;
 	}
 	elseif( $try_normal === true ) {
@@ -555,7 +555,7 @@ function tja_get_avatar( $user, $width, $height, $crop = true, $try_normal = tru
 	
 }
 
-function tja_get_avatar_upload( $user, $w, $h, $c ) {
+function hma_get_avatar_upload( $user, $w, $h, $c ) {
 	if( !empty( $user->user_avatar_path ) )
 		return wpthumb( $user->user_avatar_path, $w, $h, $c );
 }
@@ -566,7 +566,7 @@ function tja_get_avatar_upload( $user, $w, $h, $c ) {
  * @param object $user
  * @return bool
  */
-function tja_is_facebook_user( $user ) {
+function hma_is_facebook_user( $user ) {
 	return (bool) $user->fbuid;
 }
 
@@ -579,7 +579,7 @@ function tja_is_facebook_user( $user ) {
  * @param string $key Hash to validate sending user's password
  * @return bool|WP_Error
  */
-function tja_override_reset_password($key, $login) {
+function hma_override_reset_password($key, $login) {
 	global $wpdb;
 
 	$key = preg_replace('/[^a-z0-9]/i', '', $key);
@@ -628,27 +628,27 @@ function tja_override_reset_password($key, $login) {
 	return true;
 }
 
-function tja_is_login() {
+function hma_is_login() {
 	global $wp_the_query;
 	return !empty( $wp_the_query->is_login );
 }
 
-function tja_is_register() {
+function hma_is_register() {
 	global $wp_the_query;
 	return !empty( $wp_the_query->is_register );
 }
 
-function tja_is_lost_password() {
+function hma_is_lost_password() {
 	global $wp_the_query;
 	return !empty( $wp_the_query->is_lost_password );
 }
 
-function tja_is_edit_profile() {
+function hma_is_edit_profile() {
 	global $wp_the_query;
 	return !empty( $wp_the_query->is_edit_profile );
 }
 
-function tja_is_user_profile( $user_id = null ) {
+function hma_is_user_profile( $user_id = null ) {
 	
 	global $wp_the_query;
 	
@@ -660,9 +660,9 @@ function tja_is_user_profile( $user_id = null ) {
 
 }
 
-function tja_get_profile_user() {
+function hma_get_profile_user() {
 	
-	if( !tja_is_user_profile() )
+	if( !hma_is_user_profile() )
 		return null;
 	
 	return get_user_by( 'slug', get_query_var( 'author_name' ) );
@@ -676,7 +676,7 @@ function tja_get_profile_user() {
  * @param string $message - message to show on the login page
  * @return string
  */
-function tja_get_login_url( $redirect = null, $message = null ) {
+function hma_get_login_url( $redirect = null, $message = null ) {
 	$url = get_bloginfo( 'login_url', 'display' );
 
 	if( $redirect )
@@ -695,8 +695,8 @@ function tja_get_login_url( $redirect = null, $message = null ) {
  * @param string $message - message to show on the login page
  * @return string
  */
-function tja_get_logout_url( $redirect = null ) {
-	$url = add_query_arg( 'action', 'logout', tja_get_login_url() );
+function hma_get_logout_url( $redirect = null ) {
+	$url = add_query_arg( 'action', 'logout', hma_get_login_url() );
 
 	if( $redirect )
 		$url = add_query_arg( 'redirect_to', urlencode($redirect), $url );
@@ -704,13 +704,13 @@ function tja_get_logout_url( $redirect = null ) {
 	return $url;
 }
 
-function tja_get_lost_password_url() {
+function hma_get_lost_password_url() {
 	
-	return tja_get_login_url() . 'lost-password/';
+	return hma_get_login_url() . 'lost-password/';
 	
 }
 
-function tja_get_register_url() {
+function hma_get_register_url() {
 	
 	return trailingslashit( get_bloginfo( 'url' ) ) . 'register/';
 	
@@ -722,7 +722,7 @@ function tja_get_register_url() {
  * @param string $base_name
  * @return string
  */
-function tja_unique_username( $base_name ) {
+function hma_unique_username( $base_name ) {
 	
 	require_once( ABSPATH . 'wp-includes/registration.php' ); 
 	

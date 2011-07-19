@@ -1,6 +1,6 @@
 <?php
 
-class tja_SSO_Google extends tja_SSO_Provider {
+class hma_SSO_Google extends hma_SSO_Provider {
 
 	function __construct() {
 	
@@ -113,7 +113,7 @@ class tja_SSO_Google extends tja_SSO_Provider {
 		wp_set_auth_cookie( $user_id, false );
 		set_current_user( $user_id );
 		
-		do_action( 'tja_log_user_in', $user_id);
+		do_action( 'hma_log_user_in', $user_id);
 		
 		return true;
 		
@@ -137,7 +137,7 @@ class tja_SSO_Google extends tja_SSO_Provider {
 			'display_name'	=> $userinfo->entry->displayName,
 		);
 		
-		$userdata = apply_filters( 'tja_register_user_data_from_sso', $userdata, $fb_profile_data, &$this );
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', $userdata, $fb_profile_data, &$this );
 		
 		$userdata['_fc_uid'] = $userinfo->entry->id;
 		$userdata['override_nonce'] = true;
@@ -147,7 +147,7 @@ class tja_SSO_Google extends tja_SSO_Provider {
 		if( empty( $userdata['user_email'] ) )
 			$userdata['user_email'] = $userdata['user_login'] . '@no-email.com';
 		
-		tja_new_user( $userdata );
+		hma_new_user( $userdata );
 		
 		return true;
 
