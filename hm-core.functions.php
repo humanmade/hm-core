@@ -1,74 +1,7 @@
 <?php
 
-if( !isset( $_SESSION ) )
+if ( !isset( $_SESSION ) )
 	session_start();
-
-/**
- * hm_debug function.
- *
- * @access public
- * @param mixed $code
- * @param bool $output. (default: true)
- * @return void
- */
-function hm( $code, $output = true ) {
-
-	if ( $output ) : ?>
-
-		<style>
-			.hm_debug { word-wrap: break-word; white-space: pre; text-align: left; position: relative; background-color: rgba(0, 0, 0, 0.8); font-size: 11px; color: #a1a1a1; margin: 10px; padding: 10px; margin: 0 auto; width: 80%; overflow: auto;  -moz-border-radius: 5px; -webkit-border-radius: 5px; text-shadow: none; }
-		</style>
-		<br /><pre class="hm_debug">
-	<?php endif;
-	if ( is_null( $code ) || is_string($code) || is_int( $code ) || is_bool($code) || is_float( $code ) ) :
-		if ( $output )
-			var_dump( $code );
-		else
-			var_export( $code, true );
-	else :
-		if ( $output )
-			print_r( $code );
-		else
-			print_r( $code, true );
-	endif;
-
-	if ( $output )
-		echo '</pre><br />';
-
-}
-
-function hm_log( $code ) {
-
-	$output = false;
-
-	if ( is_null( $code ) || is_string($code) || is_int( $code ) || is_bool($code) || is_float( $code ) ) :
-		if ( $output )
-			var_dump( $code );
-		else
-			$code = var_export( $code, true );
-	else :
-		if ( $output )
-			print_r( $code );
-		else
-			$code = print_r( $code, true );
-	endif;
-
-	error_log( $code );
-
-}
-
-/**
- * hm_alert function.
- *
- * @access public
- * @param mixed $code
- * @return void
- */
-function hm_alert( $code ) {
-	echo '<script type="text/javascript"> alert("';
-	hm_debug( $code );
-	echo '")</script>';
-}
 
 /**
  * hm_human_post_time function.
