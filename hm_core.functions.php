@@ -1,5 +1,8 @@
 <?php
 
+if( !isset( $_SESSION ) )
+	session_start();
+
 /**
  * hm_debug function.
  *
@@ -386,7 +389,7 @@ function hm_add_message( $message, $context, $type ) {
 		$context = 'all';
 	}
 
-	if( defined( 'hm_USE_COOKIES_FOR_MESSAGES') && hm_USE_COOKIES_FOR_MESSAGES ) {
+	if( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = ( $_COOKIE['hm_messages'] ) ? $_COOKIE['hm_messages'] : "";
 		$messages = array_filter( (array) unserialize( base64_decode( $cookie ) ) );
 	} else {
@@ -398,7 +401,7 @@ function hm_add_message( $message, $context, $type ) {
 
 	$messages[$context][] = array( 'message' => $message, 'type' => $type );
 
-	if( defined( 'hm_USE_COOKIES_FOR_MESSAGES') && hm_USE_COOKIES_FOR_MESSAGES ) {
+	if( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = base64_encode( serialize( $messages ) );
 		$_COOKIE['hm_messages'] = $cookie;
 		@setcookie("hm_messages", $cookie, 0, COOKIEPATH );
@@ -412,7 +415,7 @@ function hm_add_message( $message, $context, $type ) {
 
 function hm_get_messages( $context = null, $clear_cookie = true ) {
 
-	if( defined( 'hm_USE_COOKIES_FOR_MESSAGES') && hm_USE_COOKIES_FOR_MESSAGES ) {
+	if( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = ( $_COOKIE['hm_messages'] ) ? $_COOKIE['hm_messages'] : "";
 		$messages = array_filter( (array) unserialize( base64_decode( $cookie ) ) );
 	} else {
@@ -438,7 +441,7 @@ function hm_get_messages( $context = null, $clear_cookie = true ) {
 		$messages = "";
 	}
 
-	if( $clear_cookie && defined( 'hm_USE_COOKIES_FOR_MESSAGES') && hm_USE_COOKIES_FOR_MESSAGES ) {
+	if( $clear_cookie && defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 
 		$cookie = base64_encode( serialize( $messages ) );
 		$_COOKIE['hm_messages'] = $cookie;
