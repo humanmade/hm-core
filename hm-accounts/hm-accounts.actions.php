@@ -1,18 +1,18 @@
 <?php
 
-function tja_login_submitted() {
+function hma_login_submitted() {
 
-	$return = tja_log_user_in( array( 'username' => $_POST['user_login'], 'password' => $_POST['user_pass'], 'remember' => ( !empty( $_POST['remember'] ) ? true : false ) ) );
+	$return = hma_log_user_in( array( 'username' => $_POST['user_login'], 'password' => $_POST['user_pass'], 'remember' => ( !empty( $_POST['remember'] ) ? true : false ) ) );
 	
-	tja_do_login_redirect( $return );
+	hma_do_login_redirect( $return );
 
 }
-add_action( 'tja_login_submitted', 'tja_login_submitted' );
+add_action( 'hma_login_submitted', 'hma_login_submitted' );
 
-function tja_do_login_redirect( $return ) {
+function hma_do_login_redirect( $return ) {
 	
 	if( is_wp_error($return) ) {
-		do_action( 'tja_login_submitted_error', $return );
+		do_action( 'hma_login_submitted_error', $return );
 		
 		if( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
 			$redirect = add_query_arg( 'message', $return->get_error_code(), get_bloginfo( 'login_inline_url', 'display' ) );
@@ -40,7 +40,7 @@ function tja_do_login_redirect( $return ) {
 		else
 			$redirect = get_bloginfo('url');
 			
-		do_action( 'tja_login_submitted_success', $redirect );
+		do_action( 'hma_login_submitted_success', $redirect );
 		
 		wp_redirect( hm_parse_redirect( $redirect ) );
 		exit;
@@ -48,9 +48,9 @@ function tja_do_login_redirect( $return ) {
 	
 }
 
-function tja_check_for_sso_providers_logged_in() {
+function hma_check_for_sso_providers_logged_in() {
 
-	foreach( tja_get_sso_providers() as $sso_provider ) {
+	foreach( hma_get_sso_providers() as $sso_provider ) {
 
 		if( $sso_provider->check_for_provider_logged_in() ) {
 			if( $sso_provider->perform_wordpress_login_from_provider() )
@@ -60,9 +60,9 @@ function tja_check_for_sso_providers_logged_in() {
 
 }
 
-function tja_check_for_sso_providers_registered() {
+function hma_check_for_sso_providers_registered() {
 
-	foreach( tja_get_sso_providers() as $sso_provider ) {
+	foreach( hma_get_sso_providers() as $sso_provider ) {
 
 		if( $sso_provider->check_for_provider_logged_in() ) {
 			return $sso_provider;
@@ -70,11 +70,11 @@ function tja_check_for_sso_providers_registered() {
 	}
 }
 
-function tja_login_in_user_from_sso_providers() {
+function hma_login_in_user_from_sso_providers() {
 	if( is_user_logged_in() )
 		return null;
 		
-	foreach( tja_get_sso_providers() as $sso_provider ) {
+	foreach( hma_get_sso_providers() as $sso_provider ) {
 				
 		if( $sso_provider->check_for_provider_logged_in() ) {
 			if( $sso_provider->perform_wordpress_login_from_provider() ) {
@@ -83,7 +83,7 @@ function tja_login_in_user_from_sso_providers() {
 		}
 	}
 }
-//add_action( 'init', 'tja_login_in_user_from_sso_providers' );
+//add_action( 'init', 'hma_login_in_user_from_sso_providers' );
 
 function hm_parse_redirect( $redirect ) {
 
@@ -94,13 +94,13 @@ function hm_parse_redirect( $redirect ) {
 }
 
 
-function tja_logout() {
+function hma_logout() {
 	
 	if ( isset( $_GET['action'] ) && $_GET['action'] == 'logout' ) :
 		
 		//logout of a sso provider 
-		if( tja_is_logged_in_with_sso_provider() ) {
-			$sso_provider = tja_get_logged_in_sso_provider();
+		if( hma_is_logged_in_with_sso_provider() ) {
+			$sso_provider = hma_get_logged_in_sso_provider();
 		}
 			
 		wp_logout();
@@ -123,15 +123,15 @@ function tja_logout() {
 	endif;
 	
 }
-add_action( 'init', 'tja_logout', 9 );
+add_action( 'init', 'hma_logout', 9 );
 
-add_action( 'tja_lost_password_submitted', 'tja_lost_password_submitted' );
-function tja_lost_password_submitted() {
+add_action( 'hma_lost_password_submitted', 'hma_lost_password_submitted' );
+function hma_lost_password_submitted() {
 	
-	$success = tja_lost_password( $_POST['user_email'] );
+	$success = hma_lost_password( $_POST['user_email'] );
 
 	if( is_wp_error( $success ) ) {
-		do_action( 'tja_lost_password_submitted_error', $success );
+		do_action( 'hma_lost_password_submitted_error', $success );
 		
 		if( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
 			wp_redirect( get_bloginfo( 'lost_password_inline_url', 'display' ) . '?message=' . $success->get_error_code() );
@@ -140,7 +140,7 @@ function tja_lost_password_submitted() {
 			
 		exit;
 	} else {
-		do_action( 'tja_lost_password_submitted_success', $success );
+		do_action( 'hma_lost_password_submitted_success', $success );
 		
 		if( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
 			wp_redirect( get_bloginfo( 'lost_password_inline_url', 'display' ) . '?message=' . $success['text'] );
@@ -151,9 +151,9 @@ function tja_lost_password_submitted() {
 	}
 }
 
-function tja_sso_register_submitted() {
+function hma_sso_register_submitted() {
 	
-	$registered_with_sso_provider = tja_check_for_sso_providers_registered();
+	$registered_with_sso_provider = hma_check_for_sso_providers_registered();
 	
 	if( !$registered_with_sso_provider ) {
 		return;
@@ -163,8 +163,8 @@ function tja_sso_register_submitted() {
 		
 	if( ( !$result ) || is_wp_error( $result ) ) {
 		
-		add_action( 'tja_sso_register_form', array( &$registered_with_sso_provider, 'register_form_fields' ) );
-	    do_action( 'tja_sso_provider_register_submitted_with_erroneous_details', &$registered_with_sso_provider, $result );
+		add_action( 'hma_sso_register_form', array( &$registered_with_sso_provider, 'register_form_fields' ) );
+	    do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$registered_with_sso_provider, $result );
 	    
 	    if( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
 		    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' );	    
@@ -174,7 +174,7 @@ function tja_sso_register_submitted() {
 	}
 	else {
 		
-		do_action( 'tja_sso_register_completed', &$registered_with_sso_provider, $result );
+		do_action( 'hma_sso_register_completed', &$registered_with_sso_provider, $result );
 		
 	    if( $_POST['redirect_to'] )
 	    	$redirect = $_POST['redirect_to'];
@@ -191,12 +191,12 @@ function tja_sso_register_submitted() {
 	
 			
 }
-add_action( 'tja_sso_register_submitted', 'tja_sso_register_submitted' );
+add_action( 'hma_sso_register_submitted', 'hma_sso_register_submitted' );
 
-add_action( 'tja_register_submitted', 'tja_register_submitted' );
-function tja_register_submitted() {
+add_action( 'hma_register_submitted', 'hma_register_submitted' );
+function hma_register_submitted() {
 
-	$hm_return = tja_new_user( array(
+	$hm_return = hma_new_user( array(
 	    'user_login' 	=> $_POST['user_login'],
 	    'user_email'	=> $_POST['user_email'],
 	    'use_password' 	=> true,
@@ -218,7 +218,7 @@ function tja_register_submitted() {
 	}
 	else {
 		
-		do_action( 'tja_register_completed', $hm_return );
+		do_action( 'hma_register_completed', $hm_return );
 
 		if( $_POST['redirect_to'] )
 			$redirect = $_POST['redirect_to'];
@@ -235,9 +235,9 @@ function tja_register_submitted() {
 }
 
 
-function tja_profile_submitted() {
+function hma_profile_submitted() {
 	//filter out anyone trying to brutefirce
-	check_admin_referer( 'tja_profile_submitted' );
+	check_admin_referer( 'hma_profile_submitted' );
 	
 	global $current_user;
 	
@@ -284,7 +284,7 @@ function tja_profile_submitted() {
 	if( $_FILES['user_avatar']['name'] )
 		$user_data['user_avatar'] = $_FILES['user_avatar'];
 
-	$success = tja_update_user_info( $user_data );
+	$success = hma_update_user_info( $user_data );
 	
 	//unlink any sso providers
 	if( !is_wp_error( $success ) && !empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
@@ -295,7 +295,7 @@ function tja_profile_submitted() {
 		
 			foreach( array_filter( (array) $_POST['unlink_sso_providers'] ) as $sso_provider_id ) {
 			
-				$sso_provider = tja_get_sso_provider( $sso_provider_id );
+				$sso_provider = hma_get_sso_provider( $sso_provider_id );
 				$sso_provider->unlink_provider_from_current_user();
 			
 			}
@@ -311,9 +311,9 @@ function tja_profile_submitted() {
 	else
 	    $redirect = get_bloginfo('my_profile_url', 'display');
 	   
-	do_action( 'tja_update_user_profile_completed', $redirect );
+	do_action( 'hma_update_user_profile_completed', $redirect );
 	
 	wp_redirect( add_query_arg( 'message', is_wp_error( $success ) ? $success->get_error_code() : '1', $redirect ) );
 	exit;
 }
-add_action( 'tja_profile_submitted', 'tja_profile_submitted' );
+add_action( 'hma_profile_submitted', 'hma_profile_submitted' );

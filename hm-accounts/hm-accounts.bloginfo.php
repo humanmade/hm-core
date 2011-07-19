@@ -1,7 +1,7 @@
 <?php
 
-add_filter( 'bloginfo_url', 'tja_blogfilter', 10, 2 ); 
-add_filter( 'bloginfo', 'tja_blogfilter', 10, 2 ); 
+add_filter( 'bloginfo_url', 'hma_blogfilter', 10, 2 ); 
+add_filter( 'bloginfo', 'hma_blogfilter', 10, 2 ); 
 
 /**
  * We use the blogfilter function to define all the page urls and category mappings
@@ -11,14 +11,14 @@ add_filter( 'bloginfo', 'tja_blogfilter', 10, 2 );
  * @return string - the url or category name
  *
  **/
-function tja_blogfilter( $arg, $arg2 ) {
+function hma_blogfilter( $arg, $arg2 ) {
 
 	global $current_user;
 	
 	switch( $arg2 ) :
 							
 		case 'login_url' :
-			return apply_filters( 'tja_login_url', get_bloginfo( 'url' ) . '/login/' );
+			return apply_filters( 'hma_login_url', get_bloginfo( 'url' ) . '/login/' );
 			break;
 				
 		case 'register_url' :
@@ -34,7 +34,7 @@ function tja_blogfilter( $arg, $arg2 ) {
 			break;
 
 		case 'lost_password_url' :
-			return apply_filters( 'tja_lost_password_url', get_bloginfo( 'url' ) . '/login/lost-password/' );
+			return apply_filters( 'hma_lost_password_url', get_bloginfo( 'url' ) . '/login/lost-password/' );
 			break;
 
 		case 'lost_password_inline_url' :
@@ -42,7 +42,7 @@ function tja_blogfilter( $arg, $arg2 ) {
 			break;
 
 		case 'my_profile_url' :
-			return apply_filters( 'tja_my_profile_url', get_bloginfo( 'url' ) . '/profile/' );
+			return apply_filters( 'hma_my_profile_url', get_bloginfo( 'url' ) . '/profile/' );
 			break;
 		case 'logout_url' :
 			return add_query_arg( 'action', 'logout', get_bloginfo('url') );

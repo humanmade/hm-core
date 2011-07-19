@@ -628,7 +628,7 @@ if( !function_exists( 'update_term_meta' ) ) :
 /**
  * Update term meta field based on term ID.
  *
- * Use the $prev_value parameter to differentiate betjeen meta fields with the
+ * Use the $prev_value parameter to differentiate between meta fields with the
  * same key and term ID.
  *
  * If the meta field for the term does not exist, it will be added.

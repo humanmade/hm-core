@@ -1,28 +1,28 @@
 <?php
-add_action( 'init', 'tja_check_for_pages' );
-function tja_check_for_pages() {
-	tja_check_for_submit('register');
-	tja_check_for_submit('sso_register');
-	tja_check_for_submit('login');
-	tja_check_for_submit('lost_password');
-	tja_check_for_submit('profile');
+add_action( 'init', 'hma_check_for_pages' );
+function hma_check_for_pages() {
+	hma_check_for_submit('register');
+	hma_check_for_submit('sso_register');
+	hma_check_for_submit('login');
+	hma_check_for_submit('lost_password');
+	hma_check_for_submit('profile');
 }
 
-add_action( 'tja_register_form', 'tja_add_register_inputs' );
-function tja_add_register_inputs() {
-	tja_add_form_fields( 'register', false );
+add_action( 'hma_register_form', 'hma_add_register_inputs' );
+function hma_add_register_inputs() {
+	hma_add_form_fields( 'register', false );
 	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n";
 }
 
-add_action( 'tja_sso_register_form', 'tja_add_sso_register_inputs' );
-function tja_add_sso_register_inputs() {
-	tja_add_form_fields( 'sso_register', false );
+add_action( 'hma_sso_register_form', 'hma_add_sso_register_inputs' );
+function hma_add_sso_register_inputs() {
+	hma_add_form_fields( 'sso_register', false );
 	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n";
 }
 
-add_action( 'tja_login_form', 'tja_add_login_inputs' );
-function tja_add_login_inputs() {
-	tja_add_form_fields( 'login', false );
+add_action( 'hma_login_form', 'hma_add_login_inputs' );
+function hma_add_login_inputs() {
+	hma_add_form_fields( 'login', false );
 	
 	if( !empty( $_REQUEST['redirect_to'] ) )
 		echo '<input type="hidden" name="redirect_to" value="' . ($_REQUEST['redirect_to'] ) . '" />' . "\n"; 
@@ -30,22 +30,22 @@ function tja_add_login_inputs() {
 	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n"; 
 }
 
-add_action( 'tja_lost_password_form', 'tja_add_lost_password_inputs' );
-function tja_add_lost_password_inputs() {
-	tja_add_form_fields( 'lost_password' );
+add_action( 'hma_lost_password_form', 'hma_add_lost_password_inputs' );
+function hma_add_lost_password_inputs() {
+	hma_add_form_fields( 'lost_password' );
 	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n"; 
 }
 
-add_action( 'tja_profile_form', 'tja_add_profile_inputs' );
-function tja_add_profile_inputs() {
-	tja_add_form_fields( 'profile' );
+add_action( 'hma_profile_form', 'hma_add_profile_inputs' );
+function hma_add_profile_inputs() {
+	hma_add_form_fields( 'profile' );
 }
 
-function tja_add_form_fields( $page, $add_nonce = true ) {
-	echo '<input type="hidden" name="tja_' . $page . '_submitted" value="' . $page . '" />' . "\n";
+function hma_add_form_fields( $page, $add_nonce = true ) {
+	echo '<input type="hidden" name="hma_' . $page . '_submitted" value="' . $page . '" />' . "\n";
 	
 	if( $add_nonce )
-		wp_nonce_field( 'tja_' . $page . '_submitted' );
+		wp_nonce_field( 'hma_' . $page . '_submitted' );
 }
 
 /**
@@ -53,25 +53,25 @@ function tja_add_form_fields( $page, $add_nonce = true ) {
  * 
  * @param string $page name
  */
-function tja_check_for_submit( $page ) {
-	if( empty( $_POST['tja_' . $page . '_submitted'] ) )
+function hma_check_for_submit( $page ) {
+	if( empty( $_POST['hma_' . $page . '_submitted'] ) )
 		return;
-	do_action( 'tja_' . $page . '_submitted' );
+	do_action( 'hma_' . $page . '_submitted' );
 }
 
 /**
  * Checks GET data for a password reset
  * 
  */
-add_action( 'init', 'tja_check_for_password_reset' );
-function tja_check_for_password_reset() {
+add_action( 'init', 'hma_check_for_password_reset' );
+function hma_check_for_password_reset() {
 	if ( isset( $_GET['action'] ) && $_GET['action'] == 'rp' && !empty( $_GET['key'] ) && !empty( $_GET['login'] ) ) {
-		$status = tja_reset_password(  $_GET['login'], $_GET['key'] );
+		$status = hma_reset_password(  $_GET['login'], $_GET['key'] );
 		if( !is_wp_error( $status ) ) {
-			do_action( 'tja_lost_password_reset_success' );
+			do_action( 'hma_lost_password_reset_success' );
 			wp_redirect( add_query_arg( 'message', '303', get_bloginfo('lost_password_url', 'display') ) );
 		} else {
-			do_action( 'tja_lost_password_reset_error', $status );
+			do_action( 'hma_lost_password_reset_error', $status );
 			wp_redirect( add_query_arg( 'message', $status->get_error_code(), get_bloginfo('lost_password_url', 'display') ) );
 		}
 		exit;
@@ -80,21 +80,21 @@ function tja_check_for_password_reset() {
 
 //avatar
 
-function tja_replace_avatar( $avatar, $id_or_email, $size, $default, $alt = null ) {
+function hma_replace_avatar( $avatar, $id_or_email, $size, $default, $alt = null ) {
 	
 	//If the default is supplied and an email - dont hook in (as it is the avatars options on the admin page)
 	if( is_string( $id_or_email ) && strpos( $id_or_email, '@' ) > 0 && $default )
 		return $avatar;
 		
-	$user = tja_parse_user( $id_or_email );
+	$user = hma_parse_user( $id_or_email );
 	
 	if( !$user ) return $avatar;
-	$src = tja_get_avatar( $user, $size, $size, true, false );
+	$src = hma_get_avatar( $user, $size, $size, true, false );
 
 	if( !$src ) return $avatar;
 	return "<img alt='{$alt}' src='{$src}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
 }
-add_filter( 'get_avatar', 'tja_replace_avatar', 10, 5 );
+add_filter( 'get_avatar', 'hma_replace_avatar', 10, 5 );
 
 /**
  * Adds some classes to body_class for account pages.
@@ -102,7 +102,7 @@ add_filter( 'get_avatar', 'tja_replace_avatar', 10, 5 );
  * @param array $classes
  * @return array
  */
-function tja_body_class( $classes ) {
+function hma_body_class( $classes ) {
 	
 	if( get_query_var( 'is_login' ) == '1' ) {
 		$classes[] = 'login';
@@ -116,7 +116,7 @@ function tja_body_class( $classes ) {
 	return $classes;
 	
 }
-add_filter( 'body_class', 'tja_body_class' );
+add_filter( 'body_class', 'hma_body_class' );
 
 /**
  * Returns the logout url 
@@ -125,10 +125,10 @@ add_filter( 'body_class', 'tja_body_class' );
  * @param string $redirect
  * @return string - new url
  */
-function tja_login_url_hook( $login_url, $redirect ) {
-	return tja_get_login_url( $redirect );
+function hma_login_url_hook( $login_url, $redirect ) {
+	return hma_get_login_url( $redirect );
 }
-add_filter('login_url', 'tja_login_url_hook', 10, 2 );
+add_filter('login_url', 'hma_login_url_hook', 10, 2 );
 
 /**
  * Returns the logout url
@@ -137,12 +137,12 @@ add_filter('login_url', 'tja_login_url_hook', 10, 2 );
  * @param string $redirect
  * @return string - new url
  */
-function tja_logout_url_hook( $logout_url, $redirect ) {
-	$url = tja_get_logout_url( $redirect );
+function hma_logout_url_hook( $logout_url, $redirect ) {
+	$url = hma_get_logout_url( $redirect );
 
 	return $url;
 }
-add_filter('logout_url', 'tja_logout_url_hook', 10, 2 );
+add_filter('logout_url', 'hma_logout_url_hook', 10, 2 );
 
 /**
  * Override the author url with our own user urls.
@@ -151,7 +151,7 @@ add_filter('logout_url', 'tja_logout_url_hook', 10, 2 );
  * @param int $user_id
  * @return string
  */
-function tja_get_author_link( $link, $user_id ) {
-	return tja_get_user_url( $user_id );
+function hma_get_author_link( $link, $user_id ) {
+	return hma_get_user_url( $user_id );
 }
-add_filter( 'author_link', 'tja_get_author_link', 10, 2 );
+add_filter( 'author_link', 'hma_get_author_link', 10, 2 );

@@ -1,16 +1,16 @@
 <?php
 
-include_once( 'tj-accounts.functions.php' );
-include_once( 'tj-accounts.rewrite.php' );
-include_once( 'tj-accounts.hooks.php' );
-include_once( 'tj-accounts.actions.php' );
-include_once( 'tj-accounts.bloginfo.php' );
-include_once( 'tj-accounts.sso.php' );
+include_once( 'hm-accounts.functions.php' );
+include_once( 'hm-accounts.rewrite.php' );
+include_once( 'hm-accounts.hooks.php' );
+include_once( 'hm-accounts.actions.php' );
+include_once( 'hm-accounts.bloginfo.php' );
+include_once( 'hm-accounts.sso.php' );
 
-add_action( 'init', 'tja_init' );
-function tja_init() {
+add_action( 'init', 'hma_init' );
+function hma_init() {
 	//inlucde facebook if the plugin is activated
 	if( function_exists( 'fbc_get_fbconnect_user' ) ) {
-		include_once( 'tj-accounts.sso.facebook.php' );  
+		include_once( 'hm-accounts.sso.facebook.php' );  
 	}
 }

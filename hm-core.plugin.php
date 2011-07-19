@@ -41,7 +41,7 @@ if ( !defined( 'HM_CORE_PATH' ) ) :
 
 	// Load the Accounts module
 	if ( defined( 'HM_ENABLE_ACCOUNTS' ) && HM_ENABLE_ACCOUNTS !== false )
-		include_once( HM_CORE_PATH . 'tj-accounts/tj-accounts.php' );
+		include_once( HM_CORE_PATH . 'hm-accounts/hm-accounts.php' );
 
 	// Load the custom rewrite rules
 	include_once( HM_CORE_PATH . 'template-rewrite.php' );
