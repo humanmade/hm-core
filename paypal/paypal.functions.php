@@ -19,7 +19,7 @@
 
 function tw_paypal_express_checkout( $action = 'process', $product = null, $price = null, $quantity = 1, $additional_fields = array(), $query_args = array() ) {
 
-	require_once( HELPERPATH . 'paypal/paypal.class.php' );  // include the class file
+	require_once( HM_CORE_PATH . 'paypal/paypal.class.php' );  // include the class file
 	
 	$p = new paypal_class;             // initiate an instance of the class
 	$p->paypal_url = get_option( 'paypal_url' );
@@ -30,7 +30,7 @@ function tw_paypal_express_checkout( $action = 'process', $product = null, $pric
 		$paypal_action_url = PAYPAL_ORDER_URL;
 		
 	else
-		$paypal_action_url = HELPERPATH . 'paypal/process.order.php';
+		$paypal_action_url = HM_CORE_PATH . 'paypal/process.order.php';
 	
 	if ( $query_args )
 		$paypal_action_url = add_query_arg( $query_args, $paypal_action_url );

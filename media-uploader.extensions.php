@@ -51,7 +51,7 @@ function hm_add_custom_media_button_js() {
 	$has_included_custom_media_button_js = true;
 
 	echo '<script type="text/javascript">';
-	include( HELPERPATH . 'scripts/media-uploader.extensions.js' );
+	include( HM_CORE_PATH . 'scripts/media-uploader.extensions.js' );
 	echo '</script>';
 
 }
