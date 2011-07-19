@@ -518,7 +518,7 @@ function hma_message_codes() {
 function hma_get_user_url( $authordata = null ) {
 	if( !$authordata ) global $authordata;
 	$authordata = hma_parse_user( $authordata );
-	return get_bloginfo('url') . '/users/' . $authordata->user_login . '/';
+	return get_bloginfo('url') . '/users/' . $authordata->user_nicename . '/';
 }
 
 
