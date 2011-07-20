@@ -6,7 +6,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 		parent::__construct();
 		
-		if( !defined( 'hma_SSO_FACEBOOK_APP_ID' ) || !defined( 'hma_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'hma_SSO_FACEBOOK_API_KEY' ) )
+		if ( !defined( 'hma_SSO_FACEBOOK_APP_ID' ) || !defined( 'hma_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'hma_SSO_FACEBOOK_API_KEY' ) )
 			return new WP_Error( 'constants-not-defined' );
 		
 		$this->id = 'facebook';
@@ -23,7 +23,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		  'cookie' => true,
 		));
 		
-		if( get_user_meta( get_current_user_id(), '_fb_access_token', true ) ) {
+		if ( get_user_meta( get_current_user_id(), '_fb_access_token', true ) ) {
 			$this->access_token = get_user_meta( get_current_user_id(), '_fb_access_token', true );
 		}
 		
@@ -106,7 +106,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
 		  	
 		  	//log them for for easy of use
-		  	if( FB._userStatus == "connected" ) {
+		  	if ( FB._userStatus == "connected" ) {
 				FB.logout();
 		  	}
 		  	
@@ -134,7 +134,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	function provider_authentication_register_completed() {
 		
 		//try to use the fb cookie first
-		if( $access_token = $this->get_access_token_from_cookie_session() ) {
+		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
 		}
 		
@@ -144,12 +144,12 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 			
 			$response = wp_remote_get( $access_token_request );
 			
-			if( is_wp_error( $response ) ) {
+			if ( is_wp_error( $response ) ) {
 				hm_error_message( 'There was a problem communicating with ' . $this->name . ', please try again.', 'register' );
 				return new WP_Error( 'facebook-communication-error' );
 			}
 			
-			if( $response['response']['code'] == 200 ) {
+			if ( $response['response']['code'] == 200 ) {
 				
 				$args = wp_parse_args( wp_remote_retrieve_body( $response ) );
 				$this->access_token = $args['access_token'];
@@ -164,11 +164,11 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		$info = $info = $this->get_user_info();
 		
 		//Check if this facebook account has already been connected with an account, if so log them in and dont register
-		if( !empty( $info['_fb_uid'] ) && $this->_get_user_id_from_sso_id( $info['_fb_uid'] ) ) {
+		if ( !empty( $info['_fb_uid'] ) && $this->_get_user_id_from_sso_id( $info['_fb_uid'] ) ) {
 
 			$result = $this->perform_wordpress_login_from_provider();
 			do_action( 'hma_sso_register_completed', &$this );
-		} elseif( empty( $info['_fb_uid'] ) ) {
+		} elseif ( empty( $info['_fb_uid'] ) ) {
 			
 			hm_error_message( 'There was a problem communication with Facebook, please try again.', 'register' );
 			return new WP_Error( 'facebook-connection-error' );
@@ -180,10 +180,10 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function provider_authentication_connect_with_account_completed() {
 		
-		if( !is_user_logged_in() )
+		if ( !is_user_logged_in() )
 			return new WP_Error( 'user-logged-in' );
 		
-		if( $access_token = $this->get_access_token_from_cookie_session() ) {
+		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
 		} else {
 			hm_error_message( 'There was an unknown problem connecting your with Facebook, please try again.', 'update-user' );
@@ -193,7 +193,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		$info = $this->get_facebook_user_info();
 
 		//Check if this twitter account has already been connected with an account, if so log them in and dont register
-		if( $this->_get_user_id_from_sso_id( $info->id ) ) {
+		if ( $this->_get_user_id_from_sso_id( $info->id ) ) {
 			
 			hm_error_message( 'This Twitter account is already linked with another account, please try a different one.', 'update-user' );
 			return new WP_Error( 'sso-provider-already-linked' );
@@ -209,10 +209,10 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function unlink_provider_from_current_user() {
 		
-		if( !is_user_logged_in() )
+		if ( !is_user_logged_in() )
 			return new WP_Error( 'user-logged-in' );
 		
-		if( !get_user_meta( get_current_user_id(), '_fb_uid', true ) ) {
+		if ( !get_user_meta( get_current_user_id(), '_fb_uid', true ) ) {
 			return true;	
 		}
 		
@@ -229,13 +229,13 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function is_authenticated_for_current_user() {
 		
-		if( !is_user_logged_in() )
+		if ( !is_user_logged_in() )
 			return false;
 		
 		$twitter_uid = get_user_meta( get_current_user_id(), '_fb_uid', true );
 		$access_token = get_user_meta( get_current_user_id(), '_fb_access_token', true );
 		
-		if( !$twitter_uid || !$access_token )
+		if ( !$twitter_uid || !$access_token )
 			return false;
 			
 		// Check that the access token is still valid
@@ -258,9 +258,9 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function check_for_provider_logged_in() {
 
-		if( isset( $_REQUEST['sso_registrar_authorized'] ) && $_REQUEST['sso_registrar_authorized'] == $this->id && $_REQUEST['access_token'] )  {
+		if ( isset( $_REQUEST['sso_registrar_authorized'] ) && $_REQUEST['sso_registrar_authorized'] == $this->id && $_REQUEST['access_token'] )  {
 			$this->access_token = $_REQUEST['access_token'];
-		} elseif( $access_token = $this->get_access_token_from_cookie_session() ) {
+		} elseif ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
 		}
 				
@@ -269,7 +269,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function register_form_fields() {
 		
-		if( empty( $this->access_token ) )
+		if ( empty( $this->access_token ) )
 			return;
 		
 		?>
@@ -280,10 +280,10 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function get_access_token_from_cookie_session() {
 	
-		if( empty( $this->client ) )
+		if ( empty( $this->client ) )
 			return null;
 			
-		if( !$this->client->getUser() ) {
+		if ( !$this->client->getUser() ) {
 			$this->log( 'get_access_token_from_cookie_session: ' . '$this->client->getUser() failed for object:' );
 			$this->log( print_r( $this->client, true ) );
 			return null;
@@ -293,7 +293,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		$post_url = 'https://graph.facebook.com/oauth/exchange_sessions?client_id=' . $this->api_key . '&client_secret=' . $this->application_secret . '&sessions=' . $session['session_key'];
 		$response = wp_remote_get( $post_url );
 
-		if( is_wp_error( $response ) ) {
+		if ( is_wp_error( $response ) ) {
 			$this->log( 'get_access_token_from_cookie_session: ' . 'wp_remote_get() failed with wp_error:' );
 			$this->log( print_r( $response, true ) );
 			return null;
@@ -323,7 +323,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function get_facebook_user_info() {
 		
-		if( empty( $this->user_info ) ) {
+		if ( empty( $this->user_info ) ) {
 			$this->user_info = @$this->client->api('me', 'GET', array( 'access_token' => $this->access_token ));
 		}
 		
@@ -343,14 +343,14 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function perform_wordpress_login_from_provider() {
 		
-		if( !$this->check_for_provider_logged_in() || is_user_logged_in() )
+		if ( !$this->check_for_provider_logged_in() || is_user_logged_in() )
 			return null;
 		
 		global $wpdb;
 		
 		$fb_uid = $this->client->getUser();
 		
-		if( !$fb_uid ) {
+		if ( !$fb_uid ) {
 			$this->log( 'perform_wordpress_login_from_provider: ' . 'check_for_provider_logged_in() returned true, but client->getUser() returning an empty FB UID' );
 		}
 		
@@ -358,7 +358,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		
 		error_log( 'perform_wordpress_login_from_provider: with user_id: ' . $user_id );
 		
-		if( !$user_id ) {
+		if ( !$user_id ) {
 			hm_error_message( 'This Facebook account has not been linked to an account on this site.', 'login' );
 			return new WP_Error( 'facebook-account-not-connected' );
 		}
@@ -382,10 +382,10 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		
 		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, &$this );
 		
-		if( !empty( $_POST['user_login'] ) )
+		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
 		
-		if(  !empty( $_POST['user_email'] ) )
+		if (  !empty( $_POST['user_email'] ) )
 			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
 		
 		$userdata['override_nonce'] = true;
@@ -397,11 +397,11 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 				
 	 	$result = hma_new_user( $userdata );
 	 	
-	 	if( is_wp_error( $result ) )
+	 	if ( is_wp_error( $result ) )
 			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 	 	
 	 	//set the avatar to their twitter avatar if registration completed
-		if( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated_for_current_user() ) {
+		if ( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated_for_current_user() ) {
 			
 			$this->avatar_option = new hma_Facebook_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
@@ -416,7 +416,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		$redirect = get_bloginfo( 'url' ) . str_replace( get_bloginfo( 'url' ), '', $redirect );
 		
 		//only redirect to facebook is is logged in with a cookie
-		if( $this->client->getSession() ) {
+		if ( $this->client->getSession() ) {
 			wp_redirect( $this->client->getLogoutUrl( array( 'next' => $redirect ) ) );
 			exit;
 		}
@@ -448,10 +448,10 @@ class hma_Facebook_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	function get_avatar( $size = null ) {			
 
-		if( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
+		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 
-		} elseif( $this->sso_provider->is_authenticated_for_current_user() ) {
+		} elseif ( $this->sso_provider->is_authenticated_for_current_user() ) {
 		    $user_info = $this->sso_provider->get_facebook_user_info();
 		    
 			$image_url = "http://graph.facebook.com/{$user_info['id']}/picture?type=large";			
@@ -466,7 +466,7 @@ class hma_Facebook_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	function remove_local_avatar() {
 		
-		if( !is_user_logged_in() || empty( $this->avatar_path ) )
+		if ( !is_user_logged_in() || empty( $this->avatar_path ) )
 			return null;
 		
 		unlink( $this->avatar_path );

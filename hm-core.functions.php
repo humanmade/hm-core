@@ -103,7 +103,7 @@ function hm_array_filter_recursive($input, $callback = null) {
 		}
 	}
 
-	if( $callback )
+	if ( $callback )
 		return array_filter($input, $callback);
 
 	return array_filter($input);
@@ -165,8 +165,8 @@ function masort($array, $id, $sort_ascending = true) {
 	        if ( isset($item[$id]) ) {
 				if ($array[$lowest_id][$id]) {
 
-					if( is_numeric( $item[$id] ) ) {
-						if( $item[$id] < $array[$lowest_id][$id] ) {
+					if ( is_numeric( $item[$id] ) ) {
+						if ( $item[$id] < $array[$lowest_id][$id] ) {
 							$lowest_id = $index;
 							$index_to_keys[$index] = $key;
 						}
@@ -223,12 +223,12 @@ function _hm_sort_array_by_object_key_cmp( $a, $b ) {
 function array_map_preserve_keys($callback,$arr1) {
     $results       =    array();
     $args          =    array();
-    if(func_num_args()>2)
+    if (func_num_args()>2)
         $args          =    (array) array_shift(array_slice(func_get_args(),2));
     foreach($arr1 as $key=>$value) {
         $temp    =    $args;
         array_unshift($temp,$value);
-        if(is_array($value)) {
+        if (is_array($value)) {
             $results[$key]    =    call_user_func_array($callback,$temp);
         } else {
             $results[$key]    =    call_user_func_array($callback,$temp);
@@ -258,10 +258,10 @@ function in_array_multi( $needle, $haystack ) {
 
 	foreach( (array) $haystack as $key => $stack ) {
 
-		if( is_array( $stack ) && in_array_multi( $needle, $stack ) )
+		if ( is_array( $stack ) && in_array_multi( $needle, $stack ) )
 			return true;
 
-		if( $stack === $needle )
+		if ( $stack === $needle )
 			return true;
 	}
 
@@ -300,7 +300,7 @@ function hm_count( $count, $none, $one, $more = null ) {
 	if ( $count > 1 )
 		echo str_replace( '%', $count, $more );
 
-	elseif( $count == 1 )
+	elseif ( $count == 1 )
 		echo $one;
 
 	else
@@ -318,15 +318,15 @@ function hm_success_message ( $message, $context = '' ) {
 
 function hm_add_message( $message, $context, $type ) {
 
-	if( !$context ) {
+	if ( !$context ) {
 		$context = 'all';
 	}
 
-	if( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
+	if ( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = ( $_COOKIE['hm_messages'] ) ? $_COOKIE['hm_messages'] : "";
 		$messages = array_filter( (array) unserialize( base64_decode( $cookie ) ) );
 	} else {
-		if( isset( $_SESSION['hm_messages'] ) )
+		if ( isset( $_SESSION['hm_messages'] ) )
 			$messages = array_filter( (array) $_SESSION['hm_messages'] );
 		else
 			$messages = array();
@@ -334,12 +334,12 @@ function hm_add_message( $message, $context, $type ) {
 
 	$messages[$context][] = array( 'message' => $message, 'type' => $type );
 
-	if( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
+	if ( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = base64_encode( serialize( $messages ) );
 		$_COOKIE['hm_messages'] = $cookie;
 		@setcookie("hm_messages", $cookie, 0, COOKIEPATH );
 	} else {
-		if( !isset( $_SESSION ) )
+		if ( !isset( $_SESSION ) )
 			session_start();
 
 		$_SESSION['hm_messages'] = $messages;
@@ -348,11 +348,11 @@ function hm_add_message( $message, $context, $type ) {
 
 function hm_get_messages( $context = null, $clear_cookie = true ) {
 
-	if( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
+	if ( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = ( $_COOKIE['hm_messages'] ) ? $_COOKIE['hm_messages'] : "";
 		$messages = array_filter( (array) unserialize( base64_decode( $cookie ) ) );
 	} else {
-		if( isset( $_SESSION['hm_messages'] ) )
+		if ( isset( $_SESSION['hm_messages'] ) )
 			$messages = array_filter( (array) $_SESSION['hm_messages'] );
 		else
 			$messages = array();
@@ -374,12 +374,12 @@ function hm_get_messages( $context = null, $clear_cookie = true ) {
 		$messages = "";
 	}
 
-	if( $clear_cookie && defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
+	if ( $clear_cookie && defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 
 		$cookie = base64_encode( serialize( $messages ) );
 		$_COOKIE['hm_messages'] = $cookie;
 		@setcookie("hm_messages", $cookie, 0, COOKIEPATH );
-	} elseif( $clear_cookie ) {
+	} elseif ( $clear_cookie ) {
 		$_SESSION['hm_messages'] = $messages;
 	}
 
@@ -509,7 +509,7 @@ function hm_create_term_meta_table() {
 	return true;
 }
 
-if( !function_exists( 'add_term_meta' ) ) :
+if ( !function_exists( 'add_term_meta' ) ) :
 /**
  * Add meta data field to a term.
  *
@@ -524,7 +524,7 @@ function add_term_meta($term_id, $meta_key, $meta_value, $unique = false) {
 }
 endif;
 
-if( !function_exists( 'delete_term_meta' ) ) :
+if ( !function_exists( 'delete_term_meta' ) ) :
 /**
  * Remove metadata matching criteria from a term.
  *
@@ -542,7 +542,7 @@ function delete_term_meta($term_id, $meta_key, $meta_value = '') {
 }
 endif;
 
-if( !function_exists( 'get_term_meta' ) ) :
+if ( !function_exists( 'get_term_meta' ) ) :
 /**
  * Retrieve term meta field for a term.
  *
@@ -557,7 +557,7 @@ function get_term_meta($term_id, $key, $single = false) {
 }
 endif;
 
-if( !function_exists( 'update_term_meta' ) ) :
+if ( !function_exists( 'update_term_meta' ) ) :
 /**
  * Update term meta field based on term ID.
  *
@@ -577,7 +577,7 @@ function update_term_meta($term_id, $meta_key, $meta_value, $prev_value = '') {
 }
 endif;
 
-if( !function_exists( 'get_term_custom' ) ) :
+if ( !function_exists( 'get_term_custom' ) ) :
 /**
  * Retrieve term meta fields, based on post ID.
  *
@@ -599,7 +599,7 @@ if( !function_exists( 'get_term_custom' ) ) :
 }
 endif;
 
-if( !function_exists( 'update_termmeta_cache' ) ) :
+if ( !function_exists( 'update_termmeta_cache' ) ) :
 /**
 * Updates metadata cache for list of term_ids.
 *
@@ -617,40 +617,40 @@ endif;
 
 function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = null, $default = null ) {
 
-	if( $post === null ) global $post;
+	if ( $post === null ) global $post;
 
 	// stop images with no post_id slipping in
-	if( $post->ID == 0 && !$id )
+	if ( $post->ID == 0 && !$id )
 		return;
 
 	$id = $id ? $id : hm_get_post_image_id( $post );
 
-	if( $id )
+	if ( $id )
 		return wpthumb( get_attached_file( $id ), $w, $h, $crop, true, wm_get_options( $id ) );
 
 	$att_id = hm_get_post_attached_image_id( $post );
-	if( $att_id )
+	if ( $att_id )
 		return wpthumb( get_attached_file( $att_id ), $w, $h, $crop, true, wm_get_options( $id ) );
 	//if there is no id, then try search the content for an image
-	if( $return = hm_phpthumb_it(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
+	if ( $return = hm_phpthumb_it(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
 		return $return;
 
-	if( $reutrn = hm_get_post_external_image($post) )
+	if ( $reutrn = hm_get_post_external_image($post) )
 		return $return;
 
-	if( $default ) {
+	if ( $default ) {
 		$file = $default === 'default' ? dirname( __FILE__ ) . '/includes/image-unavailable.png' : $default;
 		return hm_phpthumb_it( $file, $w, $h, $crop, true );
 	}
 }
 
 function hm_get_post_image_id( $post = null ) {
-	if( $post === null ) global $post;
-	if( $post->ID == 0 )
+	if ( $post === null ) global $post;
+	if ( $post->ID == 0 )
 		return;
 
 	$id = (int) get_post_meta( $post->ID, 'hm_post_image', true );
-	if( $id )
+	if ( $id )
 		return $id;
 	return hm_get_post_attached_image_id($post);
 
@@ -661,7 +661,7 @@ function hm_get_post_attached_image_id( $post = null, $return = 'file' ) {
 
     $images = array();
     foreach( (array) get_children( array( 'post_parent' => $post->ID, 'post_type' => 'attachment', 'orderby' => 'menu_order', 'order' => 'ASC' ) ) as $attachment ) {
-    	if( !wp_attachment_is_image( $attachment->ID ) || !file_exists( get_attached_file( $attachment->ID ) ) )
+    	if ( !wp_attachment_is_image( $attachment->ID ) || !file_exists( get_attached_file( $attachment->ID ) ) )
     		continue;
     	return $attachment->ID;
     }
@@ -672,7 +672,7 @@ function hm_get_post_attached_images( $post = null ) {
 
     $images = array();
     foreach( (array) get_children( array( 'post_parent' => $post->ID, 'post_type' => 'attachment', 'orderby' => 'menu_order', 'order' => 'ASC' ) ) as $attachment ) {
-    	if( !wp_attachment_is_image( $attachment->ID ) || !file_exists( get_attached_file( $attachment->ID ) ) )
+    	if ( !wp_attachment_is_image( $attachment->ID ) || !file_exists( get_attached_file( $attachment->ID ) ) )
     		continue;
     	$images =  $attachment;
     }
@@ -694,12 +694,12 @@ function hm_get_post_internal_image( $post = null ) {
 }
 
 function hm_get_post_internal_images( $post = null ) {
-	if( $post === null ) global $post;
+	if ( $post === null ) global $post;
 	$images = array();
 	preg_match_all('/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media);
 	$data=preg_replace('/(img|src)("|\'|="|=\')(.*)/i',"$3",$media[0]);
 	foreach($data as $url) {
-		if( strpos( $url, get_bloginfo('url') ) === 0 && file_exists( $path = str_ireplace( trailingslashit(get_bloginfo('url')), trailingslashit(ABSPATH), $url ) ) )
+		if ( strpos( $url, get_bloginfo('url') ) === 0 && file_exists( $path = str_ireplace( trailingslashit(get_bloginfo('url')), trailingslashit(ABSPATH), $url ) ) )
 			$images[] = $path;
 	}
 	return $images;
@@ -707,7 +707,7 @@ function hm_get_post_internal_images( $post = null ) {
 
 
 function strip_images( $post_content, $id = null ) {
-	if( $id === null )
+	if ( $id === null )
 		$content = preg_replace('/(<img[\s\S]*?\>)/i', '', $post_content);
 	else
 		$content = preg_replace('/<img[\s\S]*?wp-image-' . $id . '[\s\S]*?\>/i', '', $post_content);
@@ -715,7 +715,7 @@ function strip_images( $post_content, $id = null ) {
 }
 
 function hm_get_post_external_image( $post = null ) {
-	if( $post === null ) global $post;
+	if ( $post === null ) global $post;
 
 	$images = array();
 	preg_match_all('/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media);
@@ -723,7 +723,7 @@ function hm_get_post_external_image( $post = null ) {
 
 	foreach($data as $url) {
 		$ext = end(explode('.', $url));
-		if( strpos( $url, 'http://' ) === 0 && strpos( $url, get_bloginfo('url') ) === false && $ext == 'png' || $ext == 'jpg' || $ext == 'bmp' || $ext == 'jpeg' || $ext == 'gif' )
+		if ( strpos( $url, 'http://' ) === 0 && strpos( $url, get_bloginfo('url') ) === false && $ext == 'png' || $ext == 'jpg' || $ext == 'bmp' || $ext == 'jpeg' || $ext == 'gif' )
 			$images[] = $url;
 	}
 	return $images[0];
@@ -738,15 +738,15 @@ function hm_remote_get_file( $url, $cache = true ) {
 
 	// cache file 404s in options
 	$file_404s = (array) get_option( 'remote_404s' );
-	if( isset( $file_404s[$url] ) && (int) $file_404s[$url] > ( time() - ( 60 * 60 *12 ) ) && $cache === true ) {
+	if ( isset( $file_404s[$url] ) && (int) $file_404s[$url] > ( time() - ( 60 * 60 *12 ) ) && $cache === true ) {
 		return null;
 	}
 
-	if( !is_dir( $dest_folder ) ) {
+	if ( !is_dir( $dest_folder ) ) {
 		mkdir( $dest_folder );
 	}
 
-	if( file_exists( $dest_file ) && file_get_contents( $dest_file ) && $cache === true )
+	if ( file_exists( $dest_file ) && file_get_contents( $dest_file ) && $cache === true )
 		return $dest_file;
 
 
@@ -758,7 +758,7 @@ function hm_remote_get_file( $url, $cache = true ) {
  		}
    	}
 
-   	if( empty( $content ) ) {
+   	if ( empty( $content ) ) {
    		$file_404s[$url] = time();
 		update_option( 'remote_404s', $file_404s );
    		return null;
@@ -1016,7 +1016,7 @@ function hm_add_multiple_meta_to_wp_query( $where, $wp_query ) {
 
 	global $wpdb;
 
-	if( !is_array( $wp_query->query_vars['meta_key'] ) )
+	if ( !is_array( $wp_query->query_vars['meta_key'] ) )
 		return $where;
 
 	$meta_value_count = count( $wp_query->query_vars['meta_key'] ) - 1;
@@ -1177,7 +1177,7 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 	$query = wp_parse_args( $wp_query->query );
 	$orders = explode( ' ', isset( $query['orderby'] ) ? $query['orderby'] : '' );
 
-	if( count( $orders ) <= 1  )
+	if ( count( $orders ) <= 1  )
 		return $orderby;
 
 	// Some internal WordPress queries incorrectly add DESC or ASC to the orderby instead of order
@@ -1196,13 +1196,13 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
 		$table_column = in_array( $order, array( 'menu_order' ) ) ? $order : 'post_' . $order;
 
-		if(  strpos( $orderby, $wpdb->posts . '.post_' . $order ) !== false ) {
+		if (  strpos( $orderby, $wpdb->posts . '.post_' . $order ) !== false ) {
 			$one_before = $order;
 			continue;
 		}
 
-		if( strpos( $orderby, $wpdb->posts . '.post_' . $order ) === false ) {
-			if( $one_before )
+		if ( strpos( $orderby, $wpdb->posts . '.post_' . $order ) === false ) {
+			if ( $one_before )
 				$orderby = str_replace( $wpdb->posts . '.' . $one_before,  $wpdb->posts . '.post_' . $one_before . ', ' . $wpdb->posts . '.' . $table_column, $orderby );
 			else
 				$orderby =  $wpdb->posts . '.' . $table_column . ', ' . $orderby;
@@ -1217,7 +1217,7 @@ add_filter( 'posts_orderby_request', 'hm_allow_any_orderby_to_wp_query', 10, 2 )
 
 function hm_time_to_local( $time = null ) {
 
-	if( is_null( $time ) )
+	if ( is_null( $time ) )
 		$time = time();
 
 	return $time + ( get_option( 'gmt_offset' ) * 3600 );
@@ -1232,8 +1232,8 @@ function hm_time_to_dst_offset( $time ) {
 	// Set TZ so localtime works.
 	date_default_timezone_set( get_option('timezone_string') );
 
-	if( date( 'I', $time ) !== date( 'I', time() ) ) {
-		if( date( 'I', $time ) > date( 'I', time() ) ) {
+	if ( date( 'I', $time ) !== date( 'I', time() ) ) {
+		if ( date( 'I', $time ) > date( 'I', time() ) ) {
 
 			//post was created in DST (+1 hour)
 			$time += 3600;
@@ -1336,7 +1336,7 @@ function r_implode( $glue, $pieces ) {
 
 function hm_add_exclude_draft_to_get_terms_hide_empty( $terms, $taxonomies, $args ) {
 
-	if( $args['hide_empty'] == false || ( $args['hide_empty'] == true && empty( $args['hide_empty_exclude_drafts'] ) ) )
+	if ( $args['hide_empty'] == false || ( $args['hide_empty'] == true && empty( $args['hide_empty_exclude_drafts'] ) ) )
 		return $terms;
 
 	global $wpdb;
@@ -1346,7 +1346,7 @@ function hm_add_exclude_draft_to_get_terms_hide_empty( $terms, $taxonomies, $arg
 
 		$post_id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts INNER JOIN $wpdb->term_relationships ON $wpdb->posts.ID = $wpdb->term_relationships.object_id WHERE post_status != 'draft' AND $wpdb->term_relationships.term_taxonomy_id = $term->term_taxonomy_id LIMIT 0, 1" );
 
-		if( !$post_id )
+		if ( !$post_id )
 			unset( $terms[$key] );
 
 	}
@@ -1367,10 +1367,10 @@ add_filter( 'get_terms', 'hm_add_exclude_draft_to_get_terms_hide_empty', 1, 3 );
  * @return  pagination hmtl
  */
 function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null ) {
-	if( $wp_query === null ) global $wp_query;
-	if( $ppp === null ) $ppp = $wp_query->query_vars['posts_per_page'] ? $wp_query->query_vars['posts_per_page'] : 10;
+	if ( $wp_query === null ) global $wp_query;
+	if ( $ppp === null ) $ppp = $wp_query->query_vars['posts_per_page'] ? $wp_query->query_vars['posts_per_page'] : 10;
 	$number_pages = ceil($wp_query->found_posts / $ppp);
-	if( $current_page === null ) $current_page = get_query_var('paged');
+	if ( $current_page === null ) $current_page = get_query_var('paged');
 
 	$current_page = $current_page ? $current_page : 1;
 	$base = str_replace( '/page/' . $current_page . '', '', $_SERVER['REQUEST_URI'] );
@@ -1390,11 +1390,11 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null 
 
 
 	// mid-size depends on what page you are on, as it applies to each side of current_page
-	if( $current_page > ($number_pages - 3) ) {
+	if ( $current_page > ($number_pages - 3) ) {
 		$mid_size = 5 - ($number_pages - ($current_page) + 1 );
-	} elseif( $current_page >= 5 ) {
+	} elseif ( $current_page >= 5 ) {
 		$mid_size = 2;
-	} elseif( $current_page == 1 ) {
+	} elseif ( $current_page == 1 ) {
 		$mid_size = 4;
 	} else {
 		$mid_size = 5 - $current_page + 1;
@@ -1412,7 +1412,7 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null 
 		'type' => 'array'
 	));
 
-	if( !is_array( $page_links ) || empty( $page_links ) )
+	if ( !is_array( $page_links ) || empty( $page_links ) )
 		return;
 
 	// loop through the page links, removing any unwanted ones as paginate_links() does not provide such fine control
@@ -1427,7 +1427,7 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null 
 		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $prev_text ) && $current_page == 4 ) )
 			$real_counter--;
 
-		if( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
+		if ( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
 			continue;
 
 		$real_counter++;
@@ -1465,12 +1465,12 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 	global $numpages;
 
 	// set number_pages to the global if we are using global $post
-	if( $post === null ) $number_pages = $numpages;
-	if( $post === null ) global $post;
+	if ( $post === null ) $number_pages = $numpages;
+	if ( $post === null ) global $post;
 
-	if( !$current_page ) $current_page = ( ( $page = get_query_var( 'page' ) ) ? $page : 1 );
+	if ( !$current_page ) $current_page = ( ( $page = get_query_var( 'page' ) ) ? $page : 1 );
 
-	if( $number_pages == null ) {
+	if ( $number_pages == null ) {
 		$pages = explode('<!--nextpage-->', $post->post_content);
 		$number_pages = count($pages);
 	}
@@ -1481,17 +1481,17 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 
 
 	// mid-size depends on what page you are on, as it applies to each side of current_page
-	if( $current_page > ($number_pages - 3) ) {
+	if ( $current_page > ($number_pages - 3) ) {
 		$mid_size = 5 - ($number_pages - ($current_page) + 1 );
-	} elseif( $current_page >= 5 ) {
+	} elseif ( $current_page >= 5 ) {
 		$mid_size = 2;
-	} elseif( $current_page == 1 ) {
+	} elseif ( $current_page == 1 ) {
 		$mid_size = 4;
 	} else {
 		$mid_size = 5 - $current_page + 1;
 	}
 
-	if( is_preview() ) {
+	if ( is_preview() ) {
 		$base = get_permalink( $post->ID ) . '&page=%#%';
 	} else {
 		$base = trailingslashit( get_permalink( $post->ID ) ) . '%#%/';
@@ -1509,7 +1509,7 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 		'type' => 'array'
 	));
 
-	if( !is_array( $page_links ) || empty( $page_links ) )
+	if ( !is_array( $page_links ) || empty( $page_links ) )
 		return;
 
 	// loop through the page links, removing any unwanted ones as paginate_links() does not provide such fine control
@@ -1517,10 +1517,10 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 	foreach( $page_links as $counter => $pagination_item ) :
 
 		//strip ..., last page
-		if( strpos($pagination_item, '...') || ( strpos($page_links[ $counter - 1 ], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos($page_links[ 2 ], '...') ) || ( $counter == 1 && strpos($page_links[ 0 ], $prev_text) && $current_page == 4 ) )
+		if ( strpos($pagination_item, '...') || ( strpos($page_links[ $counter - 1 ], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos($page_links[ 2 ], '...') ) || ( $counter == 1 && strpos($page_links[ 0 ], $prev_text) && $current_page == 4 ) )
 			continue;
 
-		if( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
+		if ( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
 			continue;
 
 		$real_counter++;

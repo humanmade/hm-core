@@ -51,13 +51,13 @@ function hma_get_edit_profile_template() {
 // Hook into when the rules are fired as some can / cannot be access by logged in users
 function hma_restrict_access_for_logged_in_users_to_pages( $template, $rule ) {
 		
-	if( is_user_logged_in() && in_array( $template, array( hma_get_login_template(), hma_get_lost_password_template(), hma_get_register_template() ) ) ) {
+	if ( is_user_logged_in() && in_array( $template, array( hma_get_login_template(), hma_get_lost_password_template(), hma_get_register_template() ) ) ) {
 		
 		//if there is a "redirect_to" redirect there
-		if( $_REQUEST['redirect_to'] )
+		if ( $_REQUEST['redirect_to'] )
 			$redirect = hm_parse_redirect( urldecode( $_REQUEST['redirect_to'] ) );
 		
-		elseif( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo('login_url', 'display'), get_bloginfo( 'lost_password_url', 'display' ), get_bloginfo( 'register_url', 'display' ) ) ) )
+		elseif ( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo('login_url', 'display'), get_bloginfo( 'lost_password_url', 'display' ), get_bloginfo( 'register_url', 'display' ) ) ) )
 			$redirect = wp_get_referer();
 		
 		else
@@ -72,7 +72,7 @@ add_action( 'hm_load_custom_template', 'hma_restrict_access_for_logged_in_users_
 
 function hma_restrict_access_for_logged_out_users_to_pages( $template, $rule ) {
 		
-	if( !is_user_logged_in() && in_array( $template, array( hma_get_edit_profile_template() ) ) ) {
+	if ( !is_user_logged_in() && in_array( $template, array( hma_get_edit_profile_template() ) ) ) {
 		wp_redirect( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo( 'my_profile_url', 'display' ) ) ) ? wp_get_referer() : get_bloginfo('url') );
 		exit;
 	}

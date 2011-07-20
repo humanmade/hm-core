@@ -10,7 +10,7 @@ function hm_add_rewrite_rule( $rule, $query, $template = null, $args = array() )
 function hm_remove_rewrite_rule( $rule ) {
 	global $hm_rewrite_rules;
 	
-	if( isset( $hm_rewrite_rules[$rule] ) )
+	if ( isset( $hm_rewrite_rules[$rule] ) )
 		unset( $hm_rewrite_rules[$rule] );
 }
 
@@ -35,7 +35,7 @@ function hm_add_custom_page_variables( $public_query_vars ) {
 
 	global $hm_rewrite_rules;
 	
-	if( !isset( $hm_rewrite_rules ) )
+	if ( !isset( $hm_rewrite_rules ) )
 		return $public_query_vars;
 	
 	//make any query vars public
@@ -43,7 +43,7 @@ function hm_add_custom_page_variables( $public_query_vars ) {
 		$args = wp_parse_args( $rule[1] );
 
 		foreach( $args as $arg => $val ) {
-			if( !in_array( $arg, $public_query_vars ) )
+			if ( !in_array( $arg, $public_query_vars ) )
 				$public_query_vars[] = $arg;
 		}
 	}
@@ -56,7 +56,7 @@ add_filter( 'query_vars', 'hm_add_custom_page_variables' );
 function hm_set_custom_rewrite_rule_current_page( $request ) {
 
 	global $hm_rewrite_rules, $hm_current_rewrite_rule, $wp_rewrite;
-	if( isset( $hm_rewrite_rules ) && array_key_exists( $request->matched_rule, (array) $hm_rewrite_rules ) ) {
+	if ( isset( $hm_rewrite_rules ) && array_key_exists( $request->matched_rule, (array) $hm_rewrite_rules ) ) {
 		$hm_current_rewrite_rule = $hm_rewrite_rules[$request->matched_rule];
 
 		do_action_ref_array('hm_parse_request_' . $request->matched_rule, array(&$request));
@@ -64,11 +64,11 @@ function hm_set_custom_rewrite_rule_current_page( $request ) {
 		$hm_current_rewrite_rule[4] = $request->query_vars;
 	}
 
-	if( isset( $hm_current_rewrite_rule[4] ) && $hm_current_rewrite_rule[4] === $request ) {
+	if ( isset( $hm_current_rewrite_rule[4] ) && $hm_current_rewrite_rule[4] === $request ) {
 		
 		$hm_current_rewrite_rule[3]['parse_query_properties'] = wp_parse_args( ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ? $hm_current_rewrite_rule[3]['parse_query_properties'] : '' ), array( 'is_home' => false ) );
 		//apply some post query stuff to wp_query
-		if( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ) {
+		if ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ) {
 			
 			//$post_query
 			foreach( wp_parse_args( $hm_current_rewrite_rule[3]['parse_query_properties'] ) as $property => $value ) {
@@ -88,12 +88,12 @@ function hm_modify_parse_query( $wp_query ) {
 
 	global $hm_rewrite_rules, $hm_current_rewrite_rule;
 
-	if( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
+	if ( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
 		
 		
 		$hm_current_rewrite_rule[3]['parse_query_properties'] = wp_parse_args( ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ? $hm_current_rewrite_rule[3]['parse_query_properties'] : '' ), array( 'is_home' => false ) );
 		//apply some post query stuff to wp_query
-		if( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ) {
+		if ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ) {
 			
 			//$post_query
 			foreach( wp_parse_args( $hm_current_rewrite_rule[3]['parse_query_properties'] ) as $property => $value ) {
@@ -110,16 +110,16 @@ function hm_load_custom_templates( $template ) {
 	global $wp_query, $hm_rewrite_rules, $hm_current_rewrite_rule;
 
 	//Skip 404 temaplte includes
-	if( is_404() && !isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) )
+	if ( is_404() && !isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) )
 		return;
 		
 	
 	
 	//show the correct template for the query
-	if( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
+	if ( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
 		
 		//apply some post query stuff to wp_query
-		if( isset( $hm_current_rewrite_rule[3]['post_query_properties'] ) ) {
+		if ( isset( $hm_current_rewrite_rule[3]['post_query_properties'] ) ) {
 			
 			//$post_query
 			foreach( wp_parse_args( $hm_current_rewrite_rule[3]['post_query_properties'] ) as $property => $value ) {
@@ -128,11 +128,11 @@ function hm_load_custom_templates( $template ) {
 			}
 		}
 		
-		if( !empty( $hm_current_rewrite_rule[2] ) ) {
+		if ( !empty( $hm_current_rewrite_rule[2] ) ) {
 			do_action( 'hm_load_custom_template', $hm_current_rewrite_rule[2], $hm_current_rewrite_rule );
 			include( $hm_current_rewrite_rule[2] );
 			exit;
-		} else if( !empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) ) {
+		} else if ( !empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) ) {
 			remove_action( 'template_redirect', 'redirect_canonical', 10 );
 		}
 		
@@ -174,24 +174,24 @@ function hm_add_page_rule( $regex, $files, $name, $logged_in = null, $redirect =
 	$url = strpos( $url, '/' ) === 0 ? $url : '/' . $url;
 	
 	
-	if( !preg_match( '#' . $regex . '(\?[\s\S]*)?$' . '#', $url, $matches ) ) {
+	if ( !preg_match( '#' . $regex . '(\?[\s\S]*)?$' . '#', $url, $matches ) ) {
 		return;
 	}
 	
-	elseif( $logged_in === true && !is_user_logged_in() ) {
+	elseif ( $logged_in === true && !is_user_logged_in() ) {
 		wp_redirect( $redirect );
 		exit;
 	}
-	elseif( $logged_in === false && is_user_logged_in() ) {
+	elseif ( $logged_in === false && is_user_logged_in() ) {
 		wp_redirect( $redirect );
 		exit;
 	}
 	$files = (array) $files;
-	foreach( $files as $file ) : if( file_exists( $file ) ) {
+	foreach( $files as $file ) : if ( file_exists( $file ) ) {
 
 		global $wp_query;
 
-		if( $query ) { 
+		if ( $query ) { 
 
 			foreach( $query as $q => $number ) {
 				$query_gen[$q] = is_int($number) ? $matches[$number + 1] : $number;
@@ -201,10 +201,10 @@ function hm_add_page_rule( $regex, $files, $name, $logged_in = null, $redirect =
 			$wp_query = new WP_Query($query_gen);
 		}
 				
-		if( is_array($query_vars) ) {
+		if ( is_array($query_vars) ) {
 			//set any query_vars
 			foreach( $query_vars as $var => $count ) {
-				if( is_int($count) )
+				if ( is_int($count) )
 					$wp_query->$var = $matches[$count + 1];
 				else
 					$wp_query->$var = $count;

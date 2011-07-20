@@ -264,8 +264,8 @@ function hm_add_image_html_custom( $button_id, $title, $post_id, $image_ids, $cl
 	    	 <a class="delete_custom_image" rel="<?php echo $button_id ?>:<?php echo $image_id ?>">Remove</a></span>
 	    <?php endforeach; ?>
 
-	    <?php if( !$image_ids ) : ?>
-	    	<?php if( $non_attached_text === null ) : ?>
+	    <?php if ( !$image_ids ) : ?>
+	    	<?php if ( $non_attached_text === null ) : ?>
 	    		<p class="empty-message">No <?php echo $button['text'] ?> Added</p>
 	    	<?php else : ?>
 	    		<p class="empty-message"><?php echo $non_attached_text ?></p>

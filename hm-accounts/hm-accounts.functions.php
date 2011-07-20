@@ -26,7 +26,7 @@
  **/
 function hma_new_user( $args ) {
 
-	if( is_user_logged_in() ) {
+	if ( is_user_logged_in() ) {
 		hm_error_message( 'You are already logged in', 'register' );
 		return new WP_Error( 'already-logged-in');
 	}
@@ -75,7 +75,7 @@ function hma_new_user( $args ) {
 	$user_vars = array_filter( array( 'user_login' => $user_login, 'user_pass' => $user_pass, 'user_email' => $user_email, 'display_name' => $display_name ) );
 
 	//Check for require_verify_email, send email and store temp data
-	if( $require_verify_email ) {
+	if ( $require_verify_email ) {
 		$original_args['require_verify_email'] = false;
 		$unverified_users = (array) get_option('unverified_users');
 
@@ -97,7 +97,7 @@ function hma_new_user( $args ) {
 
 	$user_id = wp_insert_user( $user_vars );
 	
-	if( !$user_id || is_wp_error( $user_id ) ) {
+	if ( !$user_id || is_wp_error( $user_id ) ) {
 		return $user_id;
 	}
 
@@ -147,24 +147,24 @@ function hma_new_user( $args ) {
  */
 function hma_validate_registration( $args ) {
 	//Username
-	if( ($user = get_user_by('login', $args['user_login'])) && $user->ID ) {
+	if ( ($user = get_user_by('login', $args['user_login'])) && $user->ID ) {
 		hm_error_message( 'Sorry, the username: ' . $args['user_login'] . ' already exists.', 'register' );
 		return new WP_Error( 'username-exists', 'Sorry, the username: ' . $args['user_login'] . ' already exists.');
 	}
 	
 	//Email
-	if( !is_email( $args['user_email'] ) ) {
+	if ( !is_email( $args['user_email'] ) ) {
 		hm_error_message( 'The email address you entered is not valid', 'register' );
 		return new WP_Error( 'invalid-email', 'Invalid email address.');
 	}
 	
-	if( $args['unique_email'] == true && get_user_by_email( $args['user_email'] ) && $args['user_email'] ) {
+	if ( $args['unique_email'] == true && get_user_by_email( $args['user_email'] ) && $args['user_email'] ) {
 		hm_error_message( 'The email address you entered is already in use', 'register' );
 		return new WP_Error( 'email-in-use', 'That email is already in use.');
 	}
 	
 	//Password
-	if( $args['user_pass'] != $args['user_pass2'] ) {
+	if ( $args['user_pass'] != $args['user_pass2'] ) {
 		hm_error_message( 'The passwords you entered do not match.' );
 		return new WP_Error( 'password-mismatch', 'The passwords you entered do not match.');
 	}
@@ -175,12 +175,12 @@ add_filter( 'hma_registration_info', 'hma_validate_registration' );
 
 function hma_email_registration_success( $user, $user_pass ) {
 
-	if( file_exists( $file = get_stylesheet_directory() . '/email.register.php' ) ) {
+	if ( file_exists( $file = get_stylesheet_directory() . '/email.register.php' ) ) {
 		ob_start();
 		include( $file );
 		$message = ob_get_contents();
 		ob_end_clean();
-	} elseif( file_exists( $file = 'tt-accounts.email.register.php' ) ) {
+	} elseif ( file_exists( $file = 'tt-accounts.email.register.php' ) ) {
 		ob_start();
 		include( $file );
 		$message = ob_get_contents();
@@ -232,7 +232,7 @@ function hma_log_user_in( $args ) {
 
 	// Strip any tags then may have been put into the array
 	foreach( $args as $i => $a ) {
-		if( is_string( $a ) )
+		if ( is_string( $a ) )
 			$args[ $i ] = strip_tags( $a );
 	}
 
@@ -272,7 +272,7 @@ function hma_log_user_in( $args ) {
 }
 
 function hma_lost_password( $email ) {
-	if( !get_user_by_email( $email ) && !get_userdatabylogin( $email ) ) {
+	if ( !get_user_by_email( $email ) && !get_userdatabylogin( $email ) ) {
 		hm_error_message( apply_filters( 'hma_login_unrocognized_email_error_message', 'The email address you entered was not recognised'), 'lost-password' );
 		return new WP_Error('unrecognized-email');
 	}
@@ -291,7 +291,7 @@ function hma_lost_password( $email ) {
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
 	$errors = retrieve_password();
 
-	if( !is_wp_error( $errors ) ) {
+	if ( !is_wp_error( $errors ) ) {
 		hm_success_message( 'You have been sent an email with a link to reset your password', 'lost-password' );
 		return array( 'status' => 'success', 'text' => 'success' );
 	}
@@ -306,7 +306,7 @@ function hma_lost_password_email( $message, $key ) {
 	$reset_url = get_bloginfo( 'lost_password_url', 'display' ) . '?action=rp&key=' . $key . '&login=' . $user->user_login;
 
 
-	if( file_exists( $file = get_stylesheet_directory() . '/email.lost-password.php' ) ) {
+	if ( file_exists( $file = get_stylesheet_directory() . '/email.lost-password.php' ) ) {
 		ob_start();
 		include( $file );
 		$message = ob_get_contents();
@@ -326,7 +326,7 @@ function hma_reset_password( $user_login, $key ) {
 	
 	$status = hma_override_reset_password( $key, $user_login );
 	
-	if( !is_wp_error($status) ) {
+	if ( !is_wp_error($status) ) {
 		hm_success_message( 'You have been sent an email with your new randomly generated password', 'lost-password' );
 		return array( 'status' => 'success', 'code' => 303 );
 	}
@@ -340,7 +340,7 @@ function hma_reset_password_email( $message, $new_pass ) {
 	
 	$user = get_userdatabylogin( $_GET['login'] );
 	
-	if( file_exists( $file = get_stylesheet_directory() . '/email.reset-password.php' ) ) {
+	if ( file_exists( $file = get_stylesheet_directory() . '/email.reset-password.php' ) ) {
 		ob_start();
 		include( $file );
 		$message = ob_get_contents();
@@ -394,7 +394,7 @@ function hma_update_user_info( $info ) {
 	$user_id = wp_update_user( $userdata );
 
 	// User avatar
-	if( $info['user_avatar'] ) {
+	if ( $info['user_avatar'] ) {
 		require_once(ABSPATH . 'wp-admin/includes/admin.php');
 
 		$file = wp_handle_upload( $info['user_avatar'], array( 'test_form' => false ) );
@@ -404,7 +404,7 @@ function hma_update_user_info( $info ) {
 	}
 
 	// Remove everything we have already used
-	foreach ($info as $key => $inf) { if(is_string($inf) && $inf == '') $info[$key] = ' '; }
+	foreach ($info as $key => $inf) { if (is_string($inf) && $inf == '') $info[$key] = ' '; }
 	$meta_info = array_diff( $info, $userdata );
 	
 	//unset some important fields
@@ -421,7 +421,7 @@ function hma_update_user_info( $info ) {
 
 	endif;
 	
-	if( $user_id ) {
+	if ( $user_id ) {
 		hm_success_message( 'Updated information successfully', 'update-user' );
 	}
 	
@@ -462,27 +462,27 @@ function hma_parse_user( $user = null ) {
 }
 
 function hma_login_message() {
-	if( !$_GET['message'] )
+	if ( !$_GET['message'] )
 		return;
 
 	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
 }
 
 function hma_register_message() {
-	if( !$_GET['message'] )
+	if ( !$_GET['message'] )
 		return;
 
 	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
 }
 
 function hma_get_message( $code = null ) {
-	if( $code === null ) $code = (int) $_GET['message'];
+	if ( $code === null ) $code = (int) $_GET['message'];
 	$codes = hma_message_codes();
 	return $codes[$code];
 }
 
 function hma_get_the_message() {
-	if( !$_GET['message'] )
+	if ( !$_GET['message'] )
 		return;
 
 	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
@@ -516,7 +516,7 @@ function hma_message_codes() {
 
 //url functions
 function hma_get_user_url( $authordata = null ) {
-	if( !$authordata ) global $authordata;
+	if ( !$authordata ) global $authordata;
 	$authordata = hma_parse_user( $authordata );
 	return get_bloginfo('url') . '/users/' . $authordata->user_nicename . '/';
 }
@@ -528,26 +528,26 @@ function hma_get_avatar( $user, $width, $height, $crop = true, $try_normal = tru
 	$user = hma_parse_user( $user );
 
 	//try to use avatar option classes	
-	if( !empty( $user->user_avatar_option ) ) {
+	if ( !empty( $user->user_avatar_option ) ) {
 		$hma_avatar_option = hma_get_avatar_option( $user->user_avatar_option );
 		$hma_avatar_option->user = $user;
 		
-		if( is_a( $hma_avatar_option, 'hma_SSO_Avatar_Option' ) ) {
+		if ( is_a( $hma_avatar_option, 'hma_SSO_Avatar_Option' ) ) {
 		
 			$avatar = $hma_avatar_option->get_avatar( "width=$width&height=$height&crop=$crop" );
 			
-			if( $avatar )
+			if ( $avatar )
 				return $avatar;
 		}
 	}
 	
-	if( $avatar = hma_get_avatar_upload( $user, $width, $height, $crop ) ) {
+	if ( $avatar = hma_get_avatar_upload( $user, $width, $height, $crop ) ) {
 		return $avatar;
 	}
-	elseif( $avatar = apply_filters( 'hma_get_avatar_fallback', null, $user, $width, $height, $crop ) ) {
+	elseif ( $avatar = apply_filters( 'hma_get_avatar_fallback', null, $user, $width, $height, $crop ) ) {
 		return $avatar;
 	}
-	elseif( $try_normal === true ) {
+	elseif ( $try_normal === true ) {
 
 		preg_match( '/src=\'([^\']*)/', get_avatar( $user->user_email, $width ), $matches );
 		return $matches[1];
@@ -556,7 +556,7 @@ function hma_get_avatar( $user, $width, $height, $crop = true, $try_normal = tru
 }
 
 function hma_get_avatar_upload( $user, $w, $h, $c ) {
-	if( !empty( $user->user_avatar_path ) )
+	if ( !empty( $user->user_avatar_path ) )
 		return wpthumb( $user->user_avatar_path, $w, $h, $c );
 }
 
@@ -652,7 +652,7 @@ function hma_is_user_profile( $user_id = null ) {
 	
 	global $wp_the_query;
 	
-	if( $user_id ) {
+	if ( $user_id ) {
 	
 	} else {
 		return !empty( $wp_the_query->is_user_profile );
@@ -662,7 +662,7 @@ function hma_is_user_profile( $user_id = null ) {
 
 function hma_get_profile_user() {
 	
-	if( !hma_is_user_profile() )
+	if ( !hma_is_user_profile() )
 		return null;
 	
 	return get_user_by( 'slug', get_query_var( 'author_name' ) );
@@ -679,10 +679,10 @@ function hma_get_profile_user() {
 function hma_get_login_url( $redirect = null, $message = null ) {
 	$url = get_bloginfo( 'login_url', 'display' );
 
-	if( $redirect )
+	if ( $redirect )
 		$url = add_query_arg( 'redirect_to', urlencode($redirect), $url );
 		
-	if( $message )
+	if ( $message )
 		$url = add_query_arg( 'login_message', urlencode($message), $url );
 
 	return esc_url( $url );
@@ -698,7 +698,7 @@ function hma_get_login_url( $redirect = null, $message = null ) {
 function hma_get_logout_url( $redirect = null ) {
 	$url = add_query_arg( 'action', 'logout', hma_get_login_url() );
 
-	if( $redirect )
+	if ( $redirect )
 		$url = add_query_arg( 'redirect_to', urlencode($redirect), $url );
 	
 	return $url;
@@ -726,7 +726,7 @@ function hma_unique_username( $base_name ) {
 	
 	require_once( ABSPATH . 'wp-includes/registration.php' ); 
 	
-	if( !username_exists( $base_name ) )
+	if ( !username_exists( $base_name ) )
 		return $base_name;
 	
 	$counter = 1;

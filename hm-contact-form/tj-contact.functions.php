@@ -10,11 +10,11 @@ function hm_contact_send_email() {
 	$subject = apply_filters( 'hm_contact_email_subject', $subject );
 	
 	// server-side error checking
-	if( !$to )
+	if ( !$to )
 		return new WP_Error( 'no-admin-email', 'You must set the Admin Email option in the Settings page' );
 	
 	ob_start();
-	if(  file_exists( $file = get_template_directory() . '/email.contact.php' ) ) {
+	if (  file_exists( $file = get_template_directory() . '/email.contact.php' ) ) {
 		include( $file );
 	} else {
 		include( 'email.default.php' );

@@ -84,7 +84,7 @@ class hma_SSO_Google extends hma_SSO_Provider {
 	
 	function get_login_cookie() {
 		
-		if( empty( $_COOKIE[ 'fcauth' . $this->site_id ] ) )
+		if ( empty( $_COOKIE[ 'fcauth' . $this->site_id ] ) )
 			return null;
 		
 		return $_COOKIE[ 'fcauth' . $this->site_id ];
@@ -92,13 +92,13 @@ class hma_SSO_Google extends hma_SSO_Provider {
 	
 	function perform_wordpress_login_from_provider() {
 		
-		if( !$this->get_session() )
+		if ( !$this->get_session() )
 			return null;
 		
 		//get the user's details for login etc
 		$userinfo = $this->make_request();
 		
-		if( empty( $userinfo ) )
+		if ( empty( $userinfo ) )
 			return null;
 		
 		global $wpdb;
@@ -107,7 +107,7 @@ class hma_SSO_Google extends hma_SSO_Provider {
 		
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fc_uid' AND meta_value = '{$fc_uid}'" );
 
-		if( !$user_id )
+		if ( !$user_id )
 			return null;
 		
 		wp_set_auth_cookie( $user_id, false );
@@ -127,7 +127,7 @@ class hma_SSO_Google extends hma_SSO_Provider {
 		//get the user's details for login etc
 		$userinfo = $this->make_request();
 		
-		if( empty( $userinfo ) )
+		if ( empty( $userinfo ) )
 			return null;
 
 		$userdata = array( 
@@ -144,7 +144,7 @@ class hma_SSO_Google extends hma_SSO_Provider {
 		$userdata['do_login'] = true;
 		
 		//Facebook will not give the email address if the Facebook App has not been approved
-		if( empty( $userdata['user_email'] ) )
+		if ( empty( $userdata['user_email'] ) )
 			$userdata['user_email'] = $userdata['user_login'] . '@no-email.com';
 		
 		hma_new_user( $userdata );
@@ -187,7 +187,7 @@ class hma_SSO_Google extends hma_SSO_Provider {
 		
 		$response = wp_remote_get( $url );
 		
-		if( is_wp_error( $response ) ) 
+		if ( is_wp_error( $response ) ) 
 			return null;
 		
 		return json_decode( wp_remote_retrieve_body( $response ) );

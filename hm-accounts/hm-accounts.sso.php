@@ -26,7 +26,7 @@ function hma_get_user_avatar_options() {
 	$array = $hma_sso_avatar_options->avatar_options;
 	
 	foreach( $array as $key => $value ) {
-		if( isset( $value->sso_provider ) && method_exists( $value->sso_provider, 'is_authenticated_for_current_user' ) && !$value->sso_provider->is_authenticated_for_current_user() )
+		if ( isset( $value->sso_provider ) && method_exists( $value->sso_provider, 'is_authenticated_for_current_user' ) && !$value->sso_provider->is_authenticated_for_current_user() )
 			unset( $array[$key] );
 	}
 	
@@ -42,7 +42,7 @@ function hma_get_user_avatar_options() {
 function hma_get_avatar_option( $service_id ) {
 	
 	foreach( hma_get_avatar_options() as $option )
-		if( $option->service_id == $service_id )
+		if ( $option->service_id == $service_id )
 			return $option;
 	
 }
@@ -68,7 +68,7 @@ function hma_get_sso_providers() {
 function hma_get_sso_provider( $sso_provider_id ) {
 	
 	foreach( hma_get_sso_providers() as $sso_provider )
-		if( $sso_provider->id == $sso_provider_id )
+		if ( $sso_provider->id == $sso_provider_id )
 			return $sso_provider;
 	
 }
@@ -81,7 +81,7 @@ function hma_get_sso_provider( $sso_provider_id ) {
  */
 function hma_is_logged_in_with_sso_provider( $sso_provider = null ) {
 	
-	if( $sso_provider ) {
+	if ( $sso_provider ) {
 		
 		return $sso_provider == hma_get_logged_in_sso_provider();
 		
@@ -101,7 +101,7 @@ function hma_get_logged_in_sso_provider() {
 
 	foreach( hma_get_sso_providers() as $sso_provider ) {
 
-		if( $sso_provider->check_for_provider_logged_in() )
+		if ( $sso_provider->check_for_provider_logged_in() )
 			return $sso_provider;
 		}
 }
@@ -116,7 +116,7 @@ function hma_get_sso_providers_for_current_user() {
 	$user_providers = array();
 	
 	foreach( hma_get_sso_providers() as $sso_provider ) {
-		if( $sso_provider->is_authenticated_for_current_user() )
+		if ( $sso_provider->is_authenticated_for_current_user() )
 			$user_providers[] = $sso_provider;
 	}
 	
@@ -134,7 +134,7 @@ function hma_get_sso_providers_not_authenticated_for_current_user() {
 	$unauthenticated_providers = array();
 	
 	foreach( hma_get_sso_providers() as $p ) {
-		if( !in_array( $p, $authenticated_providers ) )
+		if ( !in_array( $p, $authenticated_providers ) )
 			$unauthenticated_providers[] = $p;
 	}
 	
@@ -148,7 +148,7 @@ function hma_get_sso_providers_not_authenticated_for_current_user() {
 function hma_init_avatar_options() {
 	
 	//only show "Uploaded" if they have one
-	if( !empty( wp_get_current_user()->user_avatar_path ) )
+	if ( !empty( wp_get_current_user()->user_avatar_path ) )
 		new hma_Uploaded_Avatar_Option();
 		
 	new hma_Gravatar_Avatar_Option();
@@ -207,17 +207,17 @@ class hma_SSO_Avatar_Option {
 		$upload_dir_base = $upload_dir['basedir'];
 		$avatar_dir = $upload_dir_base . '/avatars';
 			
-		if( !is_dir($avatar_dir) )
+		if ( !is_dir($avatar_dir) )
 			mkdir( $avatar_dir, 0775, true );
 		
-		if( !$ext )
+		if ( !$ext )
 			$ext = strtolower( end( explode( '.', $url ) ) );
 		
 		$image_path = $avatar_dir . '/' . $this->user->ID . '-' . $this->service_id . '.' . $ext;
 		file_put_contents( $image_path, file_get_contents( $url ) );
 		
 		//check that the image saved ok, if not then remove it and return null
-		if( !getimagesize( $image_path ) ) {
+		if ( !getimagesize( $image_path ) ) {
 			unlink( $image_path );
 			$image_path = null;
 		}
@@ -227,7 +227,7 @@ class hma_SSO_Avatar_Option {
 	
 	function remove_local_avatar() {
 		
-		if( !is_user_logged_in() || empty( $this->avatar_path ) )
+		if ( !is_user_logged_in() || empty( $this->avatar_path ) )
 			return null;
 		
 		unlink( $this->avatar_path );
@@ -246,7 +246,7 @@ class hma_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	function get_avatar( $size ) {
 		
-		if( empty( $this->user->user_avatar_path ) )
+		if ( empty( $this->user->user_avatar_path ) )
 			return null;
 		
 		return wpthumb( $this->user->user_avatar_path, $size );
@@ -337,7 +337,7 @@ class hma_SSO_Provider {
 	
 	function get_unlink_from_account_url() {
 		
-		if( !is_user_logged_in() )
+		if ( !is_user_logged_in() )
 			return null;
 		
 		return wp_nonce_url( add_query_arg( 'sso_unlink_from_account', $this->id, get_bloginfo( 'my_profile_url', 'display' ) ), 'sso_unlink_from_account_' . $this->id );
@@ -375,11 +375,11 @@ class hma_SSO_Provider {
 	 */
 	function perform_wordpress_register_from_provider() {
 	
-		if( !$this->check_for_provider_logged_in() )
+		if ( !$this->check_for_provider_logged_in() )
 			return null;
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if( $result = $this->perform_wordpress_login_from_provider() ) {
+		if ( $result = $this->perform_wordpress_login_from_provider() ) {
 			wp_redirect( get_bloginfo('my_profile_url', 'display') );
 			exit;
 		}
@@ -397,13 +397,13 @@ class hma_SSO_Provider {
 		
 		$login_status = hma_log_user_in( $wp_login_details );
 		
-		if( is_wp_error( $login_status ) || !$login_status ) {
+		if ( is_wp_error( $login_status ) || !$login_status ) {
 			return $login_status;
 		}
 		
 		$connect_status = $this->provider_authentication_connect_with_account_completed();
 		
-		if( is_wp_error( $connect_status ) ) {
+		if ( is_wp_error( $connect_status ) ) {
 			//connect failed, log them out
 			wp_logout();
 			
@@ -472,7 +472,7 @@ class hma_SSO_Provider {
 		
 	//internal
 	function _run_logged_out_js() {
-		if( isset( $_COOKIE['hma_sso_logged_out'] ) && $_COOKIE['hma_sso_logged_out'] == $this->id ) {
+		if ( isset( $_COOKIE['hma_sso_logged_out'] ) && $_COOKIE['hma_sso_logged_out'] == $this->id ) {
 			setcookie( 'hma_sso_logged_out', '', time() - 3600, COOKIEPATH );
 			$this->logged_out_js();
 		}
@@ -480,7 +480,7 @@ class hma_SSO_Provider {
 	
 	function _check_for_oauth_register_completed() {
 
-		if( isset( $_GET['sso_registrar_authorized'] ) && $_GET['sso_registrar_authorized'] == $this->id ) {
+		if ( isset( $_GET['sso_registrar_authorized'] ) && $_GET['sso_registrar_authorized'] == $this->id ) {
 			$result = $this->provider_authentication_register_completed();
 			
 			//show the register step 2 page
@@ -502,13 +502,13 @@ class hma_SSO_Provider {
 	
 	function _check_sso_login_submitted() {
 		
-		if( isset( $_GET['sso_login_submitted'] ) && $_GET['sso_login_submitted'] == $this->id )
+		if ( isset( $_GET['sso_login_submitted'] ) && $_GET['sso_login_submitted'] == $this->id )
 			$this->login_link_submitted();
 	}
 	
 	function _check_sso_connect_with_account_submitted() {
 	
-		if( isset( $_GET['sso_connect_with_account'] ) && $_GET['sso_connect_with_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_connect_with_account_' . $this->id ) ) {
+		if ( isset( $_GET['sso_connect_with_account'] ) && $_GET['sso_connect_with_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_connect_with_account_' . $this->id ) ) {
 			$result = $this->provider_authentication_connect_with_account_completed();
 			do_action( 'hma_sso_connect_with_account_completed', &$this, $result );
 		}
@@ -516,23 +516,23 @@ class hma_SSO_Provider {
 	
 	function _check_sso_unlink_from_account_submitted() {
 		
-		if( isset( $_GET['sso_unlink_from_account'] ) && $_GET['sso_unlink_from_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_unlink_from_account_' . $this->id ) ) {
+		if ( isset( $_GET['sso_unlink_from_account'] ) && $_GET['sso_unlink_from_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_unlink_from_account_' . $this->id ) ) {
 			$result = $this->unlink_provider_from_current_user();
 			do_action( 'hma_sso_unlink_from_account_completed', &$this, $result );
 		}
 	}
 	
 	function _check_sso_registrar_submitted() {
-		if( isset( $_GET['sso_registrar_submitted'] ) && $_GET['sso_registrar_submitted'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_registrar_submitted_' . $this->id ) )
+		if ( isset( $_GET['sso_registrar_submitted'] ) && $_GET['sso_registrar_submitted'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_registrar_submitted_' . $this->id ) )
 			$this->register_oauth_submitted();
 	}
 	
 	function _check_wordpress_login_and_connect_provider_with_account_submitted() {
-		if( isset( $_POST['sso_wordpress_login_connect_provider_with_account'] ) && $_POST['sso_wordpress_login_connect_provider_with_account'] == $this->id && check_admin_referer( 'hma_login_form_connect_with_sso_' . $this->id ) ) {
+		if ( isset( $_POST['sso_wordpress_login_connect_provider_with_account'] ) && $_POST['sso_wordpress_login_connect_provider_with_account'] == $this->id && check_admin_referer( 'hma_login_form_connect_with_sso_' . $this->id ) ) {
 			
 			$result = $this->perform_wordpress_login_from_site_and_connect_provider_with_account();
 						
-			if( ( !$result ) || is_wp_error( $result ) ) {
+			if ( ( !$result ) || is_wp_error( $result ) ) {
 				
 				//set the access token for the hooks below
 				$this->access_token = $this->get_access_token_from_string( $_POST['access_token'] );
@@ -542,7 +542,7 @@ class hma_SSO_Provider {
 				
 			    do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$this, $result );
 			    
-			    if( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
+			    if ( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
 				    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' );	    
 			    else
 				    wp_redirect( get_bloginfo( 'register_url', 'display' ) . '?message=' );
@@ -552,11 +552,11 @@ class hma_SSO_Provider {
 				
 				do_action( 'hma_sso_register_completed', &$this, $result );
 				
-			    if( $_POST['redirect_to'] )
+			    if ( $_POST['redirect_to'] )
 			    	$redirect = $_POST['redirect_to'];
-			    elseif( $_POST['referer'] )
+			    elseif ( $_POST['referer'] )
 			    	$redirect = $_POST['referer'];
-			    elseif( wp_get_referer() )
+			    elseif ( wp_get_referer() )
 			    	$redirect = wp_get_referer();
 			    else
 			    	$redirect = get_bloginfo('my_profile_url', 'display');
@@ -592,7 +592,7 @@ class hma_SSO_Provider {
 	//form hooks
 	function wordpress_login_and_connect_provider_with_account_form_field() {
 		
-		if( empty( $this->access_token ) )
+		if ( empty( $this->access_token ) )
 			return;
 		
 		?>

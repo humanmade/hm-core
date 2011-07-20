@@ -6,7 +6,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function __construct() {
 		
-		if( !defined( 'hma_SSO_TWITTER_API_KEY' ) || !defined( 'hma_SSO_TWITTER_CONSUMER_SECRET' ) )
+		if ( !defined( 'hma_SSO_TWITTER_API_KEY' ) || !defined( 'hma_SSO_TWITTER_CONSUMER_SECRET' ) )
 			return new WP_Error( 'constants-not-defined' );
 			
 		require_once( 'twitterauth/config.php' );
@@ -22,10 +22,10 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 		
 		$this->usingSession = true;
 		
-		if( !isset( $_SESSION ) )
+		if ( !isset( $_SESSION ) )
 			session_start();
 		
-		if( $this->is_authenticated_for_current_user() ) {
+		if ( $this->is_authenticated_for_current_user() ) {
 			$this->access_token = get_user_meta( get_current_user_id(), '_twitter_access_token', true );
 			$this->client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
 		}
@@ -57,7 +57,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	}
 	
 	function get_sign_in_client() {
-		if( !$this->sign_in_client )
+		if ( !$this->sign_in_client )
 			$this->sign_in_client = new Twitter_Sign_in( $this->client, $this->usingSession );
 		return $this->sign_in_client ;
 	}
@@ -110,7 +110,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function check_for_provider_logged_in() {
 		
-		if( empty( $this->access_token ) )
+		if ( empty( $this->access_token ) )
 			$this->access_token = unserialize( base64_decode( $_POST['access_token'] ) );
 		
 		return $this->access_token;
@@ -128,7 +128,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 			'_twitter_uid'	=> $this->user_info->id,
 		);
 
-		if( count( explode( ' ', $this->user_info->name ) ) > 1 ) {
+		if ( count( explode( ' ', $this->user_info->name ) ) > 1 ) {
 			$userdata['last_name'] = end( explode( ' ', $this->user_info->name ) );
 		}
 		
@@ -137,7 +137,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function get_twitter_user_info() {
 		
-		if( empty( $this->user_info ) ) {
+		if ( empty( $this->user_info ) ) {
 			
 			$this->client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
 			$this->user_info = $this->client->get('account/verify_credentials');
@@ -149,7 +149,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	function perform_wordpress_login_from_provider() {
 		
 		//we are in the popup were (seperate window)
-		if( $this->usingSession ) {
+		if ( $this->usingSession ) {
 			$this->access_token = $_SESSION['twitter_oauth_token'];
 			unset( $_SESSION['twitter_oauth_token'] );
 		} else {
@@ -161,14 +161,14 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 
 		$twitter_uid = $info['_twitter_uid'];
 		
-		if( !$twitter_uid ) {
+		if ( !$twitter_uid ) {
 			hm_error_message( 'There was a problem verifying your credentials with Twitter, please try again.', 'login' );
 			return new WP_Error( 'twitter-authentication-failed' );
 		}
 
 		$user_id = $this->_get_user_id_from_sso_id( $twitter_uid );
 		
-		if( !$user_id ) {
+		if ( !$user_id ) {
 			hm_error_message( 'This Twitter account has not been linked to an account on this site.', 'login' );
 			return new WP_Error( 'twitter-account-not-connected' );
 		}
@@ -189,7 +189,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 
 		$result = $this->perform_wordpress_register_from_provider();
 		
-		if( is_wp_error( $result ) )
+		if ( is_wp_error( $result ) )
 			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 		
 		return $result;
@@ -199,17 +199,17 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 			
 		$info = $this->get_user_info();
 		
-		if( empty( $info['_twitter_uid'] ) ) {
+		if ( empty( $info['_twitter_uid'] ) ) {
 			hm_error_message( 'There was a problem communication with Twitter, please try again.', 'register' );
 			return new WP_Error( 'twitter-connection-error' );
 		}
 		
 		$userdata = apply_filters( 'hma_register_user_data_from_sso', $info, &$this );
 		
-		if( !empty( $_POST['user_login'] ) )
+		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
 		
-		if(  !empty( $_POST['user_email'] ) )
+		if (  !empty( $_POST['user_email'] ) )
 			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
 		
 		$userdata['override_nonce'] = true;
@@ -222,7 +222,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	 	$result = hma_new_user( $userdata );
 		
 		//set the avatar to their twitter avatar if registration completed
-		if( !is_wp_error( $result ) && is_numeric( $result ) ) {
+		if ( !is_wp_error( $result ) && is_numeric( $result ) ) {
 			$this->avatar_option = new hma_Twitter_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
@@ -232,7 +232,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function logout_from_provider( $redirect ) {
 		
-		if( !empty( $_COOKIE['twitter_anywhere_identity'] ) )
+		if ( !empty( $_COOKIE['twitter_anywhere_identity'] ) )
 			setcookie( 'twitter_anywhere_identity', '', time() - 100, COOKIEPATH );
 	}
 	
@@ -244,7 +244,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	function provider_authentication_register_completed() {
 
 		//we are in the popup were (seperate window)
-		if( $this->usingSession ) {
+		if ( $this->usingSession ) {
 			$this->access_token = $_SESSION['twitter_oauth_token'];
 			unset( $_SESSION['twitter_oauth_token'] );
 		} else {
@@ -255,11 +255,11 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 		$info = $this->get_user_info();
 
 		//Check if this twitter account has already been connected with an account, if so log them in and dont register
-		if( !empty( $info['_twitter_uid'] ) && $this->_get_user_id_from_sso_id( $info['_twitter_uid'] ) ) {
+		if ( !empty( $info['_twitter_uid'] ) && $this->_get_user_id_from_sso_id( $info['_twitter_uid'] ) ) {
 
 			$result = $this->perform_wordpress_login_from_provider();
 			do_action( 'hma_sso_register_completed', &$this );
-		} elseif( empty( $info['_twitter_uid'] ) ) {
+		} elseif ( empty( $info['_twitter_uid'] ) ) {
 			
 			hm_error_message( 'There was a problem communication with Twitter, please try again.', 'register' );
 			return new WP_Error( 'twitter-connection-error' );
@@ -271,14 +271,14 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function provider_authentication_connect_with_account_completed() {
 		
-		if( !is_user_logged_in() )
+		if ( !is_user_logged_in() )
 			return new WP_Error( 'user-logged-in' );
 		
 		//we are in the popup were (seperate window)
-		if( $this->usingSession && !empty( $_SESSION['twitter_oauth_token'] ) ) {
+		if ( $this->usingSession && !empty( $_SESSION['twitter_oauth_token'] ) ) {
 			$this->access_token = $_SESSION['twitter_oauth_token'];
 			unset( $_SESSION['twitter_oauth_token'] );
-		} elseif( !empty( $_POST['access_token'] ) ) {
+		} elseif ( !empty( $_POST['access_token'] ) ) {
 			
 			$this->access_token = $this->get_access_token_from_string( $_POST['access_token'] );
 		} else {
@@ -288,13 +288,13 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 		
 		$info = $this->get_twitter_user_info();
 
-		if( !empty( $info->error ) ) {
+		if ( !empty( $info->error ) ) {
 			hm_error_message( 'There was a problem connecting you with Twitter, please try again.', 'update-user' );
 			return new WP_Error( $info->error );
 		}
 		
 		//Check if this twitter account has already been connected with an account, if so log them in and dont register
-		if( $this->_get_user_id_from_sso_id( $info->id ) ) {
+		if ( $this->_get_user_id_from_sso_id( $info->id ) ) {
 			
 			hm_error_message( 'This Twitter account is already linked with another account, please try a different one.', 'update-user' );
 			return new WP_Error( 'sso-provider-already-linked' );
@@ -310,13 +310,13 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function unlink_provider_from_current_user() {
 		
-		if( !is_user_logged_in() )
+		if ( !is_user_logged_in() )
 			return new WP_Error( 'user-not-logged-in' );
 		
 		delete_user_meta( get_current_user_id(), '_twitter_uid' );
 		delete_user_meta( get_current_user_id(), '_twitter_access_token' );
 		
-		if( !$this->userSession ) {
+		if ( !$this->userSession ) {
 			setcookie('twitter_oauth_token', '', time() - 100, COOKIEPATH);
 			setcookie('twitter_oauth_token_secret', '', time() - 100, COOKIEPATH);
 		}
@@ -348,13 +348,13 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function is_authenticated_for_current_user() {
 		
-		if( !is_user_logged_in() )
+		if ( !is_user_logged_in() )
 			return false;
 		
 		$twitter_uid = get_user_meta( get_current_user_id(), '_twitter_uid', true );
 		$access_token = get_user_meta( get_current_user_id(), '_twitter_access_token', true );
 		
-		if( !$twitter_uid || !$access_token )
+		if ( !$twitter_uid || !$access_token )
 			return false;
 			
 		//TODO: check the access token is still good
@@ -364,7 +364,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 	
 	function _get_at_anywhere_user_cookie() {
 		
-		if( !isset( $_COOKIE["twitter_anywhere_identity"] ) )
+		if ( !isset( $_COOKIE["twitter_anywhere_identity"] ) )
 			return null;
 		
 		$cookie = $_COOKIE["twitter_anywhere_identity"]; 
@@ -372,7 +372,7 @@ class hma_SSO_Twitter extends hma_SSO_Provider {
 		preg_match("/(.*):(.*)/", $cookie, $matches);
 		
 		//verify the secret is correct
-		if( sha1( $matches[1] . $this->consumer_secret ) != $matches[2] ) 
+		if ( sha1( $matches[1] . $this->consumer_secret ) != $matches[2] ) 
 			return null;
 		
 		return $matches;
@@ -401,17 +401,17 @@ class hma_Twitter_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	function get_avatar( $size = null ) {
 		
-		if( ( $avatar = get_user_meta( $this->user->ID, '_twitter_avatar', true ) ) && file_exists( $avatar ) ) {
+		if ( ( $avatar = get_user_meta( $this->user->ID, '_twitter_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 		    
-		} elseif( $this->sso_provider->is_authenticated_for_current_user() ) {
+		} elseif ( $this->sso_provider->is_authenticated_for_current_user() ) {
 			$user_info = $this->sso_provider->get_twitter_user_info();
 			$image_url = "http://img.tweetimag.es/i/{$user_info->screen_name}_o";
 			
 			$this->avatar_path = $this->save_avatar_locally( $image_url, 'png' ) ;
 			
 			// saving teh image failed
-			if( !$this->avatar_path )
+			if ( !$this->avatar_path )
 				return null;
 			
 			update_user_meta( $this->user->ID, '_twitter_avatar', $this->avatar_path );
@@ -422,7 +422,7 @@ class hma_Twitter_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	function remove_local_avatar() {
 		
-		if( !is_user_logged_in() || empty( $this->avatar_path ) )
+		if ( !is_user_logged_in() || empty( $this->avatar_path ) )
 			return null;
 		
 		unlink( $this->avatar_path );
@@ -483,7 +483,7 @@ class Twitter_Sign_in {
 	function login_completed_page( ) {
 		
 		//get the token that we sent in _twitter_sign_in_completed_hook(), and generate a new access token based of this
-		if( $this->usingSession ) {
+		if ( $this->usingSession ) {
 			
 			$oath_token = $_SESSION['twitter_oauth_token'];
 			$oath_token_secret = $_SESSION['twitter_oauth_token_secret'];
@@ -498,9 +498,9 @@ class Twitter_Sign_in {
 		$access_token = $twitterOAuth->getAccessToken( $_GET['oauth_verifier'] );
 		
 		//put the new access token into session / cookie, so when the login / register etc picks it up, they are verified
-		if( $this->usingSession ) {
+		if ( $this->usingSession ) {
 			
-			if( !isset( $_SESSION ) )
+			if ( !isset( $_SESSION ) )
 				session_start();
 			
 			$_SESSION['twitter_oauth_token'] = $access_token;
@@ -517,7 +517,7 @@ class Twitter_Sign_in {
 			<body>
 				<script type="text/javascript">
 					//call the parent window
-					if( typeof window.opener.TwitterSignInCompleted != 'undefined' ) {
+					if ( typeof window.opener.TwitterSignInCompleted != 'undefined' ) {
 						
 						window.opener.TwitterSignInCompleted();
 					
@@ -543,12 +543,12 @@ class Twitter_Sign_in {
 }
 
 function _twitter_sign_in_completed_hook() {
-	if( isset( $_GET['sign_in_with_twitter_authorized'] ) && $_GET['sign_in_with_twitter_authorized'] === '1' ) {
+	if ( isset( $_GET['sign_in_with_twitter_authorized'] ) && $_GET['sign_in_with_twitter_authorized'] === '1' ) {
 			
 		$twitter_sso = new hma_SSO_Twitter();
 		$twitter_sign_in = new Twitter_Sign_in( $twitter_sso->client );
 		
-		if( isset( $_GET['session'] ) ) {
+		if ( isset( $_GET['session'] ) ) {
 			$twitter_sign_in->usingSession = (bool) $_GET['session'];
 		}
 		
@@ -560,7 +560,7 @@ function _twitter_sign_in_completed_hook() {
 add_action( 'init', '_twitter_sign_in_completed_hook', 0 );
 
 function _twitter_sign_in_start_hook() {
-	if( isset( $_GET['sign_in_with_twitter_started'] ) ) {
+	if ( isset( $_GET['sign_in_with_twitter_started'] ) ) {
 			
 		$twitter_sso = new hma_SSO_Twitter();
 		
@@ -569,9 +569,9 @@ function _twitter_sign_in_start_hook() {
 	
 		//User $_SESSION instead of cookie - more secure, less flexible for 2+ servers
 		// store the access token in session / cookie, as we need the it when teh redirect finished
-		if( $twitter_sso->usingSession ) {
+		if ( $twitter_sso->usingSession ) {
 			
-			if( !isset( $_SESSION ) )
+			if ( !isset( $_SESSION ) )
 				session_start();
 				
 			$_SESSION['twitter_oauth_token'] = $twitter_sso->get_sign_in_client()->access_token['oauth_token'];

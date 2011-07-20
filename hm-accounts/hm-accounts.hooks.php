@@ -24,7 +24,7 @@ add_action( 'hma_login_form', 'hma_add_login_inputs' );
 function hma_add_login_inputs() {
 	hma_add_form_fields( 'login', false );
 	
-	if( !empty( $_REQUEST['redirect_to'] ) )
+	if ( !empty( $_REQUEST['redirect_to'] ) )
 		echo '<input type="hidden" name="redirect_to" value="' . ($_REQUEST['redirect_to'] ) . '" />' . "\n"; 
 		
 	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n"; 
@@ -44,7 +44,7 @@ function hma_add_profile_inputs() {
 function hma_add_form_fields( $page, $add_nonce = true ) {
 	echo '<input type="hidden" name="hma_' . $page . '_submitted" value="' . $page . '" />' . "\n";
 	
-	if( $add_nonce )
+	if ( $add_nonce )
 		wp_nonce_field( 'hma_' . $page . '_submitted' );
 }
 
@@ -54,7 +54,7 @@ function hma_add_form_fields( $page, $add_nonce = true ) {
  * @param string $page name
  */
 function hma_check_for_submit( $page ) {
-	if( empty( $_POST['hma_' . $page . '_submitted'] ) )
+	if ( empty( $_POST['hma_' . $page . '_submitted'] ) )
 		return;
 	do_action( 'hma_' . $page . '_submitted' );
 }
@@ -67,7 +67,7 @@ add_action( 'init', 'hma_check_for_password_reset' );
 function hma_check_for_password_reset() {
 	if ( isset( $_GET['action'] ) && $_GET['action'] == 'rp' && !empty( $_GET['key'] ) && !empty( $_GET['login'] ) ) {
 		$status = hma_reset_password(  $_GET['login'], $_GET['key'] );
-		if( !is_wp_error( $status ) ) {
+		if ( !is_wp_error( $status ) ) {
 			do_action( 'hma_lost_password_reset_success' );
 			wp_redirect( add_query_arg( 'message', '303', get_bloginfo('lost_password_url', 'display') ) );
 		} else {
@@ -83,15 +83,15 @@ function hma_check_for_password_reset() {
 function hma_replace_avatar( $avatar, $id_or_email, $size, $default, $alt = null ) {
 	
 	//If the default is supplied and an email - dont hook in (as it is the avatars options on the admin page)
-	if( is_string( $id_or_email ) && strpos( $id_or_email, '@' ) > 0 && $default )
+	if ( is_string( $id_or_email ) && strpos( $id_or_email, '@' ) > 0 && $default )
 		return $avatar;
 		
 	$user = hma_parse_user( $id_or_email );
 	
-	if( !$user ) return $avatar;
+	if ( !$user ) return $avatar;
 	$src = hma_get_avatar( $user, $size, $size, true, false );
 
-	if( !$src ) return $avatar;
+	if ( !$src ) return $avatar;
 	return "<img alt='{$alt}' src='{$src}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
 }
 add_filter( 'get_avatar', 'hma_replace_avatar', 10, 5 );
@@ -104,11 +104,11 @@ add_filter( 'get_avatar', 'hma_replace_avatar', 10, 5 );
  */
 function hma_body_class( $classes ) {
 	
-	if( get_query_var( 'is_login' ) == '1' ) {
+	if ( get_query_var( 'is_login' ) == '1' ) {
 		$classes[] = 'login';
 	}
 	
-	if( get_query_var( 'is_lost_password' ) == '1' ) {
+	if ( get_query_var( 'is_lost_password' ) == '1' ) {
 		$classes[] = 'login';
 		$classes[] = 'lost-password';
 	}

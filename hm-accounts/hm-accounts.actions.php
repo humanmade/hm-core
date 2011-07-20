@@ -11,31 +11,31 @@ add_action( 'hma_login_submitted', 'hma_login_submitted' );
 
 function hma_do_login_redirect( $return ) {
 	
-	if( is_wp_error($return) ) {
+	if ( is_wp_error($return) ) {
 		do_action( 'hma_login_submitted_error', $return );
 		
-		if( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
+		if ( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
 			$redirect = add_query_arg( 'message', $return->get_error_code(), get_bloginfo( 'login_inline_url', 'display' ) );
 		
 		else
 			$redirect = add_query_arg( 'message', $return->get_error_code(), get_bloginfo( 'login_url', 'display' ) );
 
-		if( !empty( $_REQUEST['redirect_to'] ) )
+		if ( !empty( $_REQUEST['redirect_to'] ) )
 			add_query_arg( 'redirect_to', $_REQUEST['redirect_to'], $redirect );
 
-		if( $_REQUEST['referer'] )
+		if ( $_REQUEST['referer'] )
 			$redirect = add_query_arg( 'referer', $_REQUEST['referer'], $redirect );
-		elseif( wp_get_referer() )
+		elseif ( wp_get_referer() )
 			$redirect = add_query_arg( 'referer', wp_get_referer(), $redirect );
 		
 		wp_redirect( hm_parse_redirect( $redirect ) );
 		exit;
 	} else {
-		if( $_REQUEST['redirect_to'] )
+		if ( $_REQUEST['redirect_to'] )
 			$redirect = urldecode( $_REQUEST['redirect_to'] );
-		elseif( $_POST['referer'] ) //success
+		elseif ( $_POST['referer'] ) //success
 			$redirect = $_POST['referer'];			
-		elseif( wp_get_referer() )
+		elseif ( wp_get_referer() )
 			$redirect = wp_get_referer();
 		else
 			$redirect = get_bloginfo('url');
@@ -52,8 +52,8 @@ function hma_check_for_sso_providers_logged_in() {
 
 	foreach( hma_get_sso_providers() as $sso_provider ) {
 
-		if( $sso_provider->check_for_provider_logged_in() ) {
-			if( $sso_provider->perform_wordpress_login_from_provider() )
+		if ( $sso_provider->check_for_provider_logged_in() ) {
+			if ( $sso_provider->perform_wordpress_login_from_provider() )
 				return true;
 		}
 	}
@@ -64,20 +64,20 @@ function hma_check_for_sso_providers_registered() {
 
 	foreach( hma_get_sso_providers() as $sso_provider ) {
 
-		if( $sso_provider->check_for_provider_logged_in() ) {
+		if ( $sso_provider->check_for_provider_logged_in() ) {
 			return $sso_provider;
 		}
 	}
 }
 
 function hma_login_in_user_from_sso_providers() {
-	if( is_user_logged_in() )
+	if ( is_user_logged_in() )
 		return null;
 		
 	foreach( hma_get_sso_providers() as $sso_provider ) {
 				
-		if( $sso_provider->check_for_provider_logged_in() ) {
-			if( $sso_provider->perform_wordpress_login_from_provider() ) {
+		if ( $sso_provider->check_for_provider_logged_in() ) {
+			if ( $sso_provider->perform_wordpress_login_from_provider() ) {
 				return true;
 			}
 		}
@@ -99,22 +99,22 @@ function hma_logout() {
 	if ( isset( $_GET['action'] ) && $_GET['action'] == 'logout' ) :
 		
 		//logout of a sso provider 
-		if( hma_is_logged_in_with_sso_provider() ) {
+		if ( hma_is_logged_in_with_sso_provider() ) {
 			$sso_provider = hma_get_logged_in_sso_provider();
 		}
 			
 		wp_logout();
-		if( $_GET['redirect_to'] ) {
+		if ( $_GET['redirect_to'] ) {
 		    $redirect = $_GET['redirect_to'];
 		} else {
 		    $redirect = remove_query_arg( 'action', wp_get_referer() );
 		    
 		    //redirect to homepage if logged out from wp-admin
-		    if( strpos( $redirect, '/wp-admin' ) )
+		    if ( strpos( $redirect, '/wp-admin' ) )
 		    	$redirect = get_bloginfo( 'url' );
 		}
 		
-		if( isset( $sso_provider ) )
+		if ( isset( $sso_provider ) )
 			$sso_provider->logout_from_provider( $redirect );
 		
 		wp_redirect( $redirect );
@@ -130,10 +130,10 @@ function hma_lost_password_submitted() {
 	
 	$success = hma_lost_password( $_POST['user_email'] );
 
-	if( is_wp_error( $success ) ) {
+	if ( is_wp_error( $success ) ) {
 		do_action( 'hma_lost_password_submitted_error', $success );
 		
-		if( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
+		if ( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
 			wp_redirect( get_bloginfo( 'lost_password_inline_url', 'display' ) . '?message=' . $success->get_error_code() );
 		else
 			wp_redirect( get_bloginfo( 'lost_password_url', 'display' ) . '?message=' . $success->get_error_code() );
@@ -142,7 +142,7 @@ function hma_lost_password_submitted() {
 	} else {
 		do_action( 'hma_lost_password_submitted_success', $success );
 		
-		if( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
+		if ( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
 			wp_redirect( get_bloginfo( 'lost_password_inline_url', 'display' ) . '?message=' . $success['text'] );
 		else
 			wp_redirect( get_bloginfo( 'lost_password_url', 'display' ) . '?message=' . $success['text'] );
@@ -155,18 +155,18 @@ function hma_sso_register_submitted() {
 	
 	$registered_with_sso_provider = hma_check_for_sso_providers_registered();
 	
-	if( !$registered_with_sso_provider ) {
+	if ( !$registered_with_sso_provider ) {
 		return;
 	}
 	
 	$result = $registered_with_sso_provider->register_sso_submitted();
 		
-	if( ( !$result ) || is_wp_error( $result ) ) {
+	if ( ( !$result ) || is_wp_error( $result ) ) {
 		
 		add_action( 'hma_sso_register_form', array( &$registered_with_sso_provider, 'register_form_fields' ) );
 	    do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$registered_with_sso_provider, $result );
 	    
-	    if( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
+	    if ( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
 		    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' );	    
 	    else
 		    wp_redirect( get_bloginfo( 'register_url', 'display' ) . '?message=' );
@@ -176,11 +176,11 @@ function hma_sso_register_submitted() {
 		
 		do_action( 'hma_sso_register_completed', &$registered_with_sso_provider, $result );
 		
-	    if( $_POST['redirect_to'] )
+	    if ( $_POST['redirect_to'] )
 	    	$redirect = $_POST['redirect_to'];
-	    elseif( $_POST['referer'] )
+	    elseif ( $_POST['referer'] )
 	    	$redirect = $_POST['referer'];
-	    elseif( wp_get_referer() )
+	    elseif ( wp_get_referer() )
 	    	$redirect = wp_get_referer();
 	    else
 	    	$redirect = get_bloginfo('my_profile_url', 'display');
@@ -209,8 +209,8 @@ function hma_register_submitted() {
 	    'override_nonce'=> true
 	));
 	
-	if( is_wp_error( $hm_return ) ) {
-		if( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
+	if ( is_wp_error( $hm_return ) ) {
+		if ( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
 		    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' . $hm_return->get_error_code() );    
 	    else
 		    wp_redirect( get_bloginfo( 'register_url', 'display' ) . '?message=' . $hm_return->get_error_code() );
@@ -220,11 +220,11 @@ function hma_register_submitted() {
 		
 		do_action( 'hma_register_completed', $hm_return );
 
-		if( $_POST['redirect_to'] )
+		if ( $_POST['redirect_to'] )
 			$redirect = $_POST['redirect_to'];
-		elseif( $_POST['referer'] )
+		elseif ( $_POST['referer'] )
 			$redirect = $_POST['referer'];
-		elseif( wp_get_referer() )
+		elseif ( wp_get_referer() )
 			$redirect = wp_get_referer();
 		else
 			$redirect = get_bloginfo('my_profile_url', 'display');
@@ -242,35 +242,35 @@ function hma_profile_submitted() {
 	global $current_user;
 	
 	//check the user is logged in
-	if( !$current_user )
+	if ( !$current_user )
 		return;
 	
 	// loop through all data and only user user_* fields
 	foreach( $_POST as $key => $value ) {
-		if( strpos( $key, 'user_' ) !== 0 ) continue;
+		if ( strpos( $key, 'user_' ) !== 0 ) continue;
 		$user_data[$key] = esc_html($value);
 	}
 	
 	//password
-	if( !empty( $user_data['user_pass'] ) && ( $user_data['user_pass'] != $user_data['user_pass2'] ) ) {
+	if ( !empty( $user_data['user_pass'] ) && ( $user_data['user_pass'] != $user_data['user_pass2'] ) ) {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
 	
-	if( $user_data['user_pass'] && $user_data['user_pass2'] && ( $user_data['user_pass'] === $user_data['user_pass2'] ) )
+	if ( $user_data['user_pass'] && $user_data['user_pass2'] && ( $user_data['user_pass'] === $user_data['user_pass2'] ) )
 		unset( $user_data['user_pass2'] );
 	
 	$user_data['ID'] = $current_user->ID;
-	if( esc_html( $_POST['first_name'] ) )
+	if ( esc_html( $_POST['first_name'] ) )
 		$user_data['first_name'] = esc_html( $_POST['first_name'] );
-	if( esc_html( $_POST['last_name'] ) )
+	if ( esc_html( $_POST['last_name'] ) )
 		$user_data['last_name'] = esc_html( $_POST['last_name'] );
-	if( $current_user->user_login )
+	if ( $current_user->user_login )
 		$user_data['user_login'] = $current_user->user_login;
-	if( esc_html( $_POST['description'] ) ) 
+	if ( esc_html( $_POST['description'] ) ) 
 		$user_data['description'] = esc_html( $_POST['description'] );
 	
-	if( $_POST['display_name'] ) {
+	if ( $_POST['display_name'] ) {
 		$name = trim($_POST['display_name']);
 		$match = preg_match_all( '/([\S^\,]*)/', $_POST['display_name'], $matches );
 				
@@ -281,15 +281,15 @@ function hma_profile_submitted() {
 		$user_data['display_name'] = $name;
 		$user_data['display_name_preference'] = esc_html( $_POST['display_name'] );
 	}
-	if( $_FILES['user_avatar']['name'] )
+	if ( $_FILES['user_avatar']['name'] )
 		$user_data['user_avatar'] = $_FILES['user_avatar'];
 
 	$success = hma_update_user_info( $user_data );
 	
 	//unlink any sso providers
-	if( !is_wp_error( $success ) && !empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
+	if ( !is_wp_error( $success ) && !empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
 		
-		if( empty( $user_data['user_pass'] ) ) {
+		if ( empty( $user_data['user_pass'] ) ) {
 			hm_error_message( 'The social network(s) could not be unlinked because you did not enter your password', 'update-user' );
 		} else {
 		
@@ -302,11 +302,11 @@ function hma_profile_submitted() {
 		}
 	}
 
-	if( $_POST['redirect_to'] )
+	if ( $_POST['redirect_to'] )
 	    $redirect = $_POST['redirect_to'];
-	elseif( $_POST['referer'] )
+	elseif ( $_POST['referer'] )
 	    $redirect = $_POST['referer'];
-	elseif( wp_get_referer() )
+	elseif ( wp_get_referer() )
 	    $redirect = wp_get_referer();
 	else
 	    $redirect = get_bloginfo('my_profile_url', 'display');

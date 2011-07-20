@@ -418,7 +418,7 @@ class OAuthRequest {
    */
   public function to_header($realm=null) {
     $first = true;
-	if($realm) {
+	if ($realm) {
       $out = 'Authorization: OAuth realm="' . OAuthUtil::urlencode_rfc3986($realm) . '"';
       $first = false;
     } else
@@ -652,7 +652,7 @@ class OAuthServer {
    * check that the timestamp is new enough
    */
   private function check_timestamp($timestamp) {
-    if( ! $timestamp )
+    if ( ! $timestamp )
       throw new OAuthException(
         'Missing timestamp parameter. The parameter is required'
       );
@@ -670,7 +670,7 @@ class OAuthServer {
    * check that the nonce is not repeated
    */
   private function check_nonce($consumer, $token, $nonce, $timestamp) {
-    if( ! $nonce )
+    if ( ! $nonce )
       throw new OAuthException(
         'Missing nonce parameter. The parameter is required'
       );
@@ -786,9 +786,9 @@ class OAuthUtil {
       // otherwise we don't have apache and are just going to have to hope
       // that $_SERVER actually contains what we need
       $out = array();
-      if( isset($_SERVER['CONTENT_TYPE']) )
+      if ( isset($_SERVER['CONTENT_TYPE']) )
         $out['Content-Type'] = $_SERVER['CONTENT_TYPE'];
-      if( isset($_ENV['CONTENT_TYPE']) )
+      if ( isset($_ENV['CONTENT_TYPE']) )
         $out['Content-Type'] = $_ENV['CONTENT_TYPE'];
 
       foreach ($_SERVER as $key => $value) {

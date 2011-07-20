@@ -7,25 +7,25 @@ function showValidation( message, field ) {
 	
     form = jQuery(field).closest('form');
         
-    if( jQuery(form).find('.validation-messages').length > 0 )
+    if ( jQuery(form).find('.validation-messages').length > 0 )
     	dest = jQuery(form).find('.validation-messages');
-    else if( jQuery(form).closest('.validation-messages').length > 0 )
+    else if ( jQuery(form).closest('.validation-messages').length > 0 )
     	dest = jQuery(form).closest('.validation-messages');
-    else if( jQuery('.validation-messages').length > 0 )
+    else if ( jQuery('.validation-messages').length > 0 )
     	dest = jQuery('.validation-messages');
     else
     	dest = form;
         	
-    if( jQuery(dest).find(".message.error").hasClass('error') )
+    if ( jQuery(dest).find(".message.error").hasClass('error') )
     	alreadyErrors = true;
 	
-	if( alreadyErrors == false )
+	if ( alreadyErrors == false )
     	jQuery(dest).append( '<p class="message error" style="display: none;">' + message + '</div>' );
     else
     	jQuery(dest).find(".message.error").html(message);
 
     //only slide down if an erro has not already been shown
-    if( alreadyErrors == false )
+    if ( alreadyErrors == false )
     	jQuery(dest).find(".message.error").slideDown();
     else
     	jQuery(dest).find(".message.error").show();
@@ -52,7 +52,7 @@ function validateForm( form ) {
 	success = true;
 	
 	jQuery( form ).find('input, textarea').filter( function() { return jQuery(this).attr('class').search('required-group-') === 0 ? true : false; }).each( function() {
-		if( success == true ) {
+		if ( success == true ) {
 			reqNum = jQuery(this).attr('class').replace('required-group-', '');
 			success = false;
 			jQuery(form).find(".required-group-" + reqNum).filter( function() { return validate_field(jQuery(this)) } ).each( function() {
@@ -63,7 +63,7 @@ function validateForm( form ) {
 	});
 
 	jQuery(form).find(".required").each( function() {
-		if( success == true ) {
+		if ( success == true ) {
 			success = validate_field(jQuery(this));
 		}
 	});
@@ -74,8 +74,8 @@ function validateForm( form ) {
 function validate_field( input ) {
 	success = true;
 	
-	if( jQuery(input).attr("id") == 'spambot' ) {
-	    if( jQuery(input).val() > '' ) {
+	if ( jQuery(input).attr("id") == 'spambot' ) {
+	    if ( jQuery(input).val() > '' ) {
 	    	success = false;
 	    	showValidation( 'Spambot detected, please contact us directly via email' );
 	    }
@@ -85,10 +85,10 @@ function validate_field( input ) {
 	    field = jQuery(input).attr("title");
 	    showValidation( 'Please upload a file into the ' + field + ' field.', jQuery(input) );		
 	}
-	else if( jQuery(input).val() == '' || jQuery(input).val() == jQuery(input).attr("alt") ) {
+	else if ( jQuery(input).val() == '' || jQuery(input).val() == jQuery(input).attr("alt") ) {
 	    success = false;
 	    				
-	    if( jQuery("label[for=" + jQuery(input).attr("id") + "]").text() > '' && jQuery(input).attr("id") )
+	    if ( jQuery("label[for=" + jQuery(input).attr("id") + "]").text() > '' && jQuery(input).attr("id") )
 	    	field = jQuery("label[for=" + jQuery(input).attr("id") + "]").text().replace(':', '');
 	    else
 	    	field = jQuery(input).attr("title");
@@ -96,16 +96,16 @@ function validate_field( input ) {
 	    showValidation( 'Please enter text into the ' + field + ' field.', jQuery(input) );			
 	}
 	
-	if( jQuery(input).attr("id") == 'email' ||  jQuery(input).hasClass("email") ) {
-	    if( !isValidEmail( jQuery(input).val() ) ) {
+	if ( jQuery(input).attr("id") == 'email' ||  jQuery(input).hasClass("email") ) {
+	    if ( !isValidEmail( jQuery(input).val() ) ) {
 	    	success = false;
 	    	showValidation( 'The email address you entered is invalid', jQuery(input) );
 	    }
 	}
 	
-	if( jQuery(input).hasClass("domain") ) {
+	if ( jQuery(input).hasClass("domain") ) {
 	    jQuery(input).val( fillUrl( jQuery(input).val() ) );
-	    if( !isValidUrl( jQuery(input).val() ) ) {
+	    if ( !isValidUrl( jQuery(input).val() ) ) {
 	    	success = false;
 	    	showValidation( 'The URL you entered is invalid', jQuery(input) );
 	    	
@@ -113,7 +113,7 @@ function validate_field( input ) {
 	    }
 	}
 	
-	if( jQuery(input).hasClass('confirm-password') && jQuery(input).val() > '' && jQuery(input).val() != jQuery(form).find(".password").val() ) {
+	if ( jQuery(input).hasClass('confirm-password') && jQuery(input).val() > '' && jQuery(input).val() != jQuery(form).find(".password").val() ) {
 	    success = false;
 	    showValidation( 'The Confirm Password and Password fields do not match', jQuery(input) );
 	}
@@ -138,10 +138,10 @@ function isValidUrl (url) {
 }
 
 function fillUrl( url ) {
-	if( url == '' )	
+	if ( url == '' )	
 		return url;
 		
-	if( ! /^(https?):\/\//i.test(url) )
+	if ( ! /^(https?):\/\//i.test(url) )
 		url = 'http://' + url;
 	
 	return url;

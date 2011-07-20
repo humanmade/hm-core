@@ -10,7 +10,7 @@ include_once( 'hm-accounts.sso.php' );
 add_action( 'init', 'hma_init' );
 function hma_init() {
 	//inlucde facebook if the plugin is activated
-	if( function_exists( 'fbc_get_fbconnect_user' ) ) {
+	if ( function_exists( 'fbc_get_fbconnect_user' ) ) {
 		include_once( 'hm-accounts.sso.facebook.php' );  
 	}
 }

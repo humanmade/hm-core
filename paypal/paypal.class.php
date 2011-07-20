@@ -182,7 +182,7 @@ class paypal_class {
 
 	   // open the connection to paypal
 	   $fp = fsockopen($url_parsed[host],"80",$err_num,$err_str,30);
-	   if(!$fp) {
+	   if (!$fp) {
 
 	      // could not open the connection.  If loggin is on, the error message
 	      // will be in the log.
