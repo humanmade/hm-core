@@ -1546,3 +1546,20 @@ function hm_post_pagination() {
 	echo hm_get_post_pagination();
 }
 
+/**
+ * Add a submenu class to parent menus
+ * 
+ * @access public
+ * @param array $classes
+ * @param object $item
+ * @return null
+ */
+function hm_submenu_class( $classes, $item ) {
+    
+    if ( get_post_meta_by( array( 'meta_value', 'meta_key' ), array( $item->ID, '_menu_item_menu_item_parent' ) ) )
+        $classes[] = 'menu_parent';
+    
+    return $classes;
+}
+
+add_filter( 'nav_menu_css_class', 'hm_submenu_class', 10, 2);
