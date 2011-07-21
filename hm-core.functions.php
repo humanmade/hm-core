@@ -423,12 +423,15 @@ function get_term_meta_by( $field = 'term_id', $value ) {
 
 }
 
-function get_metadata_by( $fields, $value, $type = 'post', $col = '*' ) {
+function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
 
-	if ( !is_array( $fields ) && !empty( $fields ) && !empty( $value ) )
-		$fields = array( $fields => $value );
+	if ( !is_array( $fields ) && !empty( $fields ) && !empty( $values ) )
+		$fields = array( $fields => $values );
+		
+	if ( is_array( $fields ) && is_array( $values ) )
+		$fields = array_combine( $fields, $values );
 
 	foreach ( $fields as $field => $value )
 		$where[] = "" . $field . " = '" . $value . "'";
