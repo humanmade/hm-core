@@ -13,7 +13,7 @@ if ( defined( 'HM_CORE_PATH' ) || defined( 'HELPERPATH' ) )
 
 define( 'HM_CORE_SLUG', 'hm-core' );
 define( 'HM_CORE_PATH', trailingslashit( WP_PLUGIN_DIR . '/' . HM_CORE_SLUG ) );
-define( 'HM_CORE_URL', trailingslashit( WP_PLUGIN_DIR . '/' . HM_CORE_SLUG ) );
+define( 'HM_CORE_URL', trailingslashit( WP_PLUGIN_URL . '/' . HM_CORE_SLUG ) );
 
 // Load core files
 include_once( HM_CORE_PATH . 'hm-core.debug.php' );
