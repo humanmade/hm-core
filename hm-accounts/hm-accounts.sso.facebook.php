@@ -55,7 +55,8 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
-			  	FB.Event.subscribe("auth.login", function() {
+			FB.logout();  
+			FB.Event.subscribe("auth.login", function() {
 				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
   			});
 
