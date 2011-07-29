@@ -11,6 +11,11 @@ function hma_rewrite_rules() {
 	hm_add_rewrite_rule( '^profile/?$', 'is_profile=1', hma_get_edit_profile_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_edit_profile' => true ) ) );
 	hm_add_rewrite_rule( '^users/([^\/]*)(/page/([\d]*))?/?$', 'author_name=$matches[1]&paged=$matches[3]', hma_get_user_profile_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_user_profile' => true ) ) );
 	
+	//sso
+	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/?$', 'is_login=1&is_twitter_popup=1' );
+	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/callback/?$', 'is_login=1&is_twitter_popup=1' );
+	hm_add_rewrite_rule( '^login/sso/authenticated/?$', 'is_login=1&is_twitter_popup=1' );
+	
 	do_action( 'hma_added_rewrite_rules' );
 	
 }
