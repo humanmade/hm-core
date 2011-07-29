@@ -16,6 +16,9 @@ function hma_rewrite_rules() {
 	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/callback/?$', 'is_login=1&is_twitter_popup=1' );
 	hm_add_rewrite_rule( '^login/sso/authenticated/?$', 'is_login=1' );
 	
+	hm_add_rewrite_rule( '^profile/sso/authenticated/?$', 'is_login=1' );
+
+	
 	do_action( 'hma_added_rewrite_rules' );
 	
 }

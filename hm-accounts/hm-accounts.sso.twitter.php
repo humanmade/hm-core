@@ -56,6 +56,26 @@ class HMA_SSO_Twitter extends hma_SSO_Provider {
 		
 	}
 	
+	function get_init_js_connect_with_account() {
+		
+		$button = new Twitter_Sign_in( $this->client, $this->usingSession );
+		
+		$output = '
+		<script type="text/javascript">
+			function TwitterSignInCompleted() {
+		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
+			}
+			function SignInWithTwitterClicked( e ) {
+				window.open("' . $this->get_login_popup_url() . '","Sign In With Twitter","width=800,height=400");
+				return false;
+			}
+		</script>
+		';
+		
+		return $output;
+
+	}
+	
 	function get_sign_in_client() {
 		if ( !$this->sign_in_client )
 			$this->sign_in_client = new Twitter_Sign_in( $this->client, $this->usingSession );

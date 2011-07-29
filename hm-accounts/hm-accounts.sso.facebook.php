@@ -65,6 +65,26 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		return $output;
 	}
 	
+	function get_init_js_connect_with_account() {
+		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
+		
+		<script type="text/javascript">
+		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
+		  	
+		  	//log them for for easy of use
+		  	if ( FB._userStatus == "connected" ) {
+				FB.logout();
+		  	}
+		  	
+		  	FB.Event.subscribe("auth.login", function() {
+		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
+		 	});
+		</script>';
+		
+						
+		return $output;
+	}
+	
 	function get_login_open_authentication_js() {
 		?>
 		<script>

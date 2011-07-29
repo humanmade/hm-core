@@ -287,11 +287,12 @@ class HMA_SSO_Provider {
 		
 		add_action( 'init', array( &$this, '_check_sso_registrar_submitted' ) );
 		add_action( 'init', array( &$this, '_check_for_oauth_register_completed' ) );
-		add_action( 'init', array( &$this, '_check_sso_connect_with_account_submitted' ) );
 		add_action( 'init', array( &$this, '_check_sso_unlink_from_account_submitted' ) );
 		add_action( 'init', array( &$this, '_check_wordpress_login_and_connect_provider_with_account_submitted' ) );
 
 		add_action( 'hm_parse_request_^login/sso/authenticated/?$', array( &$this, '_check_sso_login_submitted' ) );
+		add_action( 'hm_parse_request_^profile/sso/authenticated/?$', array( &$this, '_check_sso_connect_with_account_submitted' ) );
+
 	}
 	
 	/**
@@ -497,9 +498,12 @@ class HMA_SSO_Provider {
 	
 	function _check_sso_connect_with_account_submitted() {
 	
-		if ( isset( $_GET['sso_connect_with_account'] ) && $_GET['sso_connect_with_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_connect_with_account_' . $this->id ) ) {
+		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id ) {
 			$result = $this->provider_authentication_connect_with_account_completed();
 			do_action( 'hma_sso_connect_with_account_completed', &$this, $result );
+			
+			wp_redirect( get_bloginfo( 'my_profile_url', 'display' ), 303 );
+			exit;
 		}
 	}
 	
@@ -565,7 +569,7 @@ class HMA_SSO_Provider {
 	}
 	
 	function _get_provider_authentication_completed_connect_account_redirect_url() {
-		return html_entity_decode( wp_nonce_url( add_query_arg( 'sso_connect_with_account', $this->id, get_bloginfo( 'my_profile_url', 'display' ) ), 'sso_connect_with_account_' . $this->id ) );
+		return add_query_arg( 'id', $this->id, get_bloginfo( 'my_profile_url', 'display' ) . 'sso/authenticated/' );
 	}
 	
 	function _get_sso_register_submit_url() {
