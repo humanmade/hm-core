@@ -274,7 +274,7 @@ class hma_Gravatar_Avatar_Option extends hma_SSO_Avatar_Option {
  * Absstract class for new SSO provider (e.g. Facebook, Twitter etc)
  * 
  */
-class hma_SSO_Provider {
+class HMA_SSO_Provider {
 	
 	public $id;
 	public $name;
@@ -287,10 +287,11 @@ class hma_SSO_Provider {
 		
 		add_action( 'init', array( &$this, '_check_sso_registrar_submitted' ) );
 		add_action( 'init', array( &$this, '_check_for_oauth_register_completed' ) );
-		add_action( 'init', array( &$this, '_check_sso_login_submitted' ) );
 		add_action( 'init', array( &$this, '_check_sso_connect_with_account_submitted' ) );
 		add_action( 'init', array( &$this, '_check_sso_unlink_from_account_submitted' ) );
-		add_action( 'init', array( &$this, '_check_wordpress_login_and_connect_provider_with_account_submitted' ) );	
+		add_action( 'init', array( &$this, '_check_wordpress_login_and_connect_provider_with_account_submitted' ) );
+
+		add_action( 'hm_parse_request_^login/sso/authenticated/?$', array( &$this, '_check_sso_login_submitted' ) );
 	}
 	
 	/**
@@ -347,26 +348,6 @@ class hma_SSO_Provider {
 		return $this->access_token;
 	}
 
-	
-	/**
-	 * Check if the user is logged into the SSO provider (not necissarily wordpress).
-	 * 
-	 * @return bool
-	 */
-	function check_for_provider_logged_in() {		
-		return false;
-	}
-	
-	/**
-	 * Logs the user into WordPress from the SSO provider.
-	 * This method is responsible for the wordpress login also
-	 * 
-	 * @return bool
-	 */
-	function perform_wordpress_login_from_provider() {
-		return null;
-	}
-	
 	/**
 	 * Creates a new user based off the SSO provider details (must be check_for_provider_logged_in() = true)
 	 * If the provider credentials have already been used, just log them in
@@ -501,8 +482,8 @@ class hma_SSO_Provider {
 	}
 	
 	function _check_sso_login_submitted() {
-		
-		if ( isset( $_GET['sso_login_submitted'] ) && $_GET['sso_login_submitted'] == $this->id )
+	
+		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id )
 			$this->login_link_submitted();
 	}
 	
@@ -572,7 +553,7 @@ class hma_SSO_Provider {
 	}
 	
 	function _get_sso_login_submit_url() {
-		return html_entity_decode( wp_nonce_url( add_query_arg( 'login_source', 'popup', add_query_arg( 'sso_login_submitted', $this->id, get_bloginfo( 'login_url', 'display' ) ) ), 'sso_login_submitted_' . $this->id ) );
+		return add_query_arg( 'id', $this->id, get_bloginfo( 'login_url', 'display' ) . 'sso/authenticated/' );
 	}
 	
 	function _get_provider_authentication_completed_connect_account_redirect_url() {
