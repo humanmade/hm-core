@@ -401,6 +401,10 @@ function hm_get_the_messages( $context = null, $classes = null ) {
 
 }
 
+function hm_clear_messages( $context = null ) {
+	hm_get_messages( $context, true );
+}
+
 function hm_the_messages( $context = null, $classes = null ) {
 
 	echo hm_get_the_messages( $context, $classes );

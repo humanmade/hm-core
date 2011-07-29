@@ -6,20 +6,20 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 		parent::__construct();
 		
-		if ( !defined( 'hma_SSO_FACEBOOK_APP_ID' ) || !defined( 'hma_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'hma_SSO_FACEBOOK_API_KEY' ) )
+		if ( !defined( 'HMA_SSO_FACEBOOK_APP_ID' ) || !defined( 'HMA_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'HMA_SSO_FACEBOOK_API_KEY' ) )
 			return new WP_Error( 'constants-not-defined' );
 		
 		$this->id = 'facebook';
 		$this->name = 'Facebook';
-		$this->app_id = hma_SSO_FACEBOOK_APP_ID;
-		$this->application_secret = hma_SSO_FACEBOOK_APPLICATION_SECRET;
-		$this->api_key = hma_SSO_FACEBOOK_API_KEY;
+		$this->app_id = HMA_SSO_FACEBOOK_APP_ID;
+		$this->application_secret = HMA_SSO_FACEBOOK_APPLICATION_SECRET;
+		$this->api_key = HMA_SSO_FACEBOOK_API_KEY;
 		
 		require_once( 'facebook-sdk/facebook.php' );
 		
 		$this->client = new Facebook(array(
 		  'appId'  => $this->app_id,
-		  'secret' => $this->api_key,
+		  'secret' => $this->application_secret,
 		  'cookie' => true,
 		));
 		
@@ -37,17 +37,8 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
-		  	
-		  	FB.getLoginStatus(function(response) {
-			 	if (response.session) {
-			    	// logged in and connected user, someone you know
-			    	parent.jQuery.fancybox.showActivity();
-					document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
-			  	}
-			});
-
+			FB.logout();
 		  	FB.Event.subscribe("auth.login", function() {
-  			  	parent.jQuery.fancybox.showActivity();
 				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
   			});
 
@@ -57,6 +48,20 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		
 		return $output;
 	
+	}
+	
+	function get_init_js() {
+		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
+		
+		<script type="text/javascript">
+		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
+			  	FB.Event.subscribe("auth.login", function() {
+				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
+  			});
+
+		</script>';
+		
+		return $output;
 	}
 	
 	function get_login_open_authentication_js() {
@@ -279,13 +284,12 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	}
 	
 	function get_access_token_from_cookie_session() {
-	
+		
 		if ( empty( $this->client ) )
 			return null;
 			
 		if ( !$this->client->getUser() ) {
 			$this->log( 'get_access_token_from_cookie_session: ' . '$this->client->getUser() failed for object:' );
-			$this->log( print_r( $this->client, true ) );
 			return null;
 		}
 				
@@ -300,7 +304,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		}
 		
 		$return = json_decode( wp_remote_retrieve_body( $response ) );
-				
+			
 		return reset( $return )->access_token;
 	}
 	
@@ -343,8 +347,8 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	
 	function perform_wordpress_login_from_provider() {
 		
-		if ( !$this->check_for_provider_logged_in() || is_user_logged_in() )
-			return null;
+		if ( !$this->check_for_provider_logged_in() )
+			return new WP_Error( 'no-logged-in-to-facebook' );
 		
 		global $wpdb;
 		
@@ -355,8 +359,6 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		}
 		
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$fb_uid}'" );
-		
-		error_log( 'perform_wordpress_login_from_provider: with user_id: ' . $user_id );
 		
 		if ( !$user_id ) {
 			hm_error_message( 'This Facebook account has not been linked to an account on this site.', 'login' );
@@ -384,15 +386,23 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		
 		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
+		else
+			$userdata['user_login'] = hma_unique_username( $this->user_info['username'] );
 		
 		if (  !empty( $_POST['user_email'] ) )
 			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
+		elseif( !empty( $this->user_info['email'] ) )
+			$userdata['user_email'] = $this->user_info['email'];
+		
+		//Don't use such strict validation for registration via facebook
+		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user_for_twitter', 11 ) );
+		
 		
 		$userdata['override_nonce'] = true;
 		$userdata['do_login'] = true;
 		$userdata['_fb_access_token'] = $this->access_token;
 		$userdata['do_redirect'] = false;
-		$userdata['unique_email'] = true;
+		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
 				
 	 	$result = hma_new_user( $userdata );
@@ -410,6 +420,14 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		return $result;	
 	}
 	
+	function _validate_hma_new_user_for_twitter( $result ) {
+
+		if( is_wp_error( $result ) && $result->get_error_code() == 'invalid-email' )
+			return null;
+		
+		return $result;
+	}
+	
 	function logout_from_provider( $redirect ) {
 		
 		//redirect can be relitive, make it not so
@@ -417,7 +435,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		
 		//only redirect to facebook is is logged in with a cookie
 		if ( $this->client->getSession() ) {
-			wp_redirect( $this->client->getLogoutUrl( array( 'next' => $redirect ) ) );
+			wp_redirect( $this->client->getLogoutUrl( array( 'next' => $redirect ) ), 303 );
 			exit;
 		}
 		

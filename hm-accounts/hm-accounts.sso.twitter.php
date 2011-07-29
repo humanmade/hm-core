@@ -204,26 +204,39 @@ class HMA_SSO_Twitter extends hma_SSO_Provider {
 		
 		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
+		else
+			$userdata['user_login'] = hma_unique_username( $this->user_info->screen_name );
 		
 		if (  !empty( $_POST['user_email'] ) )
 			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
+		
+		//Don't use such strict validation for registration via twitter
+		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user_for_twitter', 11 ) );
 		
 		$userdata['override_nonce'] = true;
 		$userdata['do_login'] = true;
 		$userdata['_twitter_access_token'] = $this->access_token;
 		$userdata['do_redirect'] = false;
-		$userdata['unique_email'] = true;
+		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
 		
 	 	$result = hma_new_user( $userdata );
 		
 		//set the avatar to their twitter avatar if registration completed
 		if ( !is_wp_error( $result ) && is_numeric( $result ) ) {
-			$this->avatar_option = new hma_Twitter_Avatar_Option( &$this );
+			$this->avatar_option = new HMA_Twitter_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 		
 		return $result;	
+	}
+	
+	function _validate_hma_new_user_for_twitter( $result ) {
+
+		if( is_wp_error( $result ) && $result->get_error_code() == 'invalid-email' )
+			return null;
+		
+		return $result;
 	}
 	
 	function logout_from_provider( $redirect ) {
@@ -445,15 +458,12 @@ class Twitter_Sign_in {
 	function get_login_link() {
 		
 		$output = '
-		
 		<script type="text/javascript">
 			function SignInWithTwitterClicked( e ) {
 				window.open("' . $this->get_login_popup_url() . '","Sign In With Twitter","width=800,height=400");
 				return false;
 			}
-		</script>
-		
-		';
+		</script>';
 		
 		$output .= '<a onclick="return SignInWithTwitterClicked(this);" class="sign-in-with-twitter" href="' . $this->get_login_popup_url() . '"><img alt="Sign In with Twitter" src="http://a0.twimg.com/images/dev/buttons/sign-in-with-twitter-d.png" /></a>';
 		

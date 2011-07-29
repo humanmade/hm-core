@@ -184,7 +184,7 @@ $hma_sso_avatar_options = new hma_SSO_Avatar_Options();
  * Used as an abstract class, must be subclassed
  * 
  */
-class hma_SSO_Avatar_Option {
+class HMA_SSO_Avatar_Option {
 
 	public $service_name;
 	public $service_id;
@@ -235,7 +235,7 @@ class hma_SSO_Avatar_Option {
 	}
 }
 
-class hma_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
+class HMA_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 
 	function __construct() {
 		
@@ -475,7 +475,15 @@ class HMA_SSO_Provider {
 	
 	function login_link_submitted() {
 		$return = $this->perform_wordpress_login_from_provider();
-
+		
+		// If ther account was not connected, and we have register on login enabled, do that
+		if( is_wp_error( $return ) && in_array( $return->get_error_code(), array( 'twitter-account-not-connected', 'facebook-account-not-connected' ) ) && defined( 'HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN' ) && HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN ) {
+			
+			hm_clear_messages( 'login' );
+			$return = $this->perform_wordpress_register_from_provider();
+			hm_clear_messages( 'register' );
+		}
+		
 		do_action( 'hma_sso_login_attempt_completed', &$this, $return );
 		
 		hma_do_login_redirect( $return );
