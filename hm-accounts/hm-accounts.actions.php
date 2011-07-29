@@ -28,7 +28,7 @@ function hma_do_login_redirect( $return ) {
 		elseif ( wp_get_referer() )
 			$redirect = add_query_arg( 'referer', wp_get_referer(), $redirect );
 		
-		wp_redirect( hm_parse_redirect( $redirect ) );
+		wp_redirect( hm_parse_redirect( $redirect ), 303 );
 		exit;
 	} else {
 		if ( $_REQUEST['redirect_to'] )
@@ -42,7 +42,7 @@ function hma_do_login_redirect( $return ) {
 			
 		do_action( 'hma_login_submitted_success', $redirect );
 		
-		wp_redirect( hm_parse_redirect( $redirect ) );
+		wp_redirect( hm_parse_redirect( $redirect ), 303 );
 		exit;
 	}
 	
