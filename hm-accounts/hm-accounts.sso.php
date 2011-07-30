@@ -287,11 +287,11 @@ class HMA_SSO_Provider {
 		
 		add_action( 'init', array( &$this, '_check_sso_registrar_submitted' ) );
 		add_action( 'init', array( &$this, '_check_for_oauth_register_completed' ) );
-		add_action( 'init', array( &$this, '_check_sso_unlink_from_account_submitted' ) );
 		add_action( 'init', array( &$this, '_check_wordpress_login_and_connect_provider_with_account_submitted' ) );
 
 		add_action( 'hm_parse_request_^login/sso/authenticated/?$', array( &$this, '_check_sso_login_submitted' ) );
 		add_action( 'hm_parse_request_^profile/sso/authenticated/?$', array( &$this, '_check_sso_connect_with_account_submitted' ) );
+		add_action( 'hm_parse_request_^profile/sso/deauthenticate/?$', array( &$this, '_check_sso_unlink_from_account_submitted' ) );
 
 	}
 	
@@ -342,7 +342,7 @@ class HMA_SSO_Provider {
 		if ( !is_user_logged_in() )
 			return null;
 		
-		return wp_nonce_url( add_query_arg( 'sso_unlink_from_account', $this->id, get_bloginfo( 'my_profile_url', 'display' ) ), 'sso_unlink_from_account_' . $this->id );
+		return wp_nonce_url( add_query_arg( 'id', $this->id, get_bloginfo( 'my_profile_url', 'display' ) . 'sso/deauthenticate/' ), 'sso_unlink_from_account_' . $this->id );
 	}
 	
 	function get_access_token_string() {
@@ -509,9 +509,11 @@ class HMA_SSO_Provider {
 	
 	function _check_sso_unlink_from_account_submitted() {
 		
-		if ( isset( $_GET['sso_unlink_from_account'] ) && $_GET['sso_unlink_from_account'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_unlink_from_account_' . $this->id ) ) {
+		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_unlink_from_account_' . $this->id ) ) {
 			$result = $this->unlink_provider_from_current_user();
 			do_action( 'hma_sso_unlink_from_account_completed', &$this, $result );
+			wp_redirect( get_bloginfo( 'my_profile_url', 'display' ), 303 );
+			exit;
 		}
 	}
 	

@@ -79,6 +79,12 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		  	FB.Event.subscribe("auth.login", function() {
 		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
 		 	});
+		 	
+		 	function SignInWithFacebookClicked( elem ) {
+
+				FB.login( function() {}, { perms:"read_stream,publish_stream,offline_access"} );
+				return false;
+			}
 		</script>';
 		
 						
