@@ -1,7 +1,9 @@
 <?php
 
-class hma_SSO_Facebook extends hma_SSO_Provider {
-
+class HMA_SSO_Facebook extends HMA_SSO_Provider {
+	
+	public $facebook_uid;
+	
 	function __construct() {
 	
 		parent::__construct();
@@ -14,6 +16,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		$this->app_id = HMA_SSO_FACEBOOK_APP_ID;
 		$this->application_secret = HMA_SSO_FACEBOOK_APPLICATION_SECRET;
 		$this->api_key = HMA_SSO_FACEBOOK_API_KEY;
+		$this->facebook_uid = null;
 		
 		require_once( 'facebook-sdk/facebook.php' );
 		
@@ -27,7 +30,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 			$this->access_token = get_user_meta( get_current_user_id(), '_fb_access_token', true );
 		}
 		
-		$this->avatar_option = new hma_Facebook_Avatar_Option( &$this );
+		$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
 							
 	}
 	
@@ -264,10 +267,9 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		if ( !is_user_logged_in() )
 			return false;
 		
-		$twitter_uid = get_user_meta( get_current_user_id(), '_fb_uid', true );
 		$access_token = get_user_meta( get_current_user_id(), '_fb_access_token', true );
 		
-		if ( !$twitter_uid || !$access_token )
+		if ( !$access_token )
 			return false;
 			
 		// Check that the access token is still valid
@@ -282,6 +284,41 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		return true;
 	}
 	
+	function get_user_for_access_token() {
+		
+		if( !$this->access_token )
+			return false;
+		
+		global $wpdb;
+		
+		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_access_token' AND meta_value = '{$this->access_token}'" );
+		
+		return $user_id;
+	}
+	
+	function get_wp_user_from_facebook_user( $uid, $access_token = null ) {
+		
+		global $wpdb;
+		
+		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$uid}'" );
+		
+		if( !$user_id )
+			return null;
+		
+		if( $access_token )
+			return $this->get_user_access_token( $user_id ) == $access_token ? $user_id : null;
+		
+		return $user_id;
+	}
+	
+	function get_user_access_token( $wp_user_id = null ) {
+		
+		if( is_null( $wp_user_id ) )
+			$wp_user_id = get_current_user_id();
+		
+		return get_user_meta( $wp_user_id, '_fb_access_token', true );
+	}
+	
 	//internal
 	
 	function _get_oauth_login_url() {
@@ -289,7 +326,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 	}
 	
 	function check_for_provider_logged_in() {
-
+		
 		if ( isset( $_REQUEST['sso_registrar_authorized'] ) && $_REQUEST['sso_registrar_authorized'] == $this->id && $_REQUEST['access_token'] )  {
 			$this->access_token = $_REQUEST['access_token'];
 		} elseif ( $access_token = $this->get_access_token_from_cookie_session() ) {
@@ -361,11 +398,6 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		return $this->user_info;
 	}
 	
-	function get_user_access_token() {
-		
-		return wp_get_current_user()->_fb_access_token;
-	}
-	
 	function update_user_access_token() {
 		global $current_user;
 		$current_user->_fb_access_token = $this->access_token;
@@ -422,7 +454,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 			$userdata['user_email'] = $this->user_info['email'];
 		
 		//Don't use such strict validation for registration via facebook
-		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user_for_twitter', 11 ) );
+		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user' ),11 );
 		
 		
 		$userdata['override_nonce'] = true;
@@ -431,7 +463,10 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		$userdata['do_redirect'] = false;
 		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
-				
+		
+		// Lets us skip email check from wp_insert_user()
+		define( 'WP_IMPORTING', true );
+		
 	 	$result = hma_new_user( $userdata );
 	 	
 	 	if ( is_wp_error( $result ) )
@@ -447,7 +482,7 @@ class hma_SSO_Facebook extends hma_SSO_Provider {
 		return $result;	
 	}
 	
-	function _validate_hma_new_user_for_twitter( $result ) {
+	function _validate_hma_new_user( $result ) {
 
 		if( is_wp_error( $result ) && $result->get_error_code() == 'invalid-email' )
 			return null;

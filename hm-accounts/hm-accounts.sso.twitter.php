@@ -1,6 +1,6 @@
 <?php
 
-class HMA_SSO_Twitter extends hma_SSO_Provider {
+class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 	public $usingSession;
 	
@@ -163,6 +163,18 @@ class HMA_SSO_Twitter extends hma_SSO_Provider {
 		return $this->user_info;
 	}
 	
+	function get_user_for_access_token() {
+	
+		if( !$this->access_token )
+			return false;
+		
+		global $wpdb;
+		
+		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_twitter_oauth_token_secret' AND meta_value = '" . $this->access_token['oauth_token_secret'] . "'" );
+		
+		return $user_id;
+	}
+	
 	function perform_wordpress_login_from_provider() {
 		
 		//we are in the popup were (seperate window)
@@ -231,15 +243,20 @@ class HMA_SSO_Twitter extends hma_SSO_Provider {
 			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
 		
 		//Don't use such strict validation for registration via twitter
-		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user_for_twitter', 11 ) );
+		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user_for_twitter' ), 11 );
 		
 		$userdata['override_nonce'] = true;
 		$userdata['do_login'] = true;
 		$userdata['_twitter_access_token'] = $this->access_token;
+		$userdata['_twitter_oauth_token'] = $this->access_token['oauth_token'];
+		$userdata['_twitter_oauth_token_secret'] = $this->access_token['oauth_token_secret'];
 		$userdata['do_redirect'] = false;
 		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
 		
+		// Lets us skip email check from wp_insert_user()
+		define( 'WP_IMPORTING', true );
+
 	 	$result = hma_new_user( $userdata );
 		
 		//set the avatar to their twitter avatar if registration completed
@@ -326,6 +343,9 @@ class HMA_SSO_Twitter extends hma_SSO_Provider {
 			hm_error_message( 'This Twitter account is already linked with another account, please try a different one.', 'update-user' );
 			return new WP_Error( 'sso-provider-already-linked' );
 		}
+		
+		update_user_meta( get_current_user_id(), '_twitter_oauth_token', $this->access_token['oauth_token'] );
+		update_user_meta( get_current_user_id(), '_twitter_oauth_token_secret', $this->access_token['oauth_token_secret'] );
 		
 		update_user_meta( get_current_user_id(), '_twitter_access_token', $this->access_token );
 		update_user_meta( get_current_user_id(), '_twitter_uid', $info->id );
