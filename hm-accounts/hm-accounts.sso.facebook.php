@@ -85,7 +85,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		 	
 		 	function SignInWithFacebookClicked( elem ) {
 
-				FB.login( function() {}, { perms:"read_stream,publish_stream,offline_access"} );
+				FB.login( function() {}, { perms:"read_stream,publish_stream,offline_access,user_about_me,user_birthday,user_location,user_website,email"} );
 				return false;
 			}
 		</script>';
@@ -440,8 +440,9 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	function perform_wordpress_register_from_provider() {
 					
 		$fb_profile_data = $this->get_user_info();
+		$_fb_profile_data = $this->get_facebook_user_info();
 		
-		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, &$this );
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, $_fb_profile_data, &$this );
 		
 		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
@@ -456,13 +457,18 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		//Don't use such strict validation for registration via facebook
 		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user' ),11 );
 		
-		
 		$userdata['override_nonce'] = true;
 		$userdata['do_login'] = true;
 		$userdata['_fb_access_token'] = $this->access_token;
 		$userdata['do_redirect'] = false;
 		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
+		$userdata['gender'] = $_fb_profile_data['gender'];
+		$userdata['facebook_url'] = $_fb_profile_data['link'];
+		$userdata['url'] = $_fb_profile_data['website'];
+		$userdata['location'] = $_fb_profile_data['location']['name'];
+		$userdata['age'] = ( (int) date('Y') ) - ( (int) date( 'Y', strtotime( $_fb_profile_data['birthday'] ) ) );
+		$userdata['_facebook_data'] = $_fb_profile_data;
 		
 		// Lets us skip email check from wp_insert_user()
 		define( 'WP_IMPORTING', true );
@@ -475,7 +481,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	 	//set the avatar to their twitter avatar if registration completed
 		if ( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated_for_current_user() ) {
 			
-			$this->avatar_option = new hma_Facebook_Avatar_Option( &$this );
+			$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 
@@ -513,7 +519,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 }
 
-class hma_Facebook_Avatar_Option extends hma_SSO_Avatar_Option {
+class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 	
 	public $sso_provider;
 	
