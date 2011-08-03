@@ -1567,3 +1567,69 @@ function hm_submenu_class( $classes, $item ) {
 }
 
 add_filter( 'nav_menu_css_class', 'hm_submenu_class', 10, 2);
+
+/**
+ * hm_touch_time function.
+ * 
+ * @access public
+ * @param int $timestamp
+ * @param string $name. (default: 'hm_time_')
+ * @return null
+ */
+function hm_touch_time( $timestamp, $name = 'hm_time_' ) {
+
+	global $wp_locale, $post, $comment;
+
+	$time_adj = current_time( 'timestamp' );
+	$post_date = $post->post_date;
+
+	$jj = date( 'd', $timestamp );
+	$mm = date( 'm', $timestamp );
+	$aa = date( 'Y', $timestamp );
+	$hh = date( 'H', $timestamp );
+	$mn = date( 'i', $timestamp );
+	$ss = date( 's', $timestamp );
+
+	$month = "<select name=\"{$name}mm\">\n";
+	
+	for ( $i = 1; $i < 13; $i = $i +1 ) {
+	
+		$month .= "\t\t\t" . '<option value="' . zeroise( $i, 2 ) . '"';
+	
+		if ( $i == $mm )
+			$month .= ' selected="selected"';
+	
+		$month .= '>' . $wp_locale->get_month_abbrev( $wp_locale->get_month( $i ) ) . "</option>\n";
+	
+	}
+	
+	$month .= '</select>';
+
+	$day	= '<input style="width: 2.1em;" type="text" name="' . $name . 'jj" value="' . $jj . '" size="2" maxlength="2" autocomplete="off" />';
+	$year	= '<input style="width: 3.5em;" type="text" name="' . $name . 'aa" value="' . $aa . '" size="4" maxlength="4" autocomplete="off" />';
+	$hour	= '<input style="width: 2.1em;" type="text" name="' . $name . 'hh" value="' . $hh . '" size="2" maxlength="2" autocomplete="off" />';
+	$minute = '<input style="width: 2.1em;" type="text" name="' . $name . 'mn" value="' . $mn . '" size="2" maxlength="2" autocomplete="off" />';
+
+	echo '<div class="timestamp-wrap">';
+
+	/* translators: 1: month input, 2: day input, 3: year input, 4: hour input, 5: minute input */
+	printf(__('%1$s%2$s, %3$s @ %4$s : %5$s'), $month, $day, $year, $hour, $minute);
+
+	echo '</div><input type="hidden" id="ss" name="' . $name . 'ss" value="' . $ss . '" />';
+
+}
+
+/**
+ * hm_touch_time_get_time_from_data function.
+ * 
+ * @access public
+ * @param mixed $name
+ * @param mixed $data
+ * @return string
+ */
+function hm_touch_time_get_time_from_data( $name, $data ) {
+
+	$string = $data[ $name . 'aa' ] . '-' . $data[ $name . 'mm' ] . '-' . $data[ $name . 'jj' ] . ' ' . $data[ $name . 'hh' ] . ':' . $data[ $name . 'mn' ] . ':' . $data[ $name . 'ss' ];
+	return strtotime( $string );
+
+}
