@@ -143,6 +143,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 			'first_name'	=> reset( explode( ' ', $this->user_info->name ) ),
 			'display_name_preference' => 'first_name last_name',
 			'_twitter_uid'	=> $this->user_info->id,
+			'description'	=> $this->user_info->description
 		);
 
 		if ( count( explode( ' ', $this->user_info->name ) ) > 1 ) {
@@ -224,15 +225,17 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	}
 	
 	function perform_wordpress_register_from_provider() {
-			
+		
+		$_info = $this->get_twitter_user_info();
+
 		$info = $this->get_user_info();
 		
 		if ( empty( $info['_twitter_uid'] ) ) {
 			hm_error_message( 'There was a problem communication with Twitter, please try again.', 'register' );
 			return new WP_Error( 'twitter-connection-error' );
 		}
-		
-		$userdata = apply_filters( 'hma_register_user_data_from_sso', $info, &$this );
+
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', $info, $_info, &$this );
 		
 		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
@@ -253,6 +256,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$userdata['do_redirect'] = false;
 		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
+		$userdata['location'] = $_info->location;
+		$userdata['user_nicename'] = $_info->screen_name;
+		$userdata['_twitter_data'] = (array) $_info;
 		
 		// Lets us skip email check from wp_insert_user()
 		define( 'WP_IMPORTING', true );
