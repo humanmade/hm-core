@@ -278,6 +278,7 @@ class HMA_SSO_Provider {
 	
 	public $id;
 	public $name;
+	public $supports_publishing;
 	
 	function __construct() {
 		
@@ -447,6 +448,10 @@ class HMA_SSO_Provider {
 		
 	}
 	
+	function is_authenticated() {
+	
+	}
+	
 	function has_avatar_option() {
 		
 		return !empty( $this->avatar_option );
@@ -597,11 +602,14 @@ class HMA_SSO_Provider {
 		<?php wp_nonce_field( 'hma_login_form_connect_with_sso_' . $this->id ) ?>
 		<?php
 	}
-
-		
-	function logged_out_js() {
-		
+	
+	//Puishing
+	function can_publish() {
+	
+		return $this->supports_publishing && $this->user && $this->is_authenticated();
+	
 	}
+	
 	
 	function log( $var ) {
 		error_log( $var );

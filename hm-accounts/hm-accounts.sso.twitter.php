@@ -19,6 +19,8 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$this->api_key = HMA_SSO_TWITTER_API_KEY;
 		$this->consumer_secret = HMA_SSO_TWITTER_CONSUMER_SECRET;
 		$this->sign_in_client = null;
+		$this->supports_publishing = true;
+		$this->user = wp_get_current_user();
 		
 		$this->usingSession = true;
 		
@@ -399,6 +401,21 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return unserialize( base64_decode( $string ) );
 	}
 	
+	function is_authenticated() {
+		if ( !$this->user )
+			return false;
+		
+		
+		$twitter_uid = get_user_meta( $this->user->ID, '_twitter_uid', true );
+		$access_token = get_user_meta( $this->user->ID, '_twitter_access_token', true );
+		
+		if ( !$twitter_uid || !$access_token )
+			return false;
+			
+		//TODO: check the access token is still good
+		return true;
+	}
+	
 	function is_authenticated_for_current_user() {
 		
 		if ( !is_user_logged_in() )
@@ -439,6 +456,22 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 	function get_login_popup_url() {
 		return $this->get_sign_in_client()->get_login_popup_url();
+	}
+	
+	/**
+	 * Published a message to a user's facebook wall.
+	 * 
+	 * @access public
+	 * @param array : message, image_src, image_link, link_url, link_name
+	 * @return true | wp_error
+	 */
+	function publish( $data ) {
+	
+		if( !$this->can_publish() )
+			return new WP_Error( 'can-not-publish' );
+		
+		return $this->client->post('statuses/update', array('status' => $data['message'] ) );
+
 	}
 }
 

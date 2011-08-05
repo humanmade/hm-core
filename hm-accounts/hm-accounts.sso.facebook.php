@@ -17,6 +17,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$this->application_secret = HMA_SSO_FACEBOOK_APPLICATION_SECRET;
 		$this->api_key = HMA_SSO_FACEBOOK_API_KEY;
 		$this->facebook_uid = null;
+		$this->supports_publishing = true;
+		$this->user = wp_get_current_user();
 		
 		require_once( 'facebook-sdk/facebook.php' );
 		
@@ -261,6 +263,28 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->logout_from_provider( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
 	}
 	
+	function is_authenticated() {
+		
+		if( !$this->user )
+			return false;
+		
+		$access_token = get_user_meta( $this->user->ID, '_fb_access_token', true );
+		
+		if ( !$access_token )
+			return false;
+			
+		// Check that the access token is still valid
+		try {
+			$this->client->api('me', 'GET', array( 'access_token' => $this->access_token ));
+		} catch( Exception $e ) {
+			
+			// They key is dead, or somethign else is wrong, clean up so this doesnt happen again.
+			delete_user_meta( $this->user->ID, '_fb_access_token' );
+		}
+		
+		return true;
+		
+	}
 	
 	function is_authenticated_for_current_user() {
 		
@@ -515,7 +539,36 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		global $wpdb;
 		return $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$sso_id}'" );
 	}
+	
+	
+	function _get_facebook_username() {
+	
+		$info = $this->get_facebook_user_info();
+		
+		return $info['username'];
+	
+	}
+	
+	/**
+	 * Published a message to a user's facebook wall.
+	 * 
+	 * @access public
+	 * @param array : message, image_src, image_link, link_url, link_name
+	 * @return true | wp_error
+	 */
+	function publish( $data ) {
+	
+		if( !$this->can_publish() )
+			return new WP_Error( 'can-not-publish' );
+		
+		$fb_data = array( 'type' => $data['type'] == 'image' ? 'photo' : $data['type'], 'message' => $data['message'], 'picture' => $data['image_src'], 'link' => $data['link_url'], 'description' => $link_name );
 
+		$fb_data['access_token'] = $this->access_token;
+		
+		$fb_data = array_filter( $fb_data );
+		
+		return @$this->client->api( $this->_get_facebook_username() . '/feed', 'POST', $fb_data );
+	}
 	
 }
 

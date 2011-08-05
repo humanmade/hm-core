@@ -204,9 +204,18 @@ function hm_sort_array_by_object_key( $array, $object_key ) {
 
 function _hm_sort_array_by_object_key_cmp( $a, $b ) {
 	global $hm_sort_array_by_object_key;
+	
+	if( is_object( $a ) ) {
+	
+		$valuea = is_numeric( $a->{$hm_sort_array_by_object_key} ) ? (int) $a->{$hm_sort_array_by_object_key} : $a->{$hm_sort_array_by_object_key};
+		$valueb = is_numeric( $b->{$hm_sort_array_by_object_key} ) ? (int) $b->{$hm_sort_array_by_object_key} : $b->{$hm_sort_array_by_object_key};
 
-	$valuea = is_numeric( $a->{$hm_sort_array_by_object_key} ) ? (int) $a->{$hm_sort_array_by_object_key} : $a->{$hm_sort_array_by_object_key};
-	$valueb = is_numeric( $b->{$hm_sort_array_by_object_key} ) ? (int) $b->{$hm_sort_array_by_object_key} : $b->{$hm_sort_array_by_object_key};
+	} elseif( is_array( $a ) ) {
+	
+		$valuea = is_numeric( $a[$hm_sort_array_by_object_key] ) ? (int) $a[$hm_sort_array_by_object_key] : $a[$hm_sort_array_by_object_key];
+		$valueb = is_numeric( $b[$hm_sort_array_by_object_key] ) ? (int) $b[$hm_sort_array_by_object_key] : $b[$hm_sort_array_by_object_key];
+
+	}
 
 	return $valuea > $valueb;
 }
