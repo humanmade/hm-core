@@ -115,7 +115,7 @@ function hma_logout() {
 		}
 		
 		if ( isset( $sso_provider ) )
-			$sso_provider->logout_from_provider( $redirect );
+			$sso_provider->logout( $redirect );
 		
 		wp_redirect( $redirect );
 		exit;
@@ -296,7 +296,7 @@ function hma_profile_submitted() {
 			foreach( array_filter( (array) $_POST['unlink_sso_providers'] ) as $sso_provider_id ) {
 			
 				$sso_provider = hma_get_sso_provider( $sso_provider_id );
-				$sso_provider->unlink_provider_from_current_user();
+				$sso_provider->unlink();
 			
 			}
 		}

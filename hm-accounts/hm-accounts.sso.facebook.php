@@ -18,7 +18,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$this->api_key = HMA_SSO_FACEBOOK_API_KEY;
 		$this->facebook_uid = null;
 		$this->supports_publishing = true;
-		$this->user = wp_get_current_user();
+		$this->set_user( wp_get_current_user() );
 		
 		require_once( 'facebook-sdk/facebook.php' );
 		
@@ -28,12 +28,17 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		  'cookie' => true,
 		));
 		
-		if ( get_user_meta( get_current_user_id(), '_fb_access_token', true ) ) {
-			$this->access_token = get_user_meta( get_current_user_id(), '_fb_access_token', true );
-		}
-		
 		$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
 							
+	}
+	
+	public function get_access_token() {
+	
+		if( !$this->user )
+			return null;
+
+		return $this->get_user_access_token( $this->user->ID );
+	
 	}
 	
 	function get_login_button() {
@@ -244,23 +249,23 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return true;
 	}
 	
-	function unlink_provider_from_current_user() {
+	function unlink() {
 		
-		if ( !is_user_logged_in() )
+		if ( !$this->user() )
 			return new WP_Error( 'user-logged-in' );
 		
-		if ( !get_user_meta( get_current_user_id(), '_fb_uid', true ) ) {
+		if ( !get_user_meta( $this->user->ID, '_fb_uid', true ) ) {
 			return true;	
 		}
 		
-		delete_user_meta( get_current_user_id(), '_fb_uid' );
-		delete_user_meta( get_current_user_id(), '_fb_access_token' );
+		delete_user_meta( $this->user->ID, '_fb_uid' );
+		delete_user_meta( $this->user->ID, '_fb_access_token' );
 		
 		$this->avatar_option->remove_local_avatar();
 					
 		hm_success_message( 'Successfully unlinked Facebook from your account.', 'update-user' );
 		
-		return $this->logout_from_provider( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
+		return $this->logout( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
 	}
 	
 	function is_authenticated() {
@@ -284,28 +289,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		return true;
 		
-	}
-	
-	function is_authenticated_for_current_user() {
-		
-		if ( !is_user_logged_in() )
-			return false;
-		
-		$access_token = get_user_meta( get_current_user_id(), '_fb_access_token', true );
-		
-		if ( !$access_token )
-			return false;
-			
-		// Check that the access token is still valid
-		try {
-			$this->client->api('me', 'GET', array( 'access_token' => $this->access_token ));
-		} catch( Exception $e ) {
-			
-			// They key is dead, or somethign else is wrong, clean up so this doesnt happen again.
-			delete_user_meta( get_current_user_id(), '_fb_access_token' );
-		}
-		
-		return true;
 	}
 	
 	function get_user_for_access_token() {
@@ -397,7 +380,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	}
 	
 	function get_user_info() {
-		
+
 		$fb_profile_data = $this->get_facebook_user_info();
 			
 		$userdata = array( 
@@ -503,7 +486,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 	 	
 	 	//set the avatar to their twitter avatar if registration completed
-		if ( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated_for_current_user() ) {
+		if ( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated() ) {
 			
 			$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
@@ -520,7 +503,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $result;
 	}
 	
-	function logout_from_provider( $redirect ) {
+	public function logout( $redirect ) {
 		
 		//redirect can be relitive, make it not so
 		$redirect = get_bloginfo( 'url' ) . str_replace( get_bloginfo( 'url' ), '', $redirect );
@@ -549,6 +532,18 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	}
 	
+	public function user_info() {
+		
+		if( $data = get_user_meta( $this->user->ID, '_facebook_data', true ) )
+			return (array) $data;
+		
+		$data = (array) $this->get_facebook_user_info();
+		
+		update_user_meta( $this->user->ID, '_facebook_data', $data );
+		
+		return $data;
+	}
+	
 	/**
 	 * Published a message to a user's facebook wall.
 	 * 
@@ -556,7 +551,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	 * @param array : message, image_src, image_link, link_url, link_name
 	 * @return true | wp_error
 	 */
-	function publish( $data ) {
+	public function publish( $data ) {
 	
 		if( !$this->can_publish() )
 			return new WP_Error( 'can-not-publish' );
@@ -590,7 +585,7 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 
-		} elseif ( $this->sso_provider->is_authenticated_for_current_user() ) {
+		} elseif ( $this->sso_provider->is_authenticated() ) {
 		    $user_info = $this->sso_provider->get_facebook_user_info();
 		    
 			$image_url = "http://graph.facebook.com/{$user_info['id']}/picture?type=large";			

@@ -20,23 +20,33 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$this->consumer_secret = HMA_SSO_TWITTER_CONSUMER_SECRET;
 		$this->sign_in_client = null;
 		$this->supports_publishing = true;
-		$this->user = wp_get_current_user();
+		$this->set_user( wp_get_current_user() );
 		
 		$this->usingSession = true;
 		
 		if ( !isset( $_SESSION ) )
 			session_start();
 		
-		if ( $this->is_authenticated_for_current_user() ) {
-			$this->access_token = get_user_meta( get_current_user_id(), '_twitter_access_token', true );
-			$this->client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
-		}
+		$this->avatar_option = new HMA_Twitter_Avatar_Option( &$this );
+	}
+	
+	public function set_user( $user ) {
 		
-		else {
+		parent::set_user( $user );
+		
+		if ( $this->is_authenticated() ) {
+			$this->access_token = get_user_meta( $this->user->ID, '_twitter_access_token', true );
+			$this->client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
+		} else {
 			$this->client = new TwitterOAuth( $this->api_key, $this->consumer_secret );
 		}
 		
-		$this->avatar_option = new hma_Twitter_Avatar_Option( &$this );
+	}
+	
+	public function get_access_token() {
+	
+		return $this->user ? get_user_meta( $this->user->ID, '_twitter_access_token', true ) : null;
+	
 	}
 	
 	function get_login_button() {
@@ -81,6 +91,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	function get_sign_in_client() {
 		if ( !$this->sign_in_client )
 			$this->sign_in_client = new Twitter_Sign_in( $this->client, $this->usingSession );
+
 		return $this->sign_in_client ;
 	}
 	
@@ -284,7 +295,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return $result;
 	}
 	
-	function logout_from_provider( $redirect ) {
+	function logout( $redirect ) {
 		
 		if ( !empty( $_COOKIE['twitter_anywhere_identity'] ) )
 			setcookie( 'twitter_anywhere_identity', '', time() - 100, COOKIEPATH );
@@ -363,13 +374,13 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return true;
 	}
 	
-	function unlink_provider_from_current_user() {
+	function unlink() {
 		
-		if ( !is_user_logged_in() )
+		if ( !$this->user->ID )
 			return new WP_Error( 'user-not-logged-in' );
 		
-		delete_user_meta( get_current_user_id(), '_twitter_uid' );
-		delete_user_meta( get_current_user_id(), '_twitter_access_token' );
+		delete_user_meta( $this->user->ID, '_twitter_uid' );
+		delete_user_meta( $this->user->ID, '_twitter_access_token' );
 		
 		if ( !$this->userSession ) {
 			setcookie('twitter_oauth_token', '', time() - 100, COOKIEPATH);
@@ -401,7 +412,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return unserialize( base64_decode( $string ) );
 	}
 	
-	function is_authenticated() {
+	public function is_authenticated() {
 		if ( !$this->user )
 			return false;
 		
@@ -416,36 +427,16 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return true;
 	}
 	
-	function is_authenticated_for_current_user() {
+	public function user_info() {
 		
-		if ( !is_user_logged_in() )
-			return false;
+		if( $data = get_user_meta( $this->user->ID, '_twitter_data', true ) )
+			return (array) $data;
 		
-		$twitter_uid = get_user_meta( get_current_user_id(), '_twitter_uid', true );
-		$access_token = get_user_meta( get_current_user_id(), '_twitter_access_token', true );
+		$data = (array) $this->get_twitter_user_info();
 		
-		if ( !$twitter_uid || !$access_token )
-			return false;
-			
-		//TODO: check the access token is still good
-		return true;
-	}
-
-	
-	function _get_at_anywhere_user_cookie() {
+		update_user_meta( $this->user->ID, '_twitter_data', $data );
 		
-		if ( !isset( $_COOKIE["twitter_anywhere_identity"] ) )
-			return null;
-		
-		$cookie = $_COOKIE["twitter_anywhere_identity"]; 
-		
-		preg_match("/(.*):(.*)/", $cookie, $matches);
-		
-		//verify the secret is correct
-		if ( sha1( $matches[1] . $this->consumer_secret ) != $matches[2] ) 
-			return null;
-		
-		return $matches;
+		return $data;
 	}
 	
 	function _get_user_id_from_sso_id( $sso_id ) {
@@ -454,7 +445,8 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 	}
 	
-	function get_login_popup_url() {
+	public function get_login_popup_url() {
+
 		return $this->get_sign_in_client()->get_login_popup_url();
 	}
 	
@@ -465,7 +457,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	 * @param array : message, image_src, image_link, link_url, link_name
 	 * @return true | wp_error
 	 */
-	function publish( $data ) {
+	public function publish( $data ) {
 	
 		if( !$this->can_publish() )
 			return new WP_Error( 'can-not-publish' );
@@ -492,7 +484,7 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_twitter_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 		    
-		} elseif ( $this->sso_provider->is_authenticated_for_current_user() ) {
+		} elseif ( $this->sso_provider->is_authenticated() ) {
 			$user_info = $this->sso_provider->get_twitter_user_info();
 			$image_url = "http://img.tweetimag.es/i/{$user_info->screen_name}_o";
 			
