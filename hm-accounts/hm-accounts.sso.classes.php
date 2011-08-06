@@ -371,7 +371,10 @@ class HMA_SSO_Provider {
 	}
 	
 	function _get_sso_login_submit_url() {
-		return add_query_arg( 'id', $this->id, get_bloginfo( 'login_url', 'display' ) . 'sso/authenticated/' );
+		$url = add_query_arg( 'id', $this->id, get_bloginfo( 'login_url', 'display' ) . 'sso/authenticated/' );
+		$url = add_query_arg( $_GET, $url );
+		
+		return $url;
 	}
 	
 	function _get_provider_authentication_completed_connect_account_redirect_url() {
