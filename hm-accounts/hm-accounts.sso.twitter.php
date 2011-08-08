@@ -200,6 +200,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		}
 						
 		$info = $this->get_user_info();
+		$twitter_info = $this->user_info();
 
 		$twitter_uid = $info['_twitter_uid'];
 		
@@ -210,10 +211,21 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 
 		$user_id = $this->_get_user_id_from_sso_id( $twitter_uid );
 		
+		// If we don't have their twitter_uid, try twitter handle
+		if( !$user_id )
+			$user_id = $this->_get_user_id_from_sso_id( $twitter_info['screen_name'] );
+		
 		if ( !$user_id ) {
 			hm_error_message( 'This Twitter account has not been linked to an account on this site.', 'login' );
 			return new WP_Error( 'twitter-account-not-connected' );
 		}
+		
+		$user = get_userdata( $user_id );
+		$token = $this->access_token;
+	 	$this->set_user( $user );
+	 	$this->access_token = $token;
+	 	
+		$this->update_user_twitter_information();
 		
 		wp_set_auth_cookie( $user_id, false );
 		set_current_user( $user_id );
@@ -221,7 +233,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		do_action( 'hma_log_user_in', $user_id);
 		do_action( 'hma_login_submitted_success' );
 
-		
 		return true;
 	}
 	
@@ -277,7 +288,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		define( 'WP_IMPORTING', true );
 
 	 	$result = hma_new_user( $userdata );
-		
+	 	$user = get_userdata( $result );
+	 	$this->set_user( $user );
+ 		
 		//set the avatar to their twitter avatar if registration completed
 		if ( !is_wp_error( $result ) && is_numeric( $result ) ) {
 			$this->avatar_option = new HMA_Twitter_Avatar_Option( &$this );
@@ -300,6 +313,24 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		if ( !empty( $_COOKIE['twitter_anywhere_identity'] ) )
 			setcookie( 'twitter_anywhere_identity', '', time() - 100, COOKIEPATH );
 	}
+	
+	private function update_user_twitter_information() {
+		
+		$info = $this->user_info();
+		
+		error_log( 'updating info//...' );
+		error_log( $info['id'] );
+		error_log( $this->user->ID );
+		
+		update_user_meta( $this->user->ID, '_twitter_uid', $info['id'] );
+		update_user_meta( $this->user->ID, 'twitter_username', $info['screen_name'] );		
+		update_user_meta( $this->user->ID, '_twitter_oauth_token', $this->access_token );
+		update_user_meta( $this->user->ID, '_twitter_access_token', $this->access_token['oauth_token'] );
+		update_user_meta( $this->user->ID, '_twitter_oauth_token_secret', $this->access_token['oauth_token_secret'] );
+		update_user_meta( $this->user->ID, '_twitter_data', $info );
+
+	}
+	
 	
 	/**
 	 * Gets the access token and fires any errors before showing the Register With This SSO form.
@@ -441,8 +472,11 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 	function _get_user_id_from_sso_id( $sso_id ) {
 		global $wpdb;
-		return $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_twitter_uid' AND meta_value = '{$sso_id}'" );
-	
+		
+		if( $sso_id && $var = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_twitter_uid' OR meta_key = 'twitter_username' AND meta_value = '{$sso_id}'" ) )
+			return $var;
+		
+		return null;
 	}
 	
 	public function get_login_popup_url() {
@@ -660,3 +694,21 @@ function _twitter_sign_in_start_hook() {
 	exit;
 }
 add_action( 'hm_parse_request_^login/sso/twitter/authenticate/?$', '_twitter_sign_in_start_hook' );
+
+/**
+ * _twitter_add_username_to_editprofile_contact_info function.
+ * 
+ * @access private
+ * @param mixed $methods
+ * @param mixed $user
+ * @return null
+ */
+function _twitter_add_username_to_editprofile_contact_info( $methods, $user ) {
+
+	if( empty( $methods['twitter_username'] ) )
+		$methods['twitter_username'] = __( 'Twitter Username' );
+	
+	return $methods;
+
+}
+add_filter( 'user_contactmethods', '_twitter_add_username_to_editprofile_contact_info', 10, 2 );
