@@ -45,6 +45,34 @@ function hm( $code, $output = true ) {
 
 }
 
+function hm_backtrace( $limit = 0 ) {
+
+	$new = array();
+	$backtrace = debug_backtrace();
+	
+	array_shift( $backtrace );
+	
+	foreach( $backtrace as $num => $val ) {
+		
+		if( $val['function'] == 'do_action' )
+			$new[$num] = reset( $val['args'] ) . ' (via do_action)';
+		
+		else
+			$new[$num] = array( 'function' => $val['function'] );
+	
+		if( !empty( $val['line'] ) )
+			$new[$num]['line'] = $val['line'];
+	
+		if( !empty( $val['file'] ) )
+			$new[$num]['file'] = $val['file'];
+			
+		if( !empty( $val['class'] ) )
+			$new[$num]['class'] = $val['class'];
+	}
+	
+	hm($new);
+}
+
 /**
  * Intelligently error_log the passed var.
  *
