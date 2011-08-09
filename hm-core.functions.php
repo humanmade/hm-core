@@ -1642,3 +1642,22 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
 	return strtotime( $string );
 
 }
+
+/**
+ * Disable the admin bar and admin bar prefs for subscribers
+ * 
+ * @access public
+ * @return null
+ */
+function hm_disable_admin_bar_for_subscribers() {
+	
+	if ( current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && current( wp_get_current_user()->data->wp_capabilities ) == 1 ) :
+
+		add_filter( 'show_admin_bar', '__return_false' );
+
+		remove_action( 'personal_options', '_admin_bar_preferences' );
+
+	endif;
+	
+}
+add_action( 'init', 'hm_disable_admin_bar_for_subscribers' );
