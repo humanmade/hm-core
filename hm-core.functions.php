@@ -1651,12 +1651,11 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
  */
 function hm_disable_admin_bar_for_subscribers() {
 	
-	if ( current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && current( wp_get_current_user()->data->wp_capabilities ) == 1 ) :
-
-		add_filter( 'show_admin_bar', '__return_false' );
-
-		remove_action( 'personal_options', '_admin_bar_preferences' );
-
+	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && key( wp_get_current_user()->data->wp_capabilities ) == 'subscriber' ) :
+		show_admin_bar( false );
+		remove_action( 'wp_head', '_admin_bar_bump_cb' );
+		wp_dequeue_script( 'admin-bar' );
+		wp_dequeue_style( 'admin-bar' );
 	endif;
 	
 }
