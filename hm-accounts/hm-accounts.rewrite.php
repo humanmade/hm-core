@@ -12,9 +12,9 @@ function hma_rewrite_rules() {
 	hm_add_rewrite_rule( '^users/([^\/]*)(/page/([\d]*))?/?$', 'author_name=$matches[1]&paged=$matches[3]', hma_get_user_profile_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_user_profile' => true ) ) );
 	
 	//sso
-	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/?$', 'is_login=1&is_twitter_popup=1' );
-	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/callback/?$', 'is_login=1&is_twitter_popup=1' );
-	hm_add_rewrite_rule( '^login/sso/authenticated/?$', 'is_login=1' );
+	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/?$', 'is_login=1&is_twitter_popup=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
+	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/callback/?$', 'is_login=1&is_twitter_popup=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
+	hm_add_rewrite_rule( '^login/sso/authenticated/?$', 'is_login=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
 	
 	hm_add_rewrite_rule( '^profile/sso/authenticated/?$', 'is_login=1' );
 	hm_add_rewrite_rule( '^profile/sso/deauthenticate/?$', 'is_login=1' );

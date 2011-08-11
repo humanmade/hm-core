@@ -270,7 +270,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
 		$userdata['location'] = $_info->location;
-		$userdata['user_nicename'] = $_info->screen_name;
 		$userdata['_twitter_data'] = (array) $_info;
 		
 		// Lets us skip email check from wp_insert_user()
@@ -381,6 +380,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		
 		delete_user_meta( $this->user->ID, '_twitter_uid' );
 		delete_user_meta( $this->user->ID, '_twitter_access_token' );
+		delete_user_meta( $this->user->ID, '_twitter_oauth_token' );
+		delete_user_meta( $this->user->ID, '_twitter_oauth_token_secret' );	
+		delete_user_meta( $this->user->ID, '_twitter_data' );
 		
 		if ( !$this->userSession ) {
 			setcookie('twitter_oauth_token', '', time() - 100, COOKIEPATH);

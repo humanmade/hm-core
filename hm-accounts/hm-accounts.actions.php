@@ -248,7 +248,7 @@ function hma_profile_submitted() {
 	// loop through all data and only user user_* fields
 	foreach( $_POST as $key => $value ) {
 		if ( strpos( $key, 'user_' ) !== 0 ) continue;
-		$user_data[$key] = esc_html($value);
+		$user_data[$key] = is_string($value) ? esc_html($value) : array_map( 'esc_html', $value );
 	}
 	
 	//password
