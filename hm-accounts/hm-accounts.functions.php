@@ -422,7 +422,7 @@ function hma_update_user_info( $info ) {
 	endif;
 	
 	if ( $user_id ) {
-		hm_success_message( 'Updated information successfully', 'update-user' );
+		hm_success_message( 'Information successfully updated', 'update-user' );
 	}
 	
 	return $user_id;
