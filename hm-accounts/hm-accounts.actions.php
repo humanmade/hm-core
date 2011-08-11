@@ -35,8 +35,6 @@ function hma_do_login_redirect( $return ) {
 			$redirect = urldecode( $_REQUEST['redirect_to'] );
 		elseif ( $_POST['referer'] ) //success
 			$redirect = $_POST['referer'];			
-		elseif ( wp_get_referer() )
-			$redirect = wp_get_referer();
 		else
 			$redirect = get_bloginfo('url');
 			
