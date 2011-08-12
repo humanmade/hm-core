@@ -43,7 +43,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function get_login_button() {
 		
-		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
+		$output = '
 		
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
@@ -61,7 +61,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	}
 	
 	function get_init_js() {
-		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
+		$output = '
 		
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
@@ -76,7 +76,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	}
 	
 	function get_init_js_connect_with_account() {
-		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
+		$output = '
 		
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
