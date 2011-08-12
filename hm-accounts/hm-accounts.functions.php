@@ -389,6 +389,7 @@ function hma_update_user_info( $info ) {
 	if ( $info['last_name'] )$userdata['last_name'] = $info['last_name'];
 	if ( $info['description'] )$userdata['description'] = $info['description'];
 	if ( $info['user_pass'] ) $userdata['user_pass'] = $info['user_pass'];
+	if ( $info['user_url'] ) $userdata['user_url'] = $info['user_url'];
 
 	require_once( ABSPATH . 'wp-includes/registration.php' );
 	$user_id = wp_update_user( $userdata );
@@ -404,7 +405,10 @@ function hma_update_user_info( $info ) {
 	}
 
 	// Remove everything we have already used
-	foreach ($info as $key => $inf) { if (is_string($inf) && $inf == '') $info[$key] = ' '; }
+	foreach ($info as $key => $inf) { 
+		if (is_string($inf) && $inf == '') $info[$key] = ' '; 
+	}
+	
 	$meta_info = array_diff( $info, $userdata );
 	
 	//unset some important fields
