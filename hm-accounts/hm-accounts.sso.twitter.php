@@ -475,8 +475,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	function _get_user_id_from_sso_id( $sso_id ) {
 		global $wpdb;
 		
-		if( $sso_id && $var = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_twitter_uid' OR meta_key = 'twitter_username' AND meta_value = '{$sso_id}'" ) )
+		if( $sso_id && $var = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE ( meta_key = '_twitter_uid' OR meta_key = 'twitter_username' ) AND meta_value = '{$sso_id}'" ) ) {
 			return $var;
+		}
 		
 		return null;
 	}
