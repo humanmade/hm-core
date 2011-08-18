@@ -157,8 +157,7 @@ function hma_get_sso_providers_not_authenticated_for_current_user() {
 function hma_init_avatar_options() {
 	
 	//only show "Uploaded" if they have one
-	if ( !empty( wp_get_current_user()->user_avatar_path ) )
-		new hma_Uploaded_Avatar_Option();
+	new hma_Uploaded_Avatar_Option();
 		
 	new hma_Gravatar_Avatar_Option();
 	

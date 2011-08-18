@@ -96,6 +96,133 @@ function hma_replace_avatar( $avatar, $id_or_email, $size, $default, $alt = null
 }
 add_filter( 'get_avatar', 'hma_replace_avatar', 10, 5 );
 
+
+/**
+ * Add avatar select/upload fields to wordpress admin edit user.
+ *
+ * @access public
+ * @param mixed $user
+ * @return void
+ */
+function hma_admin_add_avatar( $user ) { ?>
+
+	<script type="text/javascript">
+		jQuery(document).ready( function() {
+			jQuery( '#hma_user_avatar' ).show();
+			jQuery( 'form#your-profile' ).attr( 'enctype', 'multipart/form-data' );
+		});
+	</script>
+
+	<style type="text/css">
+		#hma_user_avatar { display: none; }
+		#hma_user_avatar_select_row .hma_avatars { display: inline-block; width: 100px;  }
+		#hma_user_avatar_select_row .hma_avatars input { margin-right: 5px; }
+		#hma_user_avatar_file_row .avatar { display: block; float: left; margin-right: 20px;  }
+		#hma_user_avatar_file_row #hma_user_avatar_file { display: inline-block; margin-bottom: 5px;  }
+	</style>
+
+	<div id="hma_user_avatar">
+	<h3>User Avatar</h3>
+	
+	<table class="form-table">
+
+		<?php 
+		$avatar_options = hma_get_avatar_options();
+		$current_avatar_service = get_usermeta( $user->ID, 'user_avatar_option' );
+		if( $current_avatar_service ) :  ?>
+
+		<tr id="hma_user_avatar_select_row">
+			
+			<th><label for="hma_user_avatar_file">Select which avatar is used</label></th>
+			
+    		<td>
+			<?php 
+				foreach( $avatar_options as $avatar_option ) {
+		    		$avatar_option->user = $user;
+					if( ! $avatar_option->get_avatar( 60 ) )
+						continue;
+		   	?>
+
+	    		<div class="hma_avatars">
+	    			<img src="<?php echo $avatar_option->get_avatar( 60 ); ?>" height="60" width="60" alt="Avatar <?php echo $avatar_option->service_name; ?>" class="avatar" />
+	    			<br/>
+	    			<label>
+	    				<input type="radio" name="hma_user_avatar_service" value="<?php echo $avatar_option->service_id; ?>" 
+	    					<?php 
+		    					if( ! empty( $current_avatar_service ) ) {
+		    						checked( $avatar_option->service_id, $current_avatar_service ); 
+		    					} else {
+		    						checked( $avatar_option->service_id, 'gravatar' ); 
+		    					}
+		    				?>
+		    			/>
+		    			<?php echo $avatar_option->service_name; ?>
+	    			</label>	    			
+	    		</div>
+
+    		<?php } ?> 
+	    	</td>
+			
+		</tr>
+		
+		<?php else : ?>
+
+		<tr id="hma_user_avatar_current_row">
+			<th><label for="hma_user_avatar_file">Current Avatar</label></th>
+    		<td><?php echo get_avatar( $user->ID, 60 ); ?></td>
+    	</tr>
+    	
+		<?php endif; ?>
+
+		<tr id="hma_user_avatar_file_row">
+			<th><label for="hma_user_avatar_file">Upload new avatar</label></th>
+			<td>
+				<input type="file" name="hma_user_avatar_file" id="hma_user_avatar_file"><br/>
+				<span class="description">If you would like to upload a new avatar image. Otherwise leave this empty.</span>			
+			</td>
+		</tr>
+	</table>
+	</div>
+
+<?php }
+add_action( 'show_user_profile', 'hma_admin_add_avatar' );
+add_action( 'edit_user_profile', 'hma_admin_add_avatar' );
+
+
+/**
+ * Process the avatar select/upload fields on save/update.
+ * 
+ * @access public
+ * @param mixed $user_id
+ * @return void
+ */
+function hma_admin_add_avatar_save( $user_id ) {
+
+	if ( ! current_user_can( 'edit_user', $user_id ) )
+		return false;
+
+	if(  isset( $_POST['hma_user_avatar_service'] )  ) {
+	
+		update_usermeta( $user_id, 'user_avatar_option', $_POST['hma_user_avatar_service'] );
+	
+	}
+
+	if( isset( $_FILES['hma_user_avatar_file'] ) && $_FILES['hma_user_avatar_file'] != '' ) {
+	
+		$file = wp_handle_upload( $_FILES['hma_user_avatar_file'], array( 'test_form' => false ) );
+
+		if( ! isset( $file['file'] ) )
+			return; 
+			
+		update_usermeta( $user_id, 'user_avatar_path', $file['file'] );
+		update_usermeta( $user_id, 'user_avatar_option', 'uploaded' );
+	
+	}
+	
+}
+add_action( 'personal_options_update', 'hma_admin_add_avatar_save' );
+add_action( 'edit_user_profile_update', 'hma_admin_add_avatar_save' );
+
 /**
  * Adds some classes to body_class for account pages.
  * 
