@@ -253,6 +253,8 @@ add_filter( 'body_class', 'hma_body_class' );
  * @return string - new url
  */
 function hma_login_url_hook( $login_url, $redirect ) {
+	if( ! file_exists( hma_get_login_template() ) )
+		return $login_url; 
 	return hma_get_login_url( $redirect );
 }
 add_filter('login_url', 'hma_login_url_hook', 10, 2 );
