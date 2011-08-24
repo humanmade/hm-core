@@ -498,8 +498,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 		if( !$this->can_publish() )
 			return new WP_Error( 'can-not-publish' );
-		
-		return $this->client->post('statuses/update', array('status' => $data['message'] ) );
+
+		// TODO Trim to 140 (excluding links)	
+		return $this->client->post('statuses/update', array('status' => $data['message'], 'wrap_links' => true, 'short_url_length' => 19 ) );
 
 	}
 }
