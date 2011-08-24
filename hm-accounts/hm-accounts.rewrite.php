@@ -2,14 +2,22 @@
 
 function hma_rewrite_rules() {
 	
-	hm_add_rewrite_rule( '^login/?$', 'is_login=1', hma_get_login_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_login' => true ) ) );
-	hm_add_rewrite_rule( '^login-inline/?$', 'is_login=1', hma_get_login_inline_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_login' => true ) ) );
-	hm_add_rewrite_rule( '^login/lost-password/?$', 'is_lost_password=1',  hma_get_lost_password_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_lost_password' => true ) ) );
-	hm_add_rewrite_rule( '^login/lost-password-inline/?$', 'is_lost_password=1',  hma_get_lost_password_inline_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_lost_password' => true ) ) );
-	hm_add_rewrite_rule( '^register/?$', 'is_register=1', hma_get_register_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ) ) );
-	hm_add_rewrite_rule( '^register-inline/?$', 'is_register=1', hma_get_register_inline_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ) ) );
-	hm_add_rewrite_rule( '^profile/?$', 'is_profile=1', hma_get_edit_profile_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_edit_profile' => true ) ) );
-	hm_add_rewrite_rule( '^users/([^\/]*)(/page/([\d]*))?/?$', 'author_name=$matches[1]&paged=$matches[3]', hma_get_user_profile_template(), array( 'post_query_properties' => array( 'is_home' => false, 'is_user_profile' => true ) ) );
+	if( file_exists( $login = hma_get_login_template() ) )	
+		hm_add_rewrite_rule( '^login/?$', 'is_login=1', $login, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_login' => true ) ) );		
+	if( file_exists( $login_inline = hma_get_login_inline_template() ) )
+		hm_add_rewrite_rule( '^login-inline/?$', 'is_login=1', $login_inline, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_login' => true ) ) );
+	if( file_exists( $lost_pass = hma_get_lost_password_template() ) )
+		hm_add_rewrite_rule( '^login/lost-password/?$', 'is_lost_password=1',  $lost_pass, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_lost_password' => true ) ) );
+	if( file_exists( $lost_pass_inline =  hma_get_lost_password_inline_template() ) )
+		hm_add_rewrite_rule( '^login/lost-password-inline/?$', 'is_lost_password=1',  $lost_pass_inline, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_lost_password' => true ) ) );
+	if( file_exists( $register =  hma_get_register_template() ) )
+		hm_add_rewrite_rule( '^register/?$', 'is_register=1', $register, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ) ) );
+	if( file_exists( $register_inline =  hma_get_register_inline_template() ) )
+		hm_add_rewrite_rule( '^register-inline/?$', 'is_register=1', $register_inline, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ) ) );
+	if( file_exists( $edit_profile = hma_get_edit_profile_template() ) )
+		hm_add_rewrite_rule( '^profile/?$', 'is_profile=1', $edit_profile, array( 'post_query_properties' => array( 'is_home' => false, 'is_edit_profile' => true ) ) );
+	if( file_exists( $profile = hma_get_user_profile_template() ) ) 
+		hm_add_rewrite_rule( '^users/([^\/]*)(/page/([\d]*))?/?$', 'author_name=$matches[1]&paged=$matches[3]', $profile, array( 'post_query_properties' => array( 'is_home' => false, 'is_user_profile' => true ) ) );
 	
 	//sso
 	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/?$', 'is_login=1&is_twitter_popup=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
