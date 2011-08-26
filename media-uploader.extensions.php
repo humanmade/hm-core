@@ -32,6 +32,45 @@ function hm_register_custom_media_button( $id, $button_text = null, $hide_other_
 
 	if ( !$has_included_custom_media_button_js )
 		add_action( 'admin_footer', 'hm_add_custom_media_button_js');
+	
+	add_thickbox();
+	wp_enqueue_script('media-upload');
+
+}
+
+function hm_register_media_button( $id, $args = array() ) {
+	
+	$id = sanitize_title( $id );
+	
+	$defaults = array(
+		'name' => $id,
+		'hide_other_options' => true,
+		'multiple' => false,
+		'width' => 0,
+		'height' => 0,
+		'crop' => false,
+		'button_text' => 'Use This Image'
+	);
+	
+	$args = wp_parse_args( $args, $defaults );
+	
+	extract( $args );
+	
+	$buttons = get_option( 'custom_media_buttons' );
+
+	$button = array( 'id' => $id, 'button_text' => $args['button_text'], 'name' => $name, 'hide_other_options' => (bool) $hide_other_options, 'multiple' => ( $multiple ? 'yes' : '' ), 'width' => $width, 'height' => $height, 'crop' => $crop, 'insert_into_post' => false, 'type' => 'thumbnail' );
+	$buttons[$id] = $button;
+
+	update_option( 'custom_media_buttons', $buttons );
+
+	// Include the js if it hasnt already
+	global $has_included_custom_media_button_js;
+
+	if ( !$has_included_custom_media_button_js )
+		add_action( 'admin_footer', 'hm_add_custom_media_button_js');
+	
+	add_thickbox();
+	wp_enqueue_script('media-upload');
 
 }
 
@@ -175,6 +214,16 @@ function hm_add_button_to_upload_form() {
 <?php }
 add_action( 'admin_head', 'hm_add_button_to_upload_form' );
 
+/**
+ * hm_add_image_html function, Dedrecated, use hm_add_image_html_custom.
+ * 
+ * @access public
+ * @param mixed $button_id
+ * @param mixed $post. (default: null)
+ * @param mixed $classes. (default: null)
+ * @param string $size. (default: 'thumbnail')
+ * @return bool
+ */
 function hm_add_image_html( $button_id, $post = null, $classes = null, $size = 'thumbnail' ) {
 
 	if ( is_null( $post ) )
@@ -220,11 +269,15 @@ function hm_add_image_html( $button_id, $post = null, $classes = null, $size = '
  * @param string	$size (eg. 'width=15=&height=100&crop=1'
  * @param string 	$non_attached_text - Text to be shown when there are no images
  */
-function hm_add_image_html_custom( $button_id, $title, $post_id, $image_ids, $classes, $size, $non_attached_text, $args = array() ) {
+function hm_add_image_html_custom( $button_id, $title, $post_id, $image_ids, $classes = null, $size = null, $non_attached_text = 'No image added', $args = array() ) {
 
 	$image_ids = array_filter( (array) $image_ids );
 
 	$buttons = get_option( 'custom_media_buttons' );
+	
+	if( empty( $buttons[$button_id] ) )
+		return print('Media button not registered, register it with hm_register_custom_media_button');
+	
 	$button = $buttons[$button_id]; 
 	$attachments = get_posts("post_type=attachment&post_parent=$post_id");
 	
@@ -254,7 +307,7 @@ function hm_add_image_html_custom( $button_id, $title, $post_id, $image_ids, $cl
 			<?php echo $title ?>
 		</a>
 
-		<input type="hidden" name="<?php echo $button_id ?>" id="<?php echo $button_id ?>" value="<?php echo implode( ',', $image_ids ) ?>" />
+		<input type="hidden" name="<?php echo !empty( $button['name'] ) ? $button['name'] : $button['id'] ?>" id="<?php echo $button_id ?>" value="<?php echo implode( ',', $image_ids ) ?>" />
 	</p>
 
 	<span id="<?php echo $button_id; ?>_container" rel="<?php echo $button_id ?>" class="<?php echo $classes; ?>">
