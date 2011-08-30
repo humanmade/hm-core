@@ -23,7 +23,9 @@ function hm_get_related_posts( $limit = 10, $post_types = array( 'post' ), $taxo
 	
 	extract( $args );
 	
-	$related_post_taxonomies = array_map( 'hm_wrap_in_single_quotes', $related_post_taxonomies );
+	foreach( $related_post_taxonomies as &$related_post_taxonomy ) {
+		$related_post_taxonomy = "'" . $related_post_taxonomy . "'";
+	}
 
 	if ( empty( $post_id ) )
 		return;
