@@ -445,9 +445,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	}
 	
 	function perform_wordpress_register_from_provider() {
-					
-		$fb_profile_data = $this->get_user_info();
-		$_fb_profile_data = $this->get_facebook_user_info();
+		
+		try {
+			$fb_profile_data = $this->get_user_info();
+			$_fb_profile_data = $this->get_facebook_user_info();
+		} catch(Exception $e) {
+			return new WP_Error( 'facebook-exception', $e->getMessage() );
+		}
 		
 		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, $_fb_profile_data, &$this );
 		
