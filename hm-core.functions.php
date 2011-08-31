@@ -1377,12 +1377,14 @@ add_filter( 'get_terms', 'hm_add_exclude_draft_to_get_terms_hide_empty', 1, 3 );
 /**
  * Retuns pagination html for list pages
  *
+ * TODO - this should use a walker?
+ *
  * @param object $wp_query. (default: global $wp_query)
  * @param int $current_page. (default: $wp_query['query_vars']['paged'])
  * @param int $ppp. (posts per page) (default: 10)
  * @return  pagination hmtl
  */
-function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null ) {
+function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null, $args = array() ) {
 	if ( $wp_query === null ) global $wp_query;
 	if ( $ppp === null ) $ppp = $wp_query->query_vars['posts_per_page'] ? $wp_query->query_vars['posts_per_page'] : 10;
 	$number_pages = ceil($wp_query->found_posts / $ppp);
@@ -1400,9 +1402,11 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null 
 	if ( isset( $bases[1] ) )
 		$query_params = $bases[1];
 
-	//set the next / prev text
-	$next_text = __('Next &raquo;');
-	$prev_text = __('&laquo; Prev');
+	$defaults = array(
+		'next_text' => __('Next &raquo;'),
+		'prev_text' => __('&laquo; Prev')
+	);
+	$args = wp_parse_args( $args, $defaults );
 
 
 	// mid-size depends on what page you are on, as it applies to each side of current_page
@@ -1419,8 +1423,8 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null 
 	$page_links = paginate_links( array(
 		'base' => trailingslashit( $base ) . ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '' : 'page/%#%/' ) . ( ( isset( $query_params ) && $query_params ) ? '?' . $query_params : '' ) .  ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '&paged=%#%' : '' ),
 		'format' => '',
-		'prev_text' => $prev_text,
-		'next_text' => $next_text,
+		'prev_text' => $args['prev_text'],
+		'next_text' => $args['next_text'],
 		'total' => $number_pages,
 		'current' => $current_page,
 		'mid_size' => $mid_size,
@@ -1440,10 +1444,10 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null 
 			continue;
 
 		//strip ..., last page
-		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $prev_text ) && $current_page == 4 ) )
+		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $args['prev_text'] ) && $current_page == 4 ) )
 			$real_counter--;
 
-		if ( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
+		if ( $real_counter >= 6 && strpos( $pagination_item, $args['next_text'] ) === false )
 			continue;
 
 		$real_counter++;
@@ -1491,10 +1495,11 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 		$number_pages = count($pages);
 	}
 
-	//set the next / prev text
-	$next_text = __('Next &raquo;');
-	$prev_text = __('&laquo; Prev');
-
+	$defaults = array(
+		'next_text' => __('Next &raquo;'),
+		'prev_text' => __('&laquo; Prev')
+	);
+	$args = wp_parse_args( $args, $defaults );
 
 	// mid-size depends on what page you are on, as it applies to each side of current_page
 	if ( $current_page > ($number_pages - 3) ) {
@@ -1516,8 +1521,8 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 	$page_links = paginate_links( array(
 		'base' => $base,
 		'format' => '',
-		'prev_text' => $prev_text,
-		'next_text' => $next_text,
+		'prev_text' => $args['prev_text'],
+		'next_text' => $args['next_text'],
 		'total' => $number_pages,
 		'current' => $current_page,
 		'mid_size' => $mid_size,
@@ -1533,10 +1538,10 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 	foreach( $page_links as $counter => $pagination_item ) :
 
 		//strip ..., last page
-		if ( strpos($pagination_item, '...') || ( strpos($page_links[ $counter - 1 ], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos($page_links[ 2 ], '...') ) || ( $counter == 1 && strpos($page_links[ 0 ], $prev_text) && $current_page == 4 ) )
+		if ( strpos($pagination_item, '...') || ( strpos($page_links[ $counter - 1 ], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos($page_links[ 2 ], '...') ) || ( $counter == 1 && strpos($page_links[ 0 ], $args['prev_text']) && $current_page == 4 ) )
 			continue;
 
-		if ( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
+		if ( $real_counter >= 6 && strpos( $pagination_item, $args['next_text'] ) === false )
 			continue;
 
 		$real_counter++;
