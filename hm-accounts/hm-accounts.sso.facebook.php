@@ -303,7 +303,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $user_id;
 	}
 	
-	function get_wp_user_from_facebook_user( $uid, $access_token = null ) {
+	function get_user_for_uid( $uid, $access_token = null ) {
 		
 		global $wpdb;
 		
@@ -324,6 +324,22 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			$wp_user_id = get_current_user_id();
 		
 		return get_user_meta( $wp_user_id, '_fb_access_token', true );
+	}
+	
+	public function is_acccess_token_valid() {
+	
+			
+		// Check that the access token is still valid
+		try {
+			$this->client->api('me', 'GET', array( 'access_token' => $this->access_token ));
+
+		} catch( Exception $e ) {
+			
+			return false;
+			
+		}
+		
+		return true;
 	}
 	
 	//internal
@@ -405,11 +421,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->user_info;
 	}
 	
-	function update_user_access_token() {
-		global $current_user;
-		$current_user->_fb_access_token = $this->access_token;
-		update_user_meta( get_current_user_id(), '_fb_access_token', $this->access_token );
-	}
 	
 	function perform_wordpress_login_from_provider() {
 		
@@ -533,6 +544,12 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$info = $this->get_facebook_user_info();
 		
 		return $info['username'];
+	
+	}
+	
+	public function save_access_token() {
+	
+		update_user_meta( $this->user->ID, '_fb_access_token', $this->access_token );
 	
 	}
 	
