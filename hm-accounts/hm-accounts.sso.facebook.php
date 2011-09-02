@@ -189,29 +189,9 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		//try to use the fb cookie first
 		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
-		}
-		
-		else {
-		
-			$access_token_request = 'https://graph.facebook.com/oauth/access_token?client_id=' . $this->api_key . '&redirect_uri=' . $this->_get_provider_authentication_completed_register_redirect_url() . '&client_secret=' . $this->application_secret . '&code=' . $_GET['code'];
-			
-			$response = wp_remote_get( $access_token_request );
-			
-			if ( is_wp_error( $response ) ) {
-				hm_error_message( 'There was a problem communicating with ' . $this->name . ', please try again.', 'register' );
-				return new WP_Error( 'facebook-communication-error' );
-			}
-			
-			if ( $response['response']['code'] == 200 ) {
-				
-				$args = wp_parse_args( wp_remote_retrieve_body( $response ) );
-				$this->access_token = $args['access_token'];
-			} else {
+		} else {
 
-				hm_error_message( 'There was a problem communicating with ' . $this->name . ', please try again.', 'register' );
-				return new WP_Error( 'facebook-communication-error' );
-			
-			}
+			return new WP_Error( 'no-access-token' );
 		}
 		
 		$info = $info = $this->get_user_info();
@@ -497,13 +477,15 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	 	if ( is_wp_error( $result ) )
 			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 	 	
+	 	$this->set_user( get_userdata( $result ) ); 
+	 	
 	 	//set the avatar to their twitter avatar if registration completed
 		if ( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated() ) {
 			
 			$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
-
+		
 		return $result;	
 	}
 	
