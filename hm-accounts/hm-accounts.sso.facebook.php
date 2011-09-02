@@ -20,7 +20,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$this->supports_publishing = true;
 		$this->set_user( wp_get_current_user() );
 		
-		require_once( 'facebook-sdk/facebook.php' );
+		require_once( 'facebook-sdk/src/facebook.php' );
 		
 		$this->client = new Facebook(array(
 		  'appId'  => $this->app_id,
@@ -46,7 +46,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$output = '
 		
 		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
+		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
 			FB.logout();
 		  	FB.Event.subscribe("auth.login", function() {
 				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
@@ -64,7 +64,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$output = '
 		
 		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
+		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
 			FB.logout();  
 			FB.Event.subscribe("auth.login", function() {
 				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
@@ -79,7 +79,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$output = '
 		
 		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
+		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
 		  	
 		  	//log them for for easy of use
 		  	if ( FB._userStatus == "connected" ) {
@@ -119,10 +119,10 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
 		
 		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
+		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
 		  	
 		  	FB.getLoginStatus(function(response) {
-			 	if (response.session) {
+			 	if (response.status == "connected") {
 			    	// logged in and connected user, someone you know
 			    	parent.jQuery.fancybox.showActivity();
 					document.location = "' . $this->_get_provider_authentication_completed_register_redirect_url() . '&rand=" + new Date().getTime();
@@ -145,7 +145,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
 		
 		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, session: ' . json_encode( $this->client->getSession() ) . ' });
+		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
 		  	
 		  	//log them for for easy of use
 		  	if ( FB._userStatus == "connected" ) {
@@ -251,8 +251,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function unlink() {
 		
-		if ( !$this->user() )
-			return new WP_Error( 'user-logged-in' );
+		if ( !$this->user )
+			return new WP_Error( 'user-not-logged-in' );
 		
 		if ( !get_user_meta( $this->user->ID, '_fb_uid', true ) ) {
 			return true;	
@@ -374,25 +374,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		if ( empty( $this->client ) )
 			return null;
-			
+
 		if ( !$this->client->getUser() ) {
 			$this->log( 'get_access_token_from_cookie_session: ' . '$this->client->getUser() failed for object:' );
 			return null;
 		}
 				
-		$session = $this->client->getSession();
-		$post_url = 'https://graph.facebook.com/oauth/exchange_sessions?client_id=' . $this->api_key . '&client_secret=' . $this->application_secret . '&sessions=' . $session['session_key'];
-		$response = wp_remote_get( $post_url );
-
-		if ( is_wp_error( $response ) ) {
-			$this->log( 'get_access_token_from_cookie_session: ' . 'wp_remote_get() failed with wp_error:' );
-			$this->log( print_r( $response, true ) );
-			return null;
-		}
-		
-		$return = json_decode( wp_remote_retrieve_body( $response ) );
-			
-		return reset( $return )->access_token;
+		return $this->client->getAccessToken();
 	}
 	
 	function get_user_info() {
@@ -524,7 +512,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$redirect = get_bloginfo( 'url' ) . str_replace( get_bloginfo( 'url' ), '', $redirect );
 		
 		//only redirect to facebook is is logged in with a cookie
-		if ( $this->client->getSession() ) {
+		if ( $this->client->getUser() ) {
 			wp_redirect( $this->client->getLogoutUrl( array( 'next' => $redirect ) ), 303 );
 			exit;
 		}
