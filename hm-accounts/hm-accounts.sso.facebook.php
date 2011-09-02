@@ -47,7 +47,12 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
-			FB.logout();
+		  	
+		  	FB.getLoginStatus( function( response ) {
+		  		if( response.status == "connected" )
+		  			FB.logout();
+		  	} );
+		  	
 		  	FB.Event.subscribe("auth.login", function() {
 				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
   			});
@@ -65,7 +70,12 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
-			FB.logout();  
+			
+			FB.getLoginStatus( function( response ) {
+		  		if( response.status == "connected" )
+		  			FB.logout();
+		  	} );
+		  	  
 			FB.Event.subscribe("auth.login", function() {
 				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
   			});
@@ -81,10 +91,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		<script type="text/javascript">
 		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
 		  	
-		  	//log them for for easy of use
-		  	if ( FB._userStatus == "connected" ) {
-				FB.logout();
-		  	}
+		  	FB.getLoginStatus( function( response ) {
+		  		if( response.status == "connected" )
+		  			FB.logout();
+		  	} );
+		  	
 		  	
 		  	FB.Event.subscribe("auth.login", function() {
 		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
