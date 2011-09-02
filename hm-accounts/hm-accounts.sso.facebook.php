@@ -59,7 +59,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 
 		</script>';
 		
-		$output .= '<fb:login-button perms="offline_access" width=100></fb:login-button>';
+		$output .= '<fb:login-button scope="offline_access" width=100></fb:login-button>';
 		
 		return $output;
 	
@@ -103,7 +103,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		 	
 		 	function SignInWithFacebookClicked( elem ) {
 
-				FB.login( function() {}, { perms:"read_stream,publish_stream,offline_access,user_about_me,user_birthday,user_location,user_website,email"} );
+				FB.login( function() {}, { scope:"read_stream,publish_stream,offline_access,user_about_me,user_birthday,user_location,user_website,email"} );
 				return false;
 			}
 		</script>';
@@ -146,7 +146,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		 	});
 		</script>';
 		
-		$output .= '<fb:login-button perms="offline_access" width=100></fb:login-button>';
+		$output .= '<fb:login-button scope="offline_access" width=100></fb:login-button>';
 		
 		return $output;		
 	}
@@ -168,7 +168,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		 	});
 		</script>';
 		
-		$output .= '<fb:login-button perms="offline_access" width=100></fb:login-button>';
+		$output .= '<fb:login-button scope="offline_access" width=100></fb:login-button>';
 						
 		return $output;
 	}
@@ -467,8 +467,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
-		else
-			$userdata['user_login'] = hma_unique_username( $this->user_info['username'] );
 		
 		if (  !empty( $_POST['user_email'] ) )
 			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
