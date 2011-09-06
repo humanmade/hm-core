@@ -648,7 +648,7 @@ function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = n
 	if ( $att_id )
 		return wpthumb( get_attached_file( $att_id ), $w, $h, $crop, true, wm_get_options( $id ) );
 	//if there is no id, then try search the content for an image
-	if ( $return = hm_phpthumb_it(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
+	if ( $return = wpthumb(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
 		return $return;
 
 	if ( $reutrn = hm_get_post_external_image($post) )
@@ -656,7 +656,7 @@ function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = n
 
 	if ( $default ) {
 		$file = $default === 'default' ? dirname( __FILE__ ) . '/includes/image-unavailable.png' : $default;
-		return hm_phpthumb_it( $file, $w, $h, $crop, true );
+		return wpthumb( $file, $w, $h, $crop, true );
 	}
 }
 
