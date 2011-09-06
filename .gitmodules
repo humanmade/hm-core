@@ -1,3 +1,6 @@
 [submodule "WPThumb"]
 	path = WPThumb
 	url = git@github.com:humanmade/WPThumb.git
+[submodule "hm-accounts/facebook-sdk"]
+	path = hm-accounts/facebook-sdk
+	url = https://github.com/facebook/php-sdk.git
