@@ -29,15 +29,32 @@ function hm_human_post_time( $timestamp = 'current' ) {
  * @return void
  */
 function hm_parse_user( $user = null ) {
-	if ( is_object( $user ) && is_numeric( $user->ID ) ) return get_userdata( $user->ID );
-	if ( is_object( $user ) && is_numeric( $user->user_id ) ) return get_userdata( $user->user_id );
-	if ( is_array( $user ) && is_numeric( $user['ID'] ) ) return get_userdata( $user['ID'] );
-	if ( is_numeric( $user ) ) return get_userdata( $user );
-	if ( is_string( $user ) ) return get_userdatabylogin( $user );
-	if ( is_null( $user ) ) :
-		global $current_user;
-		return get_userdata( $current_user->ID );
-	endif;
+
+	// We're we passed an object with ID
+	if ( is_object( $user ) && is_numeric( $user->ID ) )
+		return get_userdata( $user->ID );
+
+	// We're we passed an object with user_id
+	if ( is_object( $user ) && is_numeric( $user->user_id ) )
+		return get_userdata( $user->user_id );
+
+	// We're we passed an array
+	if ( is_array( $user ) && is_numeric( $user['ID'] ) )
+		return get_userdata( $user['ID'] );
+
+	// ID
+	if ( is_numeric( $user ) )
+		return get_userdata( $user );
+
+	// username
+	if ( is_string( $user ) )
+		return get_userdatabylogin( $user );
+
+	// null
+	global $current_user;
+
+	return get_userdata( $current_user->ID );
+
 }
 
 /**
@@ -55,10 +72,8 @@ function hm_parse_post( $post = null ) {
 	if ( is_numeric( $post ) )
 		return get_post( $post );
 
-	if ( is_null( $post ) ) :
-		global $post;
-		return $post;
-	endif;
+	if ( is_null( $post ) )
+		return get_post( $post );
 
 	if ( is_string( $post ) && get_page_by_title( $post ) )
 		return get_page_by_title( $post );
@@ -204,14 +219,14 @@ function hm_sort_array_by_object_key( $array, $object_key ) {
 
 function _hm_sort_array_by_object_key_cmp( $a, $b ) {
 	global $hm_sort_array_by_object_key;
-	
+
 	if( is_object( $a ) ) {
-	
+
 		$valuea = is_numeric( $a->{$hm_sort_array_by_object_key} ) ? (int) $a->{$hm_sort_array_by_object_key} : $a->{$hm_sort_array_by_object_key};
 		$valueb = is_numeric( $b->{$hm_sort_array_by_object_key} ) ? (int) $b->{$hm_sort_array_by_object_key} : $b->{$hm_sort_array_by_object_key};
 
 	} elseif( is_array( $a ) ) {
-	
+
 		$valuea = is_numeric( $a[$hm_sort_array_by_object_key] ) ? (int) $a[$hm_sort_array_by_object_key] : $a[$hm_sort_array_by_object_key];
 		$valueb = is_numeric( $b[$hm_sort_array_by_object_key] ) ? (int) $b[$hm_sort_array_by_object_key] : $b[$hm_sort_array_by_object_key];
 
@@ -442,11 +457,11 @@ function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	if ( !is_array( $fields ) && !empty( $fields ) && !empty( $values ) )
 		$fields = array( $fields => $values );
-		
+
 	if ( is_array( $fields ) && is_array( $values ) )
 		$fields = array_combine( $fields, $values );
 
-	foreach ( $fields as $field => $value )
+	foreach ( (array) $fields as $field => $value )
 		$where[] = "" . $field . " = '" . $value . "'";
 
 	$table = $wpdb->prefix . $type . 'meta';
@@ -704,45 +719,79 @@ function hm_get_post_attached_images_id( $post = null ) {
     return $images;
 }
 
-function hm_get_post_internal_image( $post = null ) {
-	$images = hm_get_post_internal_images( $post );
-	return $images[0];
+/**
+ * Get the first image from inside the post content.
+ *
+ * @access public
+ * @param mixed $post. (default: null)
+ * @return int
+ */
+function hm_get_post_internal_image( $post_id ) {
+
+	return reset( hm_get_post_internal_images( $post_id ) );
 }
 
-function hm_get_post_internal_images( $post = null ) {
-	if ( $post === null ) global $post;
+function hm_get_post_internal_images( $post_id ) {
+
+	$post = get_post( $post_id );
+
 	$images = array();
-	preg_match_all('/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media);
-	$data=preg_replace('/(img|src)("|\'|="|=\')(.*)/i',"$3",$media[0]);
-	foreach($data as $url) {
-		if ( strpos( $url, get_bloginfo('url') ) === 0 && file_exists( $path = str_ireplace( trailingslashit(get_bloginfo('url')), trailingslashit(ABSPATH), $url ) ) )
+
+	preg_match_all( '/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media );
+
+	$data = preg_replace( '/(img|src)("|\'|="|=\')(.*)/i', "$3", reset( $media ) );
+
+	foreach( $data as $url )
+		if ( strpos( $url, get_bloginfo( 'url' ) ) === 0 && file_exists( $path = str_ireplace( trailingslashit( get_bloginfo( 'url' ) ), trailingslashit( ABSPATH ), $url ) ) )
 			$images[] = $path;
-	}
+
 	return $images;
+
 }
 
+/**
+ * Strip all images from a string
+ *
+ * @access public
+ * @param mixed $post_content
+ * @param mixed $post_id. (default: null)
+ * @return null
+ */
+function strip_images( $content, $post_id = null ) {
 
-function strip_images( $post_content, $id = null ) {
-	if ( $id === null )
-		$content = preg_replace('/(<img[\s\S]*?\>)/i', '', $post_content);
-	else
-		$content = preg_replace('/<img[\s\S]*?wp-image-' . $id . '[\s\S]*?\>/i', '', $post_content);
-	return $content;
+	if ( is_null( $post_id ) )
+		return preg_replace( '/(<img[\s\S]*?\>)/i', '', $content );
+
+	return preg_replace( '/<img[\s\S]*?wp-image-' . $post_id . '[\s\S]*?\>/i', '', $content );
+
 }
 
-function hm_get_post_external_image( $post = null ) {
-	if ( $post === null ) global $post;
+/**
+ * Return an array of external images in a post
+ *
+ * @access public
+ * @param mixed $post. (default: null)
+ * @return null
+ */
+function hm_get_post_external_image( $post_id = null ) {
+
+	$post = get_post( $post_id );
 
 	$images = array();
-	preg_match_all('/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media);
-	$data=preg_replace('/(img|src)("|\'|="|=\')(.*)/i',"$3",$media[0]);
 
-	foreach($data as $url) {
-		$ext = end(explode('.', $url));
-		if ( strpos( $url, 'http://' ) === 0 && strpos( $url, get_bloginfo('url') ) === false && $ext == 'png' || $ext == 'jpg' || $ext == 'bmp' || $ext == 'jpeg' || $ext == 'gif' )
+	preg_match_all( '/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media );
+	$data = preg_replace( '/(img|src)("|\'|="|=\')(.*)/i', "$3", reset( $media ) );
+
+	foreach( $data as $url) {
+
+		$ext = end( explode( '.', $url ) );
+
+		if ( strpos( $url, 'http://' ) === 0 && strpos( $url, get_bloginfo( 'url' ) ) === false && $ext == 'png' || $ext == 'jpg' || $ext == 'bmp' || $ext == 'jpeg' || $ext == 'gif' )
 			$images[] = $url;
+
 	}
-	return $images[0];
+
+	return reset( $images );
 }
 
 function hm_remote_get_file( $url, $cache = true ) {
@@ -1566,17 +1615,17 @@ function hm_post_pagination() {
 
 /**
  * Add a submenu class to parent menus
- * 
+ *
  * @access public
  * @param array $classes
  * @param object $item
  * @return null
  */
 function hm_submenu_class( $classes, $item ) {
-    
+
     if ( get_post_meta_by( array( 'meta_value', 'meta_key' ), array( $item->ID, '_menu_item_menu_item_parent' ) ) )
         $classes[] = 'menu_parent';
-    
+
     return $classes;
 }
 
@@ -1584,7 +1633,7 @@ add_filter( 'nav_menu_css_class', 'hm_submenu_class', 10, 2);
 
 /**
  * hm_touch_time function.
- * 
+ *
  * @access public
  * @param int $timestamp
  * @param string $name. (default: 'hm_time_')
@@ -1605,18 +1654,18 @@ function hm_touch_time( $timestamp, $name = 'hm_time_' ) {
 	$ss = date( 's', $timestamp );
 
 	$month = "<select name=\"{$name}mm\">\n";
-	
+
 	for ( $i = 1; $i < 13; $i = $i +1 ) {
-	
+
 		$month .= "\t\t\t" . '<option value="' . zeroise( $i, 2 ) . '"';
-	
+
 		if ( $i == $mm )
 			$month .= ' selected="selected"';
-	
+
 		$month .= '>' . $wp_locale->get_month_abbrev( $wp_locale->get_month( $i ) ) . "</option>\n";
-	
+
 	}
-	
+
 	$month .= '</select>';
 
 	$day	= '<input style="width: 2.1em;" type="text" name="' . $name . 'jj" value="' . $jj . '" size="2" maxlength="2" autocomplete="off" />';
@@ -1635,7 +1684,7 @@ function hm_touch_time( $timestamp, $name = 'hm_time_' ) {
 
 /**
  * hm_touch_time_get_time_from_data function.
- * 
+ *
  * @access public
  * @param mixed $name
  * @param mixed $data
@@ -1650,25 +1699,25 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
 
 /**
  * Disable the admin bar and admin bar prefs for subscribers
- * 
+ *
  * @access public
  * @return null
  */
 function hm_disable_admin_bar_for_subscribers() {
-	
+
 	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && key( wp_get_current_user()->data->wp_capabilities ) == 'subscriber' ) :
 		show_admin_bar( false );
 		remove_action( 'wp_head', '_admin_bar_bump_cb' );
 		wp_dequeue_script( 'admin-bar' );
 		wp_dequeue_style( 'admin-bar' );
 	endif;
-	
+
 }
 add_action( 'init', 'hm_disable_admin_bar_for_subscribers' );
 
 /**
  * Automatically pluralize a string. Adds "es" to nouns ending in "s", "ies" for "y", etc
- * 
+ *
  * @param string $str
  * @return string
  */
@@ -1678,15 +1727,15 @@ function hm_pluralize_string( $str ) {
 		's' => 'ses',
 		'y' => 'ies'
 	);
-	
+
 	$ending = substr( $str, strlen($str)-1, 1 );
-	
+
 	if( array_key_exists( $ending, $endings ) )
 		$str = substr( $str, 0, strlen( $str ) - 1 ) . $endings[$ending];
-	
+
 	else
 		$str = $str . 's';
-	
+
 	return $str;
 
 }
