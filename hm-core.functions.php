@@ -1145,7 +1145,7 @@ function hm_add_multiple_taxonomy_to_parse_query() {
 	endif;
 
 }
-add_action( 'parse_query', 'hm_add_multiple_taxonomy_to_parse_query' );
+//add_action( 'parse_query', 'hm_add_multiple_taxonomy_to_parse_query' );
 
 function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 
@@ -1234,7 +1234,7 @@ function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 	return $where;
 
 }
-add_filter( 'posts_where', 'hm_add_multiple_taxonomy_to_where', 10, 2 );
+//add_filter( 'posts_where', 'hm_add_multiple_taxonomy_to_where', 10, 2 );
 
 function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
