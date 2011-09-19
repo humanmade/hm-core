@@ -1479,20 +1479,20 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 		'mid_size' => $mid_size,
 		'end_size' => 1,
 		'type' => 'array'
-	));
-
-	foreach( $page_links as &$page_link ){
+	) );
 	
-		if( strpos( $page_link, $args['prev_text'] ) )
+	if ( !is_array( $page_links ) || empty( $page_links ) )
+		return;
+
+	foreach ( $page_links as &$page_link ) {
+	
+		if ( strpos( $page_link, $args['prev_text'] ) )
 			$page_link = str_replace( '>', ' rel="prev">', $page_link );
 
-		if( strpos( $page_link, $args['next_text'] ) )
+		if ( strpos( $page_link, $args['next_text'] ) )
 			$page_link = str_replace( '>', ' rel="next">', $page_link );
 	
 	}
-
-	if ( !is_array( $page_links ) || empty( $page_links ) )
-		return;
 
 	// loop through the page links, removing any unwanted ones as paginate_links() does not provide such fine control
 	$real_counter = 0;
