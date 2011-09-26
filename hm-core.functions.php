@@ -745,10 +745,16 @@ function hm_get_post_internal_images( $post_id ) {
 	$post = get_post( $post_id );
 
 	$images = array();
+	
+	if ( empty( $post->post_content ) )
+	  return array();
 
 	preg_match_all( '/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media );
 
 	$data = preg_replace( '/(img|src)("|\'|="|=\')(.*)/i', "$3", reset( $media ) );
+	
+	if ( empty( $data ) )
+		return array();
 
 	foreach( $data as $url )
 		if ( strpos( $url, get_bloginfo( 'url' ) ) === 0 && file_exists( $path = str_ireplace( trailingslashit( get_bloginfo( 'url' ) ), trailingslashit( ABSPATH ), $url ) ) )
