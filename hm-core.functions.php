@@ -454,6 +454,9 @@ function get_term_meta_by( $field = 'term_id', $value ) {
 function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
+	
+	if ( empty( $values ) || empty( $fields ) )
+		return array();
 
 	if ( !is_array( $fields ) && !empty( $fields ) && !empty( $values ) )
 		$fields = array( $fields => $values );
