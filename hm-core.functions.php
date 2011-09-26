@@ -723,14 +723,20 @@ function hm_get_post_attached_images_id( $post = null ) {
  * Get the first image from inside the post content.
  *
  * @access public
- * @param mixed $post. (default: null)
+ * @param int $post_id. (default: null)
  * @return int
  */
 function hm_get_post_internal_image( $post_id ) {
-
 	return reset( hm_get_post_internal_images( $post_id ) );
 }
 
+/**
+ * hm_get_post_internal_images function.
+ * 
+ * @access public
+ * @param int $post_id
+ * @return Array attachment id's
+ */
 function hm_get_post_internal_images( $post_id ) {
 
 	$post = get_post( $post_id );
