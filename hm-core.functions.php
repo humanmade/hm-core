@@ -1449,7 +1449,9 @@ add_filter( 'get_terms', 'hm_add_exclude_draft_to_get_terms_hide_empty', 1, 3 );
  * @return  pagination hmtl
  */
 function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null, $args = array() ) {
-
+	
+	global $wp_rewrite;
+	
 	if ( is_null( $wp_query ) )
 		global $wp_query;
 
@@ -1466,15 +1468,14 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 	$defaults = array(
 		'next_text' => 'Next &raquo;',
 		'prev_text' => '&laquo; Prev',
-		'slug'		=> 'page'
 	);
 
 	$args = wp_parse_args( $args, $defaults );
 
-	if ( $args['slug'] )
-		$args['slug'] = trailingslashit( $args['slug'] );
+	if ( $wp_rewrite->pagination_base )
+		$wp_rewrite->pagination_base = trailingslashit( $wp_rewrite->pagination_base );
 
-	$base = str_replace( $args['slug'] . $current_page . '/', '', $_SERVER['REQUEST_URI'] );
+	$base = str_replace( $wp_rewrite->pagination_base . $current_page . '/', '', $_SERVER['REQUEST_URI'] );
 
 	$base = remove_query_arg( 'paged', $base );
 
@@ -1499,7 +1500,7 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 		$mid_size = 5 - $current_page + 1;
 
 	$page_links = paginate_links( array(
-		'base' => trailingslashit( $base ) . ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '' : $args['slug'] . '%#%/' ) . ( ( isset( $query_params ) && $query_params ) ? '?' . $query_params : '' ) .  ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '&paged=%#%' : '' ),
+		'base' => trailingslashit( $base ) . ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '' : $wp_rewrite->pagination_base . '%#%/' ) . ( ( isset( $query_params ) && $query_params ) ? '?' . $query_params : '' ) .  ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '&paged=%#%' : '' ),
 		'format' => '',
 		'prev_text' => $args['prev_text'],
 		'next_text' => $args['next_text'],
@@ -1550,7 +1551,7 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 		$output = str_replace( "&#038;paged=1'", "'", $output );
 
 	else
-		$output = str_replace( $args['slug'] . '1/', '', $output );
+		$output = str_replace( $wp_rewrite->pagination_base . '1/', '', $output );
 
 	return '<div class="pagination">' . $output . '</div>';
 }
