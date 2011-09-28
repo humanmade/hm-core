@@ -1449,9 +1449,9 @@ add_filter( 'get_terms', 'hm_add_exclude_draft_to_get_terms_hide_empty', 1, 3 );
  * @return  pagination hmtl
  */
 function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null, $args = array() ) {
-	
+
 	global $wp_rewrite;
-	
+
 	if ( is_null( $wp_query ) )
 		global $wp_query;
 
@@ -1757,26 +1757,28 @@ function hm_disable_admin_bar_for_subscribers() {
 add_action( 'init', 'hm_disable_admin_bar_for_subscribers' );
 
 /**
- * Automatically pluralize a string. Adds "es" to nouns ending in "s", "ies" for "y", etc
+ * Gets an array of a specified property from an array of objects. Eg, returns all IDs of $wp_query->posts when passed 'ID'.
  *
- * @param string $str
- * @return string
+ * @param array $array
+ * @param string $property
+ * @return array
  */
-function hm_pluralize_string( $str ) {
+function hm_get_object_properties_from_array( $array, $property ) {
 
-	$endings = array(
-		's' => 'ses',
-		'y' => 'ies'
-	);
+	if ( !is_array( $array ) )
+		return array();
 
-	$ending = substr( $str, strlen($str)-1, 1 );
+	$properties = array();
 
-	if( array_key_exists( $ending, $endings ) )
-		$str = substr( $str, 0, strlen( $str ) - 1 ) . $endings[$ending];
+	foreach ( $array as $value ) {
 
-	else
-		$str = $str . 's';
+		$value = (object) $value;
 
-	return $str;
+		if ( isset( $value->$property ) )
+			$properties[] = $value->$property;
+
+	}
+
+	return $properties;
 
 }
