@@ -131,6 +131,10 @@ function hm_load_custom_templates( $template ) {
 
 		if ( !empty( $hm_current_rewrite_rule[2] ) ) {
 			do_action( 'hm_load_custom_template', $hm_current_rewrite_rule[2], $hm_current_rewrite_rule );
+
+			if ( empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) && !$hm_current_rewrite_rule[1] )
+				redirect_canonical();
+
 			include( $hm_current_rewrite_rule[2] );
 			exit;
 		} else if ( !empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) ) {
