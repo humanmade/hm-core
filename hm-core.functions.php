@@ -454,7 +454,7 @@ function get_term_meta_by( $field = 'term_id', $value ) {
 function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
-	
+
 	if ( empty( $values ) || empty( $fields ) )
 		return array();
 
@@ -735,7 +735,7 @@ function hm_get_post_internal_image( $post_id ) {
 
 /**
  * hm_get_post_internal_images function.
- * 
+ *
  * @access public
  * @param int $post_id
  * @return Array attachment id's
@@ -745,14 +745,14 @@ function hm_get_post_internal_images( $post_id ) {
 	$post = get_post( $post_id );
 
 	$images = array();
-	
+
 	if ( empty( $post->post_content ) )
 	  return array();
 
 	preg_match_all( '/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media );
 
 	$data = preg_replace( '/(img|src)("|\'|="|=\')(.*)/i', "$3", reset( $media ) );
-	
+
 	if ( empty( $data ) )
 		return array();
 
@@ -1449,43 +1449,57 @@ add_filter( 'get_terms', 'hm_add_exclude_draft_to_get_terms_hide_empty', 1, 3 );
  * @return  pagination hmtl
  */
 function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null, $args = array() ) {
-	if ( $wp_query === null ) global $wp_query;
-	if ( $ppp === null ) $ppp = $wp_query->query_vars['posts_per_page'] ? $wp_query->query_vars['posts_per_page'] : 10;
-	$number_pages = ceil($wp_query->found_posts / $ppp);
-	if ( $current_page === null ) $current_page = get_query_var('paged');
+
+	if ( is_null( $wp_query ) )
+		global $wp_query;
+
+	if ( is_null( $ppp ) )
+		$ppp = $wp_query->query_vars['posts_per_page'] ? $wp_query->query_vars['posts_per_page'] : get_option( 'posts_per_page' );
+
+	$number_pages = ceil ( $wp_query->found_posts / $ppp );
+
+	if ( is_null( $current_page ) )
+		$current_page = get_query_var( 'paged' );
 
 	$current_page = $current_page ? $current_page : 1;
-	$base = str_replace( '/page/' . $current_page . '', '', $_SERVER['REQUEST_URI'] );
+
+	$defaults = array(
+		'next_text' => 'Next &raquo;',
+		'prev_text' => '&laquo; Prev',
+		'slug'		=> 'page'
+	);
+
+	$args = wp_parse_args( $args, $defaults );
+
+	if ( $args['slug'] )
+		$args['slug'] = trailingslashit( $args['slug'] );
+
+	$base = str_replace( $args['slug'] . $current_page . '/', '', $_SERVER['REQUEST_URI'] );
 
 	$base = remove_query_arg( 'paged', $base );
 
-	// strip any query args, put them on the end (after /page/%number%/
+	// Strip any query args, put them on the end (after /page/%number%/
 	$bases = explode( '?', $base );
 	$base = current( $bases );
 
 	if ( isset( $bases[1] ) )
 		$query_params = $bases[1];
 
-	$defaults = array(
-		'next_text' => __('Next &raquo;'),
-		'prev_text' => __('&laquo; Prev')
-	);
-	$args = wp_parse_args( $args, $defaults );
+	// Mid-size depends on what page you are on, as it applies to each side of current_page
+	if ( $current_page > ( $number_pages - 3 ) )
+		$mid_size = 5 - ( $number_pages - ( $current_page ) + 1 );
 
-
-	// mid-size depends on what page you are on, as it applies to each side of current_page
-	if ( $current_page > ($number_pages - 3) ) {
-		$mid_size = 5 - ($number_pages - ($current_page) + 1 );
-	} elseif ( $current_page >= 5 ) {
+	elseif ( $current_page >= 5 )
 		$mid_size = 2;
-	} elseif ( $current_page == 1 ) {
+
+	elseif ( $current_page == 1 )
 		$mid_size = 4;
-	} else {
+
+	else
 		$mid_size = 5 - $current_page + 1;
-	}
 
 	$page_links = paginate_links( array(
-		'base' => trailingslashit( $base ) . ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '' : 'page/%#%/' ) . ( ( isset( $query_params ) && $query_params ) ? '?' . $query_params : '' ) .  ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '&paged=%#%' : '' ),
+		'base' => trailingslashit( $base ) . ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '' : $args['slug'] . '%#%/' ) . ( ( isset( $query_params ) && $query_params ) ? '?' . $query_params : '' ) .  ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '&paged=%#%' : '' ),
 		'format' => '',
 		'prev_text' => $args['prev_text'],
 		'next_text' => $args['next_text'],
@@ -1495,29 +1509,30 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 		'end_size' => 1,
 		'type' => 'array'
 	) );
-	
+
 	if ( !is_array( $page_links ) || empty( $page_links ) )
 		return;
 
 	foreach ( $page_links as &$page_link ) {
-	
+
 		if ( strpos( $page_link, $args['prev_text'] ) )
 			$page_link = str_replace( '>', ' rel="prev">', $page_link );
 
 		if ( strpos( $page_link, $args['next_text'] ) )
 			$page_link = str_replace( '>', ' rel="next">', $page_link );
-	
+
 	}
 
-	// loop through the page links, removing any unwanted ones as paginate_links() does not provide such fine control
+	// Loop through the page links, removing any unwanted ones as paginate_links() does not provide such fine control
 	$real_counter = 0;
 	$output = '';
+
 	foreach( $page_links as $counter => $pagination_item ) :
 
 		if ( ( strpos($pagination_item, '...') && $counter == 2) || ( $counter == 1 && strpos($page_links[2], '...' ) ) || ( $counter == 1 && $current_page == 4 ) )
 			continue;
 
-		//strip ..., last page
+		// Strip ..., last page
 		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $args['prev_text'] ) && $current_page == 4 ) )
 			$real_counter--;
 
@@ -1530,12 +1545,12 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 
 	endforeach;
 
-	// exception for page 1
+	// Exception for page 1
 	if ( isset( $_GET['s'] ) && $_GET['s'] )
 		$output = str_replace( "&#038;paged=1'", "'", $output );
 
 	else
-		$output = str_replace( '/page/1/', '/', $output );
+		$output = str_replace( $args['slug'] . '1/', '', $output );
 
 	return '<div class="pagination">' . $output . '</div>';
 }
