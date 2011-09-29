@@ -1,8 +1,5 @@
 <?php
 
-if ( !isset( $_SESSION ) )
-	session_start();
-
 /**
  * hm_human_post_time function.
  *
