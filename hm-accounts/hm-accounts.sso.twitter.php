@@ -313,13 +313,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 			setcookie( 'twitter_anywhere_identity', '', time() - 100, COOKIEPATH );
 	}
 	
-	private function update_user_twitter_information() {
+	public function update_user_twitter_information() {
 		
 		$info = $this->user_info();
-		
-		error_log( 'updating info//...' );
-		error_log( $info['id'] );
-		error_log( $this->user->ID );
 		
 		update_user_meta( $this->user->ID, '_twitter_uid', $info['id'] );
 		update_user_meta( $this->user->ID, 'twitter_username', $info['screen_name'] );		
@@ -327,7 +323,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		update_user_meta( $this->user->ID, '_twitter_access_token', $this->access_token['oauth_token'] );
 		update_user_meta( $this->user->ID, '_twitter_oauth_token_secret', $this->access_token['oauth_token_secret'] );
 		update_user_meta( $this->user->ID, '_twitter_data', $info );
-
 	}
 	
 	
@@ -445,6 +440,19 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return unserialize( base64_decode( $string ) );
 	}
 	
+	public function is_access_token_valid() {
+	
+			
+		$client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
+		$user_info = $client->get('account/verify_credentials');
+		
+		if( $user_info->error || empty( $user_info->id ) )
+			return false;
+		
+		return true;
+
+	}
+	
 	public function is_authenticated() {
 		if ( !$this->user )
 			return false;
@@ -470,6 +478,10 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		update_user_meta( $this->user->ID, '_twitter_data', $data );
 		
 		return $data;
+	}
+	
+	public function get_user_for_uid( $sso_id ) {
+		return $this->_get_user_id_from_sso_id( $sso_id );
 	}
 	
 	function _get_user_id_from_sso_id( $sso_id ) {
