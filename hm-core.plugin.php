@@ -19,6 +19,9 @@ define( 'HM_CORE_URL', trailingslashit( WP_PLUGIN_URL . '/' . HM_CORE_SLUG ) );
 include_once( HM_CORE_PATH . 'hm-core.debug.php' );
 include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 
+//Related Posts function
+include_once( HM_CORE_PATH . 'hm-core.related-posts.php' );
+
 // Load the custom media button support
 if ( !defined( 'HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS' ) || HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS )
     include_once( HM_CORE_PATH . 'media-uploader.extensions.php' );

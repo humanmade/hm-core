@@ -1,8 +1,5 @@
 <?php
 
-if ( !isset( $_SESSION ) )
-	session_start();
-
 /**
  * hm_human_post_time function.
  *
@@ -29,15 +26,32 @@ function hm_human_post_time( $timestamp = 'current' ) {
  * @return void
  */
 function hm_parse_user( $user = null ) {
-	if ( is_object( $user ) && is_numeric( $user->ID ) ) return get_userdata( $user->ID );
-	if ( is_object( $user ) && is_numeric( $user->user_id ) ) return get_userdata( $user->user_id );
-	if ( is_array( $user ) && is_numeric( $user['ID'] ) ) return get_userdata( $user['ID'] );
-	if ( is_numeric( $user ) ) return get_userdata( $user );
-	if ( is_string( $user ) ) return get_userdatabylogin( $user );
-	if ( is_null( $user ) ) :
-		global $current_user;
-		return get_userdata( $current_user->ID );
-	endif;
+
+	// We're we passed an object with ID
+	if ( is_object( $user ) && is_numeric( $user->ID ) )
+		return get_userdata( $user->ID );
+
+	// We're we passed an object with user_id
+	if ( is_object( $user ) && is_numeric( $user->user_id ) )
+		return get_userdata( $user->user_id );
+
+	// We're we passed an array
+	if ( is_array( $user ) && is_numeric( $user['ID'] ) )
+		return get_userdata( $user['ID'] );
+
+	// ID
+	if ( is_numeric( $user ) )
+		return get_userdata( $user );
+
+	// username
+	if ( is_string( $user ) )
+		return get_userdatabylogin( $user );
+
+	// null
+	global $current_user;
+
+	return get_userdata( $current_user->ID );
+
 }
 
 /**
@@ -55,10 +69,8 @@ function hm_parse_post( $post = null ) {
 	if ( is_numeric( $post ) )
 		return get_post( $post );
 
-	if ( is_null( $post ) ) :
-		global $post;
-		return $post;
-	endif;
+	if ( is_null( $post ) )
+		return get_post( $post );
 
 	if ( is_string( $post ) && get_page_by_title( $post ) )
 		return get_page_by_title( $post );
@@ -204,14 +216,14 @@ function hm_sort_array_by_object_key( $array, $object_key ) {
 
 function _hm_sort_array_by_object_key_cmp( $a, $b ) {
 	global $hm_sort_array_by_object_key;
-	
+
 	if( is_object( $a ) ) {
-	
+
 		$valuea = is_numeric( $a->{$hm_sort_array_by_object_key} ) ? (int) $a->{$hm_sort_array_by_object_key} : $a->{$hm_sort_array_by_object_key};
 		$valueb = is_numeric( $b->{$hm_sort_array_by_object_key} ) ? (int) $b->{$hm_sort_array_by_object_key} : $b->{$hm_sort_array_by_object_key};
 
 	} elseif( is_array( $a ) ) {
-	
+
 		$valuea = is_numeric( $a[$hm_sort_array_by_object_key] ) ? (int) $a[$hm_sort_array_by_object_key] : $a[$hm_sort_array_by_object_key];
 		$valueb = is_numeric( $b[$hm_sort_array_by_object_key] ) ? (int) $b[$hm_sort_array_by_object_key] : $b[$hm_sort_array_by_object_key];
 
@@ -440,13 +452,16 @@ function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
 
+	if ( empty( $values ) || empty( $fields ) )
+		return array();
+
 	if ( !is_array( $fields ) && !empty( $fields ) && !empty( $values ) )
 		$fields = array( $fields => $values );
-		
+
 	if ( is_array( $fields ) && is_array( $values ) )
 		$fields = array_combine( $fields, $values );
 
-	foreach ( $fields as $field => $value )
+	foreach ( (array) $fields as $field => $value )
 		$where[] = "" . $field . " = '" . $value . "'";
 
 	$table = $wpdb->prefix . $type . 'meta';
@@ -648,7 +663,7 @@ function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = n
 	if ( $att_id )
 		return wpthumb( get_attached_file( $att_id ), $w, $h, $crop, true, wm_get_options( $id ) );
 	//if there is no id, then try search the content for an image
-	if ( $return = hm_phpthumb_it(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
+	if ( $return = wpthumb(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
 		return $return;
 
 	if ( $reutrn = hm_get_post_external_image($post) )
@@ -656,7 +671,7 @@ function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = n
 
 	if ( $default ) {
 		$file = $default === 'default' ? dirname( __FILE__ ) . '/includes/image-unavailable.png' : $default;
-		return hm_phpthumb_it( $file, $w, $h, $crop, true );
+		return wpthumb( $file, $w, $h, $crop, true );
 	}
 }
 
@@ -704,45 +719,91 @@ function hm_get_post_attached_images_id( $post = null ) {
     return $images;
 }
 
-function hm_get_post_internal_image( $post = null ) {
-	$images = hm_get_post_internal_images( $post );
-	return $images[0];
+/**
+ * Get the first image from inside the post content.
+ *
+ * @access public
+ * @param int $post_id. (default: null)
+ * @return int
+ */
+function hm_get_post_internal_image( $post_id ) {
+	return reset( hm_get_post_internal_images( $post_id ) );
 }
 
-function hm_get_post_internal_images( $post = null ) {
-	if ( $post === null ) global $post;
+/**
+ * hm_get_post_internal_images function.
+ *
+ * @access public
+ * @param int $post_id
+ * @return Array attachment id's
+ */
+function hm_get_post_internal_images( $post_id ) {
+
+	$post = get_post( $post_id );
+
 	$images = array();
-	preg_match_all('/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media);
-	$data=preg_replace('/(img|src)("|\'|="|=\')(.*)/i',"$3",$media[0]);
-	foreach($data as $url) {
-		if ( strpos( $url, get_bloginfo('url') ) === 0 && file_exists( $path = str_ireplace( trailingslashit(get_bloginfo('url')), trailingslashit(ABSPATH), $url ) ) )
+
+	if ( empty( $post->post_content ) )
+	  return array();
+
+	preg_match_all( '/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media );
+
+	$data = preg_replace( '/(img|src)("|\'|="|=\')(.*)/i', "$3", reset( $media ) );
+
+	if ( empty( $data ) )
+		return array();
+
+	foreach( $data as $url )
+		if ( strpos( $url, get_bloginfo( 'url' ) ) === 0 && file_exists( $path = str_ireplace( trailingslashit( get_bloginfo( 'url' ) ), trailingslashit( ABSPATH ), $url ) ) )
 			$images[] = $path;
-	}
+
 	return $images;
+
 }
 
+/**
+ * Strip all images from a string
+ *
+ * @access public
+ * @param mixed $post_content
+ * @param mixed $post_id. (default: null)
+ * @return null
+ */
+function strip_images( $content, $post_id = null ) {
 
-function strip_images( $post_content, $id = null ) {
-	if ( $id === null )
-		$content = preg_replace('/(<img[\s\S]*?\>)/i', '', $post_content);
-	else
-		$content = preg_replace('/<img[\s\S]*?wp-image-' . $id . '[\s\S]*?\>/i', '', $post_content);
-	return $content;
+	if ( is_null( $post_id ) )
+		return preg_replace( '/(<img[\s\S]*?\>)/i', '', $content );
+
+	return preg_replace( '/<img[\s\S]*?wp-image-' . $post_id . '[\s\S]*?\>/i', '', $content );
+
 }
 
-function hm_get_post_external_image( $post = null ) {
-	if ( $post === null ) global $post;
+/**
+ * Return an array of external images in a post
+ *
+ * @access public
+ * @param mixed $post. (default: null)
+ * @return null
+ */
+function hm_get_post_external_image( $post_id = null ) {
+
+	$post = get_post( $post_id );
 
 	$images = array();
-	preg_match_all('/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media);
-	$data=preg_replace('/(img|src)("|\'|="|=\')(.*)/i',"$3",$media[0]);
 
-	foreach($data as $url) {
-		$ext = end(explode('.', $url));
-		if ( strpos( $url, 'http://' ) === 0 && strpos( $url, get_bloginfo('url') ) === false && $ext == 'png' || $ext == 'jpg' || $ext == 'bmp' || $ext == 'jpeg' || $ext == 'gif' )
+	preg_match_all( '/(img|src)=("|\')[^"\'>]+/i', $post->post_content, $media );
+	$data = preg_replace( '/(img|src)("|\'|="|=\')(.*)/i', "$3", reset( $media ) );
+
+	foreach( $data as $url) {
+
+		$ext = end( explode( '.', $url ) );
+
+		if ( strpos( $url, 'http://' ) === 0 && strpos( $url, get_bloginfo( 'url' ) ) === false && $ext == 'png' || $ext == 'jpg' || $ext == 'bmp' || $ext == 'jpeg' || $ext == 'gif' )
 			$images[] = $url;
+
 	}
-	return $images[0];
+
+	return reset( $images );
 }
 
 function hm_remote_get_file( $url, $cache = true ) {
@@ -1096,7 +1157,7 @@ function hm_add_multiple_taxonomy_to_parse_query() {
 	endif;
 
 }
-add_action( 'parse_query', 'hm_add_multiple_taxonomy_to_parse_query' );
+//add_action( 'parse_query', 'hm_add_multiple_taxonomy_to_parse_query' );
 
 function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 
@@ -1185,7 +1246,7 @@ function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
 	return $where;
 
 }
-add_filter( 'posts_where', 'hm_add_multiple_taxonomy_to_where', 10, 2 );
+//add_filter( 'posts_where', 'hm_add_multiple_taxonomy_to_where', 10, 2 );
 
 function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
@@ -1377,73 +1438,103 @@ add_filter( 'get_terms', 'hm_add_exclude_draft_to_get_terms_hide_empty', 1, 3 );
 /**
  * Retuns pagination html for list pages
  *
+ * TODO - this should use a walker?
+ *
  * @param object $wp_query. (default: global $wp_query)
  * @param int $current_page. (default: $wp_query['query_vars']['paged'])
  * @param int $ppp. (posts per page) (default: 10)
  * @return  pagination hmtl
  */
-function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null ) {
-	if ( $wp_query === null ) global $wp_query;
-	if ( $ppp === null ) $ppp = $wp_query->query_vars['posts_per_page'] ? $wp_query->query_vars['posts_per_page'] : 10;
-	$number_pages = ceil($wp_query->found_posts / $ppp);
-	if ( $current_page === null ) $current_page = get_query_var('paged');
+function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null, $args = array() ) {
+
+	global $wp_rewrite;
+
+	if ( is_null( $wp_query ) )
+		global $wp_query;
+
+	if ( is_null( $ppp ) )
+		$ppp = $wp_query->query_vars['posts_per_page'] ? $wp_query->query_vars['posts_per_page'] : get_option( 'posts_per_page' );
+
+	$number_pages = ceil ( $wp_query->found_posts / $ppp );
+
+	if ( is_null( $current_page ) )
+		$current_page = get_query_var( 'paged' );
 
 	$current_page = $current_page ? $current_page : 1;
-	$base = str_replace( '/page/' . $current_page . '', '', $_SERVER['REQUEST_URI'] );
+
+	$defaults = array(
+		'next_text' => 'Next &raquo;',
+		'prev_text' => '&laquo; Prev',
+	);
+
+	$args = wp_parse_args( $args, $defaults );
+
+	if ( $wp_rewrite->pagination_base )
+		$wp_rewrite->pagination_base = trailingslashit( $wp_rewrite->pagination_base );
+
+	$base = str_replace( $wp_rewrite->pagination_base . $current_page . '/', '', $_SERVER['REQUEST_URI'] );
 
 	$base = remove_query_arg( 'paged', $base );
 
-	// strip any query args, put them on the end (after /page/%number%/
+	// Strip any query args, put them on the end (after /page/%number%/
 	$bases = explode( '?', $base );
 	$base = current( $bases );
 
 	if ( isset( $bases[1] ) )
 		$query_params = $bases[1];
 
-	//set the next / prev text
-	$next_text = __('Next &raquo;');
-	$prev_text = __('&laquo; Prev');
+	// Mid-size depends on what page you are on, as it applies to each side of current_page
+	if ( $current_page > ( $number_pages - 3 ) )
+		$mid_size = 5 - ( $number_pages - ( $current_page ) + 1 );
 
-
-	// mid-size depends on what page you are on, as it applies to each side of current_page
-	if ( $current_page > ($number_pages - 3) ) {
-		$mid_size = 5 - ($number_pages - ($current_page) + 1 );
-	} elseif ( $current_page >= 5 ) {
+	elseif ( $current_page >= 5 )
 		$mid_size = 2;
-	} elseif ( $current_page == 1 ) {
+
+	elseif ( $current_page == 1 )
 		$mid_size = 4;
-	} else {
+
+	else
 		$mid_size = 5 - $current_page + 1;
-	}
 
 	$page_links = paginate_links( array(
-		'base' => trailingslashit( $base ) . ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '' : 'page/%#%/' ) . ( ( isset( $query_params ) && $query_params ) ? '?' . $query_params : '' ) .  ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '&paged=%#%' : '' ),
+		'base' => trailingslashit( $base ) . ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '' : $wp_rewrite->pagination_base . '%#%/' ) . ( ( isset( $query_params ) && $query_params ) ? '?' . $query_params : '' ) .  ( ( isset( $_GET['s'] ) && $_GET['s'] ) ? '&paged=%#%' : '' ),
 		'format' => '',
-		'prev_text' => $prev_text,
-		'next_text' => $next_text,
+		'prev_text' => $args['prev_text'],
+		'next_text' => $args['next_text'],
 		'total' => $number_pages,
 		'current' => $current_page,
 		'mid_size' => $mid_size,
 		'end_size' => 1,
 		'type' => 'array'
-	));
+	) );
 
 	if ( !is_array( $page_links ) || empty( $page_links ) )
 		return;
 
-	// loop through the page links, removing any unwanted ones as paginate_links() does not provide such fine control
+	foreach ( $page_links as &$page_link ) {
+
+		if ( strpos( $page_link, $args['prev_text'] ) )
+			$page_link = str_replace( '>', ' rel="prev">', $page_link );
+
+		if ( strpos( $page_link, $args['next_text'] ) )
+			$page_link = str_replace( '>', ' rel="next">', $page_link );
+
+	}
+
+	// Loop through the page links, removing any unwanted ones as paginate_links() does not provide such fine control
 	$real_counter = 0;
 	$output = '';
+
 	foreach( $page_links as $counter => $pagination_item ) :
 
 		if ( ( strpos($pagination_item, '...') && $counter == 2) || ( $counter == 1 && strpos($page_links[2], '...' ) ) || ( $counter == 1 && $current_page == 4 ) )
 			continue;
 
-		//strip ..., last page
-		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $prev_text ) && $current_page == 4 ) )
+		// Strip ..., last page
+		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $args['prev_text'] ) && $current_page == 4 ) )
 			$real_counter--;
 
-		if ( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
+		if ( $real_counter >= 6 && strpos( $pagination_item, $args['next_text'] ) === false )
 			continue;
 
 		$real_counter++;
@@ -1452,12 +1543,12 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null 
 
 	endforeach;
 
-	// exception for page 1
+	// Exception for page 1
 	if ( isset( $_GET['s'] ) && $_GET['s'] )
 		$output = str_replace( "&#038;paged=1'", "'", $output );
 
 	else
-		$output = str_replace( '/page/1/', '/', $output );
+		$output = str_replace( $wp_rewrite->pagination_base . '1/', '', $output );
 
 	return '<div class="pagination">' . $output . '</div>';
 }
@@ -1491,10 +1582,11 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 		$number_pages = count($pages);
 	}
 
-	//set the next / prev text
-	$next_text = __('Next &raquo;');
-	$prev_text = __('&laquo; Prev');
-
+	$defaults = array(
+		'next_text' => __('Next &raquo;'),
+		'prev_text' => __('&laquo; Prev')
+	);
+	$args = wp_parse_args( $args, $defaults );
 
 	// mid-size depends on what page you are on, as it applies to each side of current_page
 	if ( $current_page > ($number_pages - 3) ) {
@@ -1516,8 +1608,8 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 	$page_links = paginate_links( array(
 		'base' => $base,
 		'format' => '',
-		'prev_text' => $prev_text,
-		'next_text' => $next_text,
+		'prev_text' => $args['prev_text'],
+		'next_text' => $args['next_text'],
 		'total' => $number_pages,
 		'current' => $current_page,
 		'mid_size' => $mid_size,
@@ -1533,10 +1625,10 @@ function hm_get_post_pagination( $post = null, $current_page = null ) {
 	foreach( $page_links as $counter => $pagination_item ) :
 
 		//strip ..., last page
-		if ( strpos($pagination_item, '...') || ( strpos($page_links[ $counter - 1 ], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos($page_links[ 2 ], '...') ) || ( $counter == 1 && strpos($page_links[ 0 ], $prev_text) && $current_page == 4 ) )
+		if ( strpos($pagination_item, '...') || ( strpos($page_links[ $counter - 1 ], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos($page_links[ 2 ], '...') ) || ( $counter == 1 && strpos($page_links[ 0 ], $args['prev_text']) && $current_page == 4 ) )
 			continue;
 
-		if ( $real_counter >= 6 && strpos( $pagination_item, $next_text ) === false )
+		if ( $real_counter >= 6 && strpos( $pagination_item, $args['next_text'] ) === false )
 			continue;
 
 		$real_counter++;
@@ -1561,17 +1653,17 @@ function hm_post_pagination() {
 
 /**
  * Add a submenu class to parent menus
- * 
+ *
  * @access public
  * @param array $classes
  * @param object $item
  * @return null
  */
 function hm_submenu_class( $classes, $item ) {
-    
+
     if ( get_post_meta_by( array( 'meta_value', 'meta_key' ), array( $item->ID, '_menu_item_menu_item_parent' ) ) )
         $classes[] = 'menu_parent';
-    
+
     return $classes;
 }
 
@@ -1579,7 +1671,7 @@ add_filter( 'nav_menu_css_class', 'hm_submenu_class', 10, 2);
 
 /**
  * hm_touch_time function.
- * 
+ *
  * @access public
  * @param int $timestamp
  * @param string $name. (default: 'hm_time_')
@@ -1600,18 +1692,18 @@ function hm_touch_time( $timestamp, $name = 'hm_time_' ) {
 	$ss = date( 's', $timestamp );
 
 	$month = "<select name=\"{$name}mm\">\n";
-	
+
 	for ( $i = 1; $i < 13; $i = $i +1 ) {
-	
+
 		$month .= "\t\t\t" . '<option value="' . zeroise( $i, 2 ) . '"';
-	
+
 		if ( $i == $mm )
 			$month .= ' selected="selected"';
-	
+
 		$month .= '>' . $wp_locale->get_month_abbrev( $wp_locale->get_month( $i ) ) . "</option>\n";
-	
+
 	}
-	
+
 	$month .= '</select>';
 
 	$day	= '<input style="width: 2.1em;" type="text" name="' . $name . 'jj" value="' . $jj . '" size="2" maxlength="2" autocomplete="off" />';
@@ -1630,7 +1722,7 @@ function hm_touch_time( $timestamp, $name = 'hm_time_' ) {
 
 /**
  * hm_touch_time_get_time_from_data function.
- * 
+ *
  * @access public
  * @param mixed $name
  * @param mixed $data
@@ -1645,43 +1737,45 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
 
 /**
  * Disable the admin bar and admin bar prefs for subscribers
- * 
+ *
  * @access public
  * @return null
  */
 function hm_disable_admin_bar_for_subscribers() {
-	
+
 	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && key( wp_get_current_user()->data->wp_capabilities ) == 'subscriber' ) :
 		show_admin_bar( false );
 		remove_action( 'wp_head', '_admin_bar_bump_cb' );
 		wp_dequeue_script( 'admin-bar' );
 		wp_dequeue_style( 'admin-bar' );
 	endif;
-	
+
 }
 add_action( 'init', 'hm_disable_admin_bar_for_subscribers' );
 
 /**
- * Automatically pluralize a string. Adds "es" to nouns ending in "s", "ies" for "y", etc
- * 
- * @param string $str
- * @return string
+ * Gets an array of a specified property from an array of objects. Eg, returns all IDs of $wp_query->posts when passed 'ID'.
+ *
+ * @param array $array
+ * @param string $property
+ * @return array
  */
-function hm_pluralize_string( $str ) {
+function hm_get_object_properties_from_array( $array, $property ) {
 
-	$endings = array(
-		's' => 'ses',
-		'y' => 'ies'
-	);
-	
-	$ending = substr( $str, strlen($str)-1, 1 );
-	
-	if( array_key_exists( $ending, $endings ) )
-		$str = substr( $str, 0, strlen( $str ) - 1 ) . $endings[$ending];
-	
-	else
-		$str = $str . 's';
-	
-	return $str;
+	if ( !is_array( $array ) )
+		return array();
+
+	$properties = array();
+
+	foreach ( $array as $value ) {
+
+		$value = (object) $value;
+
+		if ( isset( $value->$property ) )
+			$properties[] = $value->$property;
+
+	}
+
+	return $properties;
 
 }
