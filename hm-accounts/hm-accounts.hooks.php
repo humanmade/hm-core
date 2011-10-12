@@ -214,7 +214,7 @@ function hma_admin_add_avatar_save( $user_id ) {
 		if( ! isset( $file['file'] ) )
 			return; 
 			
-		update_usermeta( $user_id, 'user_avatar_path', $file['file'] );
+		update_usermeta( $user_id, 'user_avatar_path', str_replace( '\\', '/', $file['file'] ) );
 		update_usermeta( $user_id, 'user_avatar_option', 'uploaded' );
 	
 	}
