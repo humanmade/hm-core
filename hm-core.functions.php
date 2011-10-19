@@ -365,19 +365,27 @@ function hm_add_message( $message, $context, $type ) {
 
 		$_SESSION['hm_messages'] = $messages;
 	}
+
 }
 
 function hm_get_messages( $context = null, $clear_cookie = true ) {
 
+
 	if ( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = ( $_COOKIE['hm_messages'] ) ? $_COOKIE['hm_messages'] : "";
 		$messages = array_filter( (array) unserialize( base64_decode( $cookie ) ) );
+		
 	} else {
+		if ( !isset( $_SESSION ) )
+			session_start();
+
 		if ( isset( $_SESSION['hm_messages'] ) )
 			$messages = array_filter( (array) $_SESSION['hm_messages'] );
 		else
 			$messages = array();
 	}
+	
+
 
 	if ( !empty( $context ) && !empty( $messages[$context] ) ) {
 
