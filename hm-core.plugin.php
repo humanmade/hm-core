@@ -12,8 +12,8 @@ if ( defined( 'HM_CORE_PATH' ) || defined( 'HELPERPATH' ) )
 	return '';
 
 define( 'HM_CORE_SLUG', 'hm-core' );
-define( 'HM_CORE_PATH', trailingslashit( WP_PLUGIN_DIR . '/' . HM_CORE_SLUG ) );
-define( 'HM_CORE_URL', trailingslashit( WP_PLUGIN_URL . '/' . HM_CORE_SLUG ) );
+define( 'HM_CORE_PATH', dirname( __FILE__ ) . '/' );
+define( 'HM_CORE_URL', str_replace( ABSPATH, get_bloginfo( 'url' ) . '/', HM_CORE_PATH ) );
 
 // Load core files
 include_once( HM_CORE_PATH . 'hm-core.debug.php' );
