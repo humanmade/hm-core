@@ -116,6 +116,10 @@ function hm_load_custom_templates( $template ) {
 	if ( is_404() && !isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) )
 		return;
 
+	if( is_404() && isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) && $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] == false ) {
+		status_header('200');
+	}
+
 	//show the correct template for the query
 	if ( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
 
@@ -131,6 +135,10 @@ function hm_load_custom_templates( $template ) {
 
 		if ( !empty( $hm_current_rewrite_rule[2] ) ) {
 			do_action( 'hm_load_custom_template', $hm_current_rewrite_rule[2], $hm_current_rewrite_rule );
+
+			if ( empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) && $hm_current_rewrite_rule[1] )
+				redirect_canonical();
+
 			include( $hm_current_rewrite_rule[2] );
 			exit;
 		} else if ( !empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) ) {
