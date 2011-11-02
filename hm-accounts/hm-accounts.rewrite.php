@@ -100,34 +100,6 @@ function hma_get_register_inline_template() {
 }
 
 /**
- * Return the path to the login inline template
- *
- * @return string
- */
-function hma_get_login_inline_template() {
-	return  apply_filters( 'hma_login_inline_template', get_stylesheet_directory() . '/login-popup.php' );
-}
-
-/**
- * Return the path to the login inline template
- *
- * @return string
- */
-function hma_get_login_inline_template() {
-	return  apply_filters( 'hma_login_inline_template', get_stylesheet_directory() . '/login-popup.php' );
-}
-
-/**
- * Return the path to the login inline template
- *
- * @return string
- */
-function hma_get_login_inline_template() {
-	return  apply_filters( 'hma_login_inline_template', get_stylesheet_directory() . '/login-popup.php' );
-}
-
-
-/**
  * Return the path to the user profile template
  *
  * @return string
