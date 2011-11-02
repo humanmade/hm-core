@@ -121,7 +121,7 @@ function hma_get_edit_profile_template() {
  * Some rewrites can only be accessed by logged out users
  *
  * @param string $template
- * @param mixed $rule
+ * @param string $rule
  * @return null
  */
 function hma_restrict_access_for_logged_in_users_to_pages( $template, $rule ) {
@@ -149,7 +149,7 @@ add_action( 'hm_load_custom_template', 'hma_restrict_access_for_logged_in_users_
  * Some rewrites can only be accessed by logged in users
  *
  * @param string $template
- * @param mixed $rule
+ * @param string $rule
  * @return null
  */
 function hma_restrict_access_for_logged_out_users_to_pages( $template, $rule ) {
