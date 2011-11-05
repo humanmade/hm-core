@@ -65,4 +65,5 @@ function hm_deactivate_conflicts() {
 
 	update_option( 'active_plugins', $plugins );
 }
-add_action( 'init', 'hm_deactivate_conflicts' );
+if ( (!defined( 'HM_ENABLE_PHPTHUMB' ) || HM_ENABLE_PHPTHUMB ) && !function_exists( 'wpthumb' ) )
+	add_action( 'init', 'hm_deactivate_conflicts' );
