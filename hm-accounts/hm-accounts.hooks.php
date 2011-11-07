@@ -224,7 +224,7 @@ function hma_admin_add_avatar( $user ) { ?>
 
 		    			<br/>
 
-						<?php // TODO for attribute?
+						<?php // TODO for attribute? ?>
 
 		    			<label>
 
