@@ -460,10 +460,10 @@ function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
 
-	if ( empty( $values ) || empty( $fields ) )
+	if ( empty( $fields ) || ( !is_array( $fields  ) && empty( $values ) ) )
 		return array();
 
-	if ( !is_array( $fields ) && !empty( $fields ) && !empty( $values ) )
+	if ( !is_array( $fields ) && !empty( $fields ) && !is_array( $values ) && !empty( $values ) )
 		$fields = array( $fields => $values );
 
 	if ( is_array( $fields ) && is_array( $values ) )
