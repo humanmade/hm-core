@@ -20,14 +20,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 		parent::__construct();
 		
-		if ( !defined( 'HMA_SSO_FACEBOOK_APP_ID' ) || !defined( 'HMA_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'HMA_SSO_FACEBOOK_API_KEY' ) )
+		if ( !defined( 'HMA_SSO_FACEBOOK_APP_ID' ) || !defined( 'HMA_SSO_FACEBOOK_APPLICATION_SECRET' ) )
 			return new WP_Error( 'constants-not-defined' );
 		
 		$this->id = 'facebook';
 		$this->name = 'Facebook';
 		$this->app_id = HMA_SSO_FACEBOOK_APP_ID;
 		$this->application_secret = HMA_SSO_FACEBOOK_APPLICATION_SECRET;
-		$this->api_key = HMA_SSO_FACEBOOK_API_KEY;
 		$this->facebook_uid = null;
 		$this->supports_publishing = true;
 		$this->set_user( wp_get_current_user() );
