@@ -1,37 +1,33 @@
 <?php
 
 /**
- * TT New User
- * Creates a new user with args passed through an array or string of arguments. Passing arguments works the same
- * as functions such as query_posts(). Params are show as variable names which you must use when passing args
- * NOTE: wp_nonce_field( 'register' ) must be used on the register form
+ * Creates a new user with args passed through an array or string of arguments.
  *
- * @Param: username [string] - The desired username for the new user
- * @Param: email [string] - The desired email address for the new user
- * @Param: use_password [bool] [default: false] - Whether to specify a password on registration
- * @Param: password [string] - If use_password is true, the desired password for the new user
- * @Param: use_tos [bool] [default: true] - Whether the user needs to accept Terms of Service
- * @Param: tos [string] - If use_tos is true, the value to the accept Terms of Service checkbox
- * @Param: unique_email [bool] [default: false] - Set to true if only one username is allowed per email address
- * @Param: do_redirect [bool] [default: true] Whether to redirect the user after registration is complete
- * @Param: redirect [string] [default: User Profile Page] - The url to redirect the user to after successful login
- * @Param: send_email [bool] [default: true] Whether to send an email containing the username and password of the newly registered user
- * @Param: profile_info [array] [dafault: false] An array containing values to be used in wp_update_user() such as first_name, last_name
- * @Param: validate [bool] [default: true]
+ * wp_nonce_field( 'register' ) must be used on the register form
+ *
+ * @param: username [string] - The desired username for the new user
+ * @param: email [string] - The desired email address for the new user
+ * @param: use_password [bool] [default: false] - Whether to specify a password on registration
+ * @param: password [string] - If use_password is true, the desired password for the new user
+ * @param: use_tos [bool] [default: true] - Whether the user needs to accept Terms of Service
+ * @param: tos [string] - If use_tos is true, the value to the accept Terms of Service checkbox
+ * @param: unique_email [bool] [default: false] - Set to true if only one username is allowed per email address
+ * @param: do_redirect [bool] [default: true] Whether to redirect the user after registration is complete
+ * @param: redirect [string] [default: User Profile Page] - The url to redirect the user to after successful login
+ * @param: send_email [bool] [default: true] Whether to send an email containing the username and password of the newly registered user
+ * @param: profile_info [array] [dafault: false] An array containing values to be used in wp_update_user() such as first_name, last_name
+ * @param: validate [bool] [default: true]
  * @param: require_verify_email [bool] [default: false] Sends the user an email with a Activate Account link to activate their account
  * @param: override_nonce [bool] [default: false] Bypasses the nonce check, not recommended in most situations
- * @return: The ID of the newly registered user [on error returns error string]
- * @author: Joe Hoyle
- * @version 1.0
- **/
+ *
+ * @return: Int ID, the ID of the newly registered user [on error returns error string] or WP_Error
+ */
 function hma_new_user( $args ) {
 
 	if ( is_user_logged_in() ) {
 		hm_error_message( 'You are already logged in', 'register' );
 		return new WP_Error( 'already-logged-in');
 	}
-
-	include_once( ABSPATH . '/wp-includes/registration.php' );
 
 	$checks = array(
 		'use_password' => false,
@@ -59,23 +55,22 @@ function hma_new_user( $args ) {
 
 	$args = wp_parse_args( $args, $default_args );
 	extract( $args, EXTR_SKIP );
-	
+
 	$validation = apply_filters( 'hma_registration_info', $args );
 
 	unset( $args['user_pass2'] );
 	unset( $original_args['user_pass2'] );
 	unset( $user_pass2 );
-	
-	if ( is_wp_error( $validation ) && $validate == true ) {
-		return $validation;
-	}
 
+	if ( is_wp_error( $validation ) && $validate == true )
+		return $validation;
 
 	// Merge arrays overwritting defaults, remove any non-standard keys keys with empty values.
 	$user_vars = array_filter( array( 'user_login' => $user_login, 'user_pass' => $user_pass, 'user_email' => $user_email, 'display_name' => $display_name ) );
 
-	//Check for require_verify_email, send email and store temp data
+	// Check for require_verify_email, send email and store temp data
 	if ( $require_verify_email ) {
+
 		$original_args['require_verify_email'] = false;
 		$unverified_users = (array) get_option('unverified_users');
 
@@ -96,42 +91,48 @@ function hma_new_user( $args ) {
 	}
 
 	$user_id = wp_insert_user( $user_vars );
-	
-	if ( !$user_id || is_wp_error( $user_id ) ) {
-		return $user_id;
-	}
 
-	if ( $role ) :
+	if ( !$user_id || is_wp_error( $user_id ) )
+		return $user_id;
+
+	// Setup the users role
+	if ( $role ) {
 		$user = new WP_User( $user_id );
 		$user->set_role( $role );
-	endif;
-	
+	}
 
 	// Get any remaining variable that were passed
 	$meta_vars = array_diff_key( $original_args, $defaults, $checks, $user_vars );
 
-	foreach ( (array) $meta_vars as $key => $value ) :
+	foreach ( (array) $meta_vars as $key => $value )
 		update_usermeta( $user_id, $key, $value );
-	endforeach;
 
 	$user = get_userdata( $user_id );
 
-	//Send Notifcation email if specified
+	// Send Notifcation email if specified
 	if ( $send_email == true )
 		$email = hma_email_registration_success( $user, $user_pass );
 
-	//If they chose a password, login them in
-	if ( ( $use_password == 'true' || $do_login == true ) && $user->ID > 0 ) :
-		wp_login($user->user_login, $user_pass);
+	// If they chose a password, login them in
+	if ( ( $use_password == 'true' || $do_login == true ) && !empty( $user->ID ) ) :
+
+		wp_login( $user->user_login, $user_pass );
+
 		wp_clearcookie();
 		wp_setcookie($user->user_login, $user_pass, false);
+
 		do_action( 'wp_login', $user->user_login );
+
 		wp_set_current_user( $user->ID );
+
 	endif;
 
-	//Redirect the user if is set
-	if ( $redirect !== '' && $user->ID && $do_redirect == true ) wp_redirect( $redirect );
-	
+	// Redirect the user if is set
+	if ( $redirect !== '' && !empty( $user->ID ) && $do_redirect == true ) {
+		wp_redirect( $redirect );
+		exit;
+	}
+
 	do_action( 'hma_registered_user', $user );
 
 	return $user_id;
@@ -139,89 +140,109 @@ function hma_new_user( $args ) {
 }
 
 /**
- * hma_validate_registration function.
+ * Validate the registration data
  *
- * @access public
- * @param mixed $args
+ * @param array $args
  * @return void
  */
 function hma_validate_registration( $args ) {
-	//Username
-	if ( ($user = get_user_by('login', $args['user_login'])) && $user->ID ) {
+
+	// Unique username?
+	// TODO could this not use username_exists?
+	if ( !empty( $args['user_login'] ) && !empty( get_user_by( 'login', $args['user_login'] )->ID ) ) {
 		hm_error_message( 'Sorry, the username: ' . $args['user_login'] . ' already exists.', 'register' );
 		return new WP_Error( 'username-exists', 'Sorry, the username: ' . $args['user_login'] . ' already exists.');
 	}
-	
-	//Email
-	if ( !is_email( $args['user_email'] ) ) {
+
+	// Valid email?
+	if ( !empty( $user->ID ) && !is_email( $args['user_email'] ) ) {
 		hm_error_message( 'The email address you entered is not valid', 'register' );
 		return new WP_Error( 'invalid-email', 'Invalid email address.');
 	}
-	
-	if ( $args['unique_email'] == true && get_user_by_email( $args['user_email'] ) && $args['user_email'] ) {
+
+	// Unique email?
+	// TODO whats wrong with email_exists?
+	if ( !empty( $args['unique_email'] ) && !empty( $args['user_email'] ) && get_user_by_email( $args['user_email'] ) ) {
 		hm_error_message( 'The email address you entered is already in use', 'register' );
 		return new WP_Error( 'email-in-use', 'That email is already in use.');
 	}
-	
-	//Password
-	if ( $args['user_pass'] != $args['user_pass2'] ) {
+
+	// Passwords match
+	if ( !empty( $args['user_pass'] ) && !empty( $args['user_pass2'] ) && $args['user_pass'] != $args['user_pass2'] ) {
 		hm_error_message( 'The passwords you entered do not match.' );
 		return new WP_Error( 'password-mismatch', 'The passwords you entered do not match.');
 	}
-	
-	
+
+
 }
 add_filter( 'hma_registration_info', 'hma_validate_registration' );
 
+/**
+ * Send the new user notification email on register success
+ *
+ * The email can easily be overriden by including an email.register.php file in your theme
+ *
+ * @param object $user
+ * @param string $user_pass
+ * @todo the email template file should be filterable
+ * @return bool
+ */
 function hma_email_registration_success( $user, $user_pass ) {
 
 	if ( file_exists( $file = get_stylesheet_directory() . '/email.register.php' ) ) {
+
 		ob_start();
 		include( $file );
 		$message = ob_get_contents();
 		ob_end_clean();
+
 	} elseif ( file_exists( $file = 'tt-accounts.email.register.php' ) ) {
+
 		ob_start();
 		include( $file );
 		$message = ob_get_contents();
 		ob_end_clean();
+
 	} else {
+
 		wp_new_user_notification( $user->ID, $user_pass );
 		return;
+
 	}
+
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
+
 	return wp_mail( $user->user_email, apply_filters( 'hma_register_email_subject', 'New account registered for ' . get_bloginfo() ), $message, 'content-type=text/html' );
 
 }
 
-
 /**
  * Logs a user in
  *
- * @Param: username (string)
- * @Param: password (string)
- * @Param: password_hashed (bool) [default: false]
- * @Param: redirect_to (string) [optional]
- * @Param: remember (bool) [default: false]
- * @Param: allow_email_login (bool) [default: true]
+ * @param: username (string)
+ * @param: password (string)
+ * @param: password_hashed (bool) [default: false]
+ * @param: redirect_to (string) [optional]
+ * @param: remember (bool) [default: false]
+ * @param: allow_email_login (bool) [default: true]
  *
- * @Return: error array (message => string, number => (int) true on success
+ * @return: error array (message => string, number => (int) true on success
  * 			101: already logged in
- 			102: no username
- 			103: unrocognized username
- 			104: incorrect password
- 			105: success
-**/
+ *			102: no username
+ *			103: unrocognized username
+ *			104: incorrect password
+ *			105: success
+ */
 function hma_log_user_in( $args ) {
-	
+
 	$args = apply_filters( 'hma_log_user_in_args', $args );
 
-	if ( empty( $args['username'] ) ) :
+	if ( empty( $args['username'] ) ) {
 		hm_error_message( apply_filters( 'hma_login_no_username_error_message', 'Please enter your username' ), 'login' );
 		return new WP_Error( 'no-username', 'Please enter your username' );
-	endif;
+	}
 
 	$user = hma_parse_user( $args['username'] );
 
@@ -231,31 +252,42 @@ function hma_log_user_in( $args ) {
 	);
 
 	// Strip any tags then may have been put into the array
+	// TODO array_map?
 	foreach( $args as $i => $a ) {
 		if ( is_string( $a ) )
-			$args[ $i ] = strip_tags( $a );
+			$args[$i] = strip_tags( $a );
 	}
 
 
 	$args = wp_parse_args( $args, $defaults );
 	extract( $args, EXTR_SKIP );
 
-	if ( !is_numeric( $user->ID ) ) :
+	if ( !is_numeric( $user->ID ) ) {
 		hm_error_message(  apply_filters( 'hma_login_unrecognized_username_error_message', 'The username you entered was not recognized' ), 'login' );
 		return new WP_Error( 'unrecognized-username', 'The username you entered was not recognized');
-	endif;
+	}
 
-	if ( $password_hashed != true ) :
-		if ( !wp_check_password( $password, $user->user_pass ) ) :
+	if ( $password_hashed != true ) {
+
+		if ( !wp_check_password( $password, $user->user_pass ) ) {
+
 			hm_error_message( apply_filters( 'hma_login_incorrect_password_error_message', 'The password you entered is incorrect' ), 'login' );
+
 			return new WP_Error('incorrect-password', 'The password you entered is incorrect');
-		endif;
-	else :
-		if ( $password != $user->user_pass ) :
+
+		}
+
+	} else {
+
+		if ( $password != $user->user_pass ) {
+
 			hm_error_message( apply_filters( 'hma_login_incorrect_password_error_message', 'The password you entered is incorrect' ), 'login' );
+
 			return new WP_Error('incorrect-password', 'The password you entered is incorrect');
-		endif;
-	endif;
+
+		}
+
+	}
 
 	wp_set_auth_cookie( $user->ID, $remember );
 	set_current_user( $user->ID );
@@ -266,12 +298,24 @@ function hma_log_user_in( $args ) {
 	if ( $redirect_to == 'referer' )
 		$redirect_to = wp_get_referer();
 
-	if ( $redirect_to )
+	if ( $redirect_to ) {
+
 		wp_redirect( hm_parse_redirect( apply_filters( 'hma_login_redirect', $redirect_to, $user ) ) );
+		exit;
+
+	}
+
 	return true;
 }
 
+/**
+ * Send the lost password email
+ *
+ * @param string $email
+ * @return string on success, WP_Error on failure
+ */
 function hma_lost_password( $email ) {
+
 	if ( !get_user_by_email( $email ) && !get_userdatabylogin( $email ) ) {
 		hm_error_message( apply_filters( 'hma_login_unrocognized_email_error_message', 'The email address you entered was not recognised'), 'lost-password' );
 		return new WP_Error('unrecognized-email');
@@ -280,7 +324,7 @@ function hma_lost_password( $email ) {
 	$_POST['user_email'] = $email;
 	$_POST['user_login'] = $email;
 
-	//grab the retrieve password function from wp-login.php
+	// Grab the retrieve password function from wp-login.php
 	ob_start();
 	include_once( trailingslashit(ABSPATH) . 'wp-login.php' );
 	ob_end_clean();
@@ -289,23 +333,32 @@ function hma_lost_password( $email ) {
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
+
 	$errors = retrieve_password();
 
 	if ( !is_wp_error( $errors ) ) {
 		hm_success_message( 'You have been sent an email with a link to reset your password', 'lost-password' );
 		return array( 'status' => 'success', 'text' => 'success' );
 	}
+
 	hm_error_message( 'There was an unknown error', 'lost-password' );
 
 	return new WP_Error('unknown');
 }
 
+/**
+ * Load the lost password email template
+ *
+ * @param string $message
+ * @param string $key
+ * @return string, the email contents
+ */
 function hma_lost_password_email( $message, $key ) {
 
 	$user = get_user_by_email(trim($_POST['user_login']));
 	$reset_url = get_bloginfo( 'lost_password_url', 'display' ) . '?action=rp&key=' . $key . '&login=' . $user->user_login;
 
-
+	// TODO this template path should be filterable
 	if ( file_exists( $file = get_stylesheet_directory() . '/email.lost-password.php' ) ) {
 		ob_start();
 		include( $file );
@@ -317,125 +370,154 @@ function hma_lost_password_email( $message, $key ) {
 
 }
 
+/**
+ * Send the user their new password
+ *
+ * @param string $user_login
+ * @param string $key
+ * @return array on success, WP_Error on failure
+ */
 function hma_reset_password( $user_login, $key ) {
-	
+
 	add_filter( 'password_reset_message', 'hma_reset_password_email', 10, 2 );
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
-	
+
 	$status = hma_override_reset_password( $key, $user_login );
-	
-	if ( !is_wp_error($status) ) {
+
+	if ( !is_wp_error( $status ) ) {
 		hm_success_message( 'You have been sent an email with your new randomly generated password', 'lost-password' );
 		return array( 'status' => 'success', 'code' => 303 );
 	}
-	
+
 	hm_error_message( 'The request to reset your password was not successful.', 'lost-password' );
+
 	return $status;
 
 }
 
+/**
+ * Load the reset password email template
+ *
+ * @access public
+ * @param mixed $message
+ * @param mixed $new_pass
+ * @return null
+ */
 function hma_reset_password_email( $message, $new_pass ) {
-	
+
 	$user = get_userdatabylogin( $_GET['login'] );
-	
+
+	// TODO template path should be filterable
 	if ( file_exists( $file = get_stylesheet_directory() . '/email.reset-password.php' ) ) {
 		ob_start();
 		include( $file );
 		$message = ob_get_contents();
 		ob_end_clean();
-		
 	}
+
 	return $message;
+
 }
 
 /**
- * Updates a users Information
+ * Update a users information
  *
- * Can take a variety of arguments all in the form of a userInfo array.
+ * Can take a variety of arguments all in the form of a userinfo array.
  *
- * For starters you can pass any of the default wordpress user fields, you can also pass
+ * You can pass any of the default wordpress user fields, you can also pass
  * an avatar to upload or an image url to use as an avatar.
  * You can also pass any amount of additonal fields which will be added to the
  * 'profile_info' usermeta.
- * Note this function does not do any stripping or sanitizing, all that should be done before the data gets here.
  *
- * @PARAM: (array) of user information
- * @RETURN: (mixed) user_id on succes, wp_error on fail
- * @AUTHOR: Tom Willmot
- * @VERSION: 1.0
+ * This function does not do any stripping or sanitizing, all that should be done before the data gets here.
+ *
+ * @param: (array) of user information
+ * @return: (mixed) user_id on success, WP_Error on failure
  **/
 function hma_update_user_info( $info ) {
 
 	// If an email was passed, check that it is valid
-	if ( !preg_match( "/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/", strtolower( $info['user_email'] ) ) && is_string( $info['user_email'] ) && strpos( $info['user_email'], 'apps+' ) !== 0 ) {
+	if ( !is_email( $info['user_email'] ) ) {
 		hm_error_message( 'Please enter a valid email address', 'update-user' );
 		return new WP_Error( 'invalid-email', 'Please enter a valid email address' );
 	}
+
 	// If an ID wasn't passed then use the current user
-	if ( !$info['ID'] ) :
-		global $current_user;
-		$info['ID'] = $current_user->ID;
-	endif;
+	if ( empty( $info['ID'] ) )
+		$info['ID'] = get_current_user_id();
 
-	if ( !$info['ID'] ) return false;
+	if ( empty( $info['ID'] ) ) {
+		hm_error_message( 'Invalid user.', 'update-user' );
+		return new WP_Error( 'invalid-user', 'Empty user ID' );
+	}
 
-	// prepare the array for wp_update_user
+	// Prepare the array for wp_update_user
 	$userdata['ID'] = $info['ID'];
-	if ( $info['user_email'] ) $userdata['user_email'] = $info['user_email'];
-	if ( $info['display_name'] )$userdata['display_name'] = $info['display_name'];
-	if ( $info['first_name'] )$userdata['first_name'] = $info['first_name'];
-	if ( $info['last_name'] )$userdata['last_name'] = $info['last_name'];
-	if ( $info['description'] )$userdata['description'] = $info['description'];
-	if ( $info['user_pass'] ) $userdata['user_pass'] = $info['user_pass'];
-	if ( $info['user_url'] ) $userdata['user_url'] = $info['user_url'];
 
-	require_once( ABSPATH . 'wp-includes/registration.php' );
+	if ( !empty( $info['user_email'] ) )
+		$userdata['user_email'] = $info['user_email'];
+
+	if ( !empty( $info['display_name'] ) )
+		$userdata['display_name'] = $info['display_name'];
+
+	if ( !empty( $info['first_name'] ) )
+		$userdata['first_name'] = $info['first_name'];
+
+	if ( !empty( $info['last_name'] ) )
+		$userdata['last_name'] = $info['last_name'];
+
+	if ( !empty( $info['description'] ) )
+		$userdata['description'] = $info['description'];
+
+	if ( !empty( $info['user_pass'] ) )
+		$userdata['user_pass'] = $info['user_pass'];
+
+	if ( !empty( $info['user_url'] ) )
+		$userdata['user_url'] = $info['user_url'];
+
 	$user_id = wp_update_user( $userdata );
 
 	// User avatar
 	if ( $info['user_avatar'] ) {
+
 		require_once(ABSPATH . 'wp-admin/includes/admin.php');
 
 		$file = wp_handle_upload( $info['user_avatar'], array( 'test_form' => false ) );
 		$info['user_avatar_path'] = $file['file'];
 		$info['user_avatar_option'] = 'uploaded';
 		unset( $info['user_avatar'] );
+
 	}
 
 	// Remove everything we have already used
-	foreach ($info as $key => $inf) { 
-		if (is_string($inf) && $inf == '') $info[$key] = ' '; 
-	}
-	
+	foreach ( $info as $key => $inf )
+		if ( is_string( $inf ) && $inf == '' )
+			$info[$key] = ' ';
+
 	$meta_info = array_diff( $info, $userdata );
-	
-	//unset some important fields
+
+	// Unset some important fields
 	unset( $meta_info['user_pass'] );
 	unset( $meta_info['user_pass2'] );
 	unset( $meta_info['user_login'] );
 
 	// Anything left gets added to usermeta as a seperate user-meta field
-	if ( !empty( $meta_info ) ) :
-
-		foreach( (array) $meta_info as $key => $value ) :
+	if ( !empty( $meta_info ) )
+		foreach( (array) $meta_info as $key => $value )
 			update_usermeta( $info['ID'], $key, $value );
-		endforeach;
 
-	endif;
-	
-	if ( $user_id ) {
+	if ( $user_id )
 		hm_success_message( 'Information successfully updated', 'update-user' );
-	}
-	
+
 	return $user_id;
 }
 
 /**
- * hma_parse_user function.
+ * Loads a user using any piece of userdata as input
  *
- * @access public
+ * @todo this would be better as hma_get_user_by()
  * @param mixed $user. (default: null)
  * @return void
  */
@@ -446,134 +528,88 @@ function hma_parse_user( $user = null ) {
 
 	if ( is_object( $user ) && isset( $user->user_id ) && is_numeric( $user->user_id ) )
 		return get_userdata( $user->user_id );
-	
+
 	if ( is_array( $user ) && isset( $user['ID'] ) && is_numeric( $user['ID'] ) )
 		return get_userdata( $user['ID'] );
-	
+
 	if ( is_numeric( $user ) )
 		return get_userdata( $user );
 
 	if ( is_string( $user ) ) {
+
 		if ( strpos( $user, "@" ) > 0 && $user = get_user_by_email( $user ) )
 			return $user;
+
 		return get_userdatabylogin( $user );
 	}
 
-	if ( is_null( $user ) ) :
-		global $current_user;
-		return get_userdata( $current_user->ID );
-	endif;
-}
-
-function hma_login_message() {
-	if ( !$_GET['message'] )
-		return;
-
-	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
-}
-
-function hma_register_message() {
-	if ( !$_GET['message'] )
-		return;
-
-	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
-}
-
-function hma_get_message( $code = null ) {
-	if ( $code === null ) $code = (int) $_GET['message'];
-	$codes = hma_message_codes();
-	return $codes[$code];
-}
-
-function hma_get_the_message() {
-	if ( !$_GET['message'] )
-		return;
-
-	echo '<p class="message error">' . hma_get_message( (int) $_GET['message'] ) . '</p>' . "\n";
-}
-
-function hma_message_codes() {
-	$codes = array();
-	$codes[101] = 'You are already logged in.';
-	$codes[102] = 'Please enter a username.';
-	$codes[103] = 'The username you entered has not been recognised.';
-	$codes[104] = 'The password you entered is incorrect.';
-	$codes[105] = 'Successfully logged in';
-
-	$codes[200] = 'Successfully registered';
-	$codes[201] = 'You are already logged in.';
-	$codes[202] = 'Sorry, that username already exists.';
-	$codes[203] = 'The passwords you entered do not match.';
-	$codes[204] = 'The email address you entered is not valid';
-	$codes[205] = 'The email address you entered is already in use.';
-	$codes[206] = 'You have been sent an activation email, please follow the link in the email.';
-
-	$codes[300] = 'You have been emailed a link to reset yoru password, please check your email.';
-	$codes[301] = 'The email address you entered was not recognized';
-	$codes[302] = 'There was a problem, please contact the site administrator';
-
-	$codes[400] = 'Successfully updated your profile.';
-
-	return apply_filters( 'hma_message_codes', $codes );
-}
-
-
-//url functions
-function hma_get_user_url( $authordata = null ) {
-	if ( !$authordata ) global $authordata;
-	$authordata = hma_parse_user( $authordata );
-	return get_bloginfo('url') . '/users/' . $authordata->user_nicename . '/';
-}
-
-
-//get user functions
-function hma_get_avatar( $user, $width, $height, $crop = true, $try_normal = true ) {
-	
-	$user = hma_parse_user( $user );
-
-	//try to use avatar option classes	
-	if ( !empty( $user->user_avatar_option ) ) {
-		$hma_avatar_option = hma_get_avatar_option( $user->user_avatar_option );
-		$hma_avatar_option->user = $user;
-		
-		if ( is_a( $hma_avatar_option, 'hma_SSO_Avatar_Option' ) ) {
-		
-			$avatar = $hma_avatar_option->get_avatar( "width=$width&height=$height&crop=$crop" );
-			
-			if ( $avatar )
-				return $avatar;
-		}
-	}
-	
-	if ( $avatar = hma_get_avatar_upload( $user, $width, $height, $crop ) ) {
-		return $avatar;
-	}
-	elseif ( $avatar = apply_filters( 'hma_get_avatar_fallback', null, $user, $width, $height, $crop ) ) {
-		return $avatar;
-	}
-	elseif ( $try_normal === true ) {
-
-		preg_match( '/src=\'([^\']*)/', get_avatar( $user->user_email, $width ), $matches );
-		return $matches[1];
-	}
-	
-}
-
-function hma_get_avatar_upload( $user, $w, $h, $c ) {
-	if ( !empty( $user->user_avatar_path ) )
-		return wpthumb( $user->user_avatar_path, $w, $h, $c );
+	if ( is_null( $user ) )
+		return wp_get_current_user();
 }
 
 /**
- * Checks if a given user is a facebook user
+ * Return the users avatar
  *
+ * @access public
  * @param object $user
- * @return bool
+ * @param int $width
+ * @param int $height
+ * @param bool $crop. (default: true)
+ * @param bool $try_normal. (default: true)
+ * @return string
  */
-function hma_is_facebook_user( $user ) {
-	return (bool) $user->fbuid;
+function hma_get_avatar( $user = null, $width, $height, $crop = true, $try_normal = true ) {
+
+	$user = hma_parse_user( $user );
+
+	// Try to use avatar option classes
+	if ( !empty( $user->user_avatar_option ) ) {
+
+		$hma_avatar_option = hma_get_avatar_option( $user->user_avatar_option );
+		$hma_avatar_option->user = $user;
+
+		if ( is_a( $hma_avatar_option, 'hma_SSO_Avatar_Option' ) ) {
+
+			$avatar = $hma_avatar_option->get_avatar( "width=$width&height=$height&crop=$crop" );
+
+			if ( $avatar )
+				return $avatar;
+
+		}
+
+	}
+
+	if ( $avatar = hma_get_avatar_upload( $user, $width, $height, $crop ) ) {
+		return $avatar;
+
+	} elseif ( $avatar = apply_filters( 'hma_get_avatar_fallback', null, $user, $width, $height, $crop ) ) {
+		return $avatar;
+
+	} elseif ( $try_normal === true ) {
+
+		preg_match( '/src=\'([^\']*)/', get_avatar( $user->user_email, $width ), $matches );
+		return $matches[1];
+
+	}
+
 }
 
+/**
+ * hma_get_avatar_upload function.
+ *
+ * @access public
+ * @param object $user
+ * @param int $width
+ * @param int $height
+ * @param bool $crop
+ * @return string
+ */
+function hma_get_avatar_upload( $user, $width, $height, $crop ) {
+
+	if ( !empty( $user->user_avatar_path ) )
+		return wpthumb( $user->user_avatar_path, $width, $height, $crop );
+
+}
 
 /**
  * Handles resetting the user's password.
@@ -597,7 +633,7 @@ function hma_override_reset_password($key, $login) {
 		hm_error_message( 'The key you provided was invalid', 'lost-password' );
 		return new WP_Error('invalid_key', __('Invalid key'));
 	}
-	
+
 	$user = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $key, $login));
 	if ( empty( $user ) ){
 		hm_error_message( 'The key you provided was invalid', 'lost-password' );
@@ -623,7 +659,7 @@ function hma_override_reset_password($key, $login) {
 
 	$title = apply_filters('password_reset_title', $title);
 	$message = apply_filters('password_reset_message', $message, $new_pass);
-	
+
 	if ( $message && !wp_mail($user->user_email, $title, $message) )
   		die('<p>' . __('The e-mail could not be sent.') . "<br />\n" . __('Possible reason: your host may have disabled the mail() function...') . '</p>');
 
@@ -632,114 +668,25 @@ function hma_override_reset_password($key, $login) {
 	return true;
 }
 
-function hma_is_login() {
-	global $wp_the_query;
-	return !empty( $wp_the_query->is_login );
-}
-
-function hma_is_register() {
-	global $wp_the_query;
-	return !empty( $wp_the_query->is_register );
-}
-
-function hma_is_lost_password() {
-	global $wp_the_query;
-	return !empty( $wp_the_query->is_lost_password );
-}
-
-function hma_is_edit_profile() {
-	global $wp_the_query;
-	return !empty( $wp_the_query->is_edit_profile );
-}
-
-function hma_is_user_profile( $user_id = null ) {
-	
-	global $wp_the_query;
-	
-	if ( $user_id ) {
-	
-	} else {
-		return !empty( $wp_the_query->is_user_profile );
-	}
-
-}
-
-function hma_get_profile_user() {
-	
-	if ( !hma_is_user_profile() )
-		return null;
-	
-	return get_user_by( 'slug', get_query_var( 'author_name' ) );
-}
-
-
-/**
- * Returns the login page url.
- *
- * @param string $redirect. (default: null) - where to redirect to after login is successful
- * @param string $message - message to show on the login page
- * @return string
- */
-function hma_get_login_url( $redirect = null, $message = null ) {
-	$url = get_bloginfo( 'login_url', 'display' );
-
-	if ( $redirect )
-		$url = add_query_arg( 'redirect_to', urlencode($redirect), $url );
-		
-	if ( $message )
-		$url = add_query_arg( 'login_message', urlencode($message), $url );
-
-	return esc_url( $url );
-}
-
-/**
- * Returns the login page url.
- *
- * @param string $redirect. (default: null) - where to redirect to after login is successful
- * @param string $message - message to show on the login page
- * @return string
- */
-function hma_get_logout_url( $redirect = null ) {
-	$url = add_query_arg( 'action', 'logout', hma_get_login_url() );
-
-	if ( $redirect )
-		$url = add_query_arg( 'redirect_to', urlencode($redirect), $url );
-	
-	return $url;
-}
-
-function hma_get_lost_password_url() {
-	
-	return hma_get_login_url() . 'lost-password/';
-	
-}
-
-function hma_get_register_url() {
-	
-	return trailingslashit( get_bloginfo( 'url' ) ) . 'register/';
-	
-}
-
 /**
  * Will make a username unique if it already exists.
- * 
+ *
  * @param string $base_name
  * @return string
  */
 function hma_unique_username( $base_name ) {
-	
-	require_once( ABSPATH . 'wp-includes/registration.php' ); 
-	
+
 	if ( !username_exists( $base_name ) )
 		return $base_name;
-	
+
 	$counter = 1;
 	$new_name = $base_name . $counter;
+
 	while( username_exists( $new_name ) ) {
 		$counter++;
 		$new_name = $base_name . $counter;
 	}
-	
+
 	return $new_name;
-	
+
 }
