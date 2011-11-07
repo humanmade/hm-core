@@ -4,6 +4,10 @@ function hma_get_displayed_user_id() {
 	return get_query_var( 'author' ) ? get_query_var( 'author' ) : 0;
 }
 
+function hma_get_displayed_user() {
+	return get_userdata( hma_get_displayed_user_id() );
+}
+
 function hma_get_displayed_user_avatar( $width, $height, $crop = true ) {
 	return hma_get_avatar( hma_get_displayed_user_id(), $width, $height, $crop );
 }
@@ -36,6 +40,34 @@ function hma_get_displayed_user_login() {
 
 function hma_displayed_user_login() {
 	echo hma_get_displayed_user_login();
+}
+
+function hma_get_displayed_user_profile_field_data( $field ) {
+	return hma_get_profile_field_data( hma_get_displayed_user_id(), $field );
+}
+
+function hma_get_current_user_profile_field_data( $field ) {
+	return hma_get_profile_field_data( get_current_user_id(), $field );
+}
+
+function hma_get_user_link( $user_id ) {
+	return '<a href="' . hma_get_user_url( $user_id ) . '">' . hma_get_user_name( $user_id ) . '</a>';
+}
+
+function hma_user_link( $user_id ) {
+	echo hma_get_user_link( $user_id );
+}
+
+function hma_displayed_user_link() {
+	echo hma_get_user_link( hma_get_displayed_user_id() );
+}
+
+function hma_get_user_name( $user_id ) {
+	return get_the_author_meta( 'display_name', $user_id );
+}
+
+function hma_get_displayed_user_name() {
+	return hma_get_user_name( hma_get_displayed_user_id() );
 }
 
 /**
@@ -193,6 +225,7 @@ function hma_is_facebook_user( $user ) {
  * Return the users profile url
  *
  * @todo the user profile permalink structure should be filterable
+ * @todo refactor out $authordata and hm_parse_user();
  * @param object $authordata. (default: null)
  * @return string
  */

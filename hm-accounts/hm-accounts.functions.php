@@ -105,12 +105,13 @@ function hma_new_user( $args ) {
 	$meta_vars = array_diff_key( $original_args, $defaults, $checks, $user_vars );
 
 	foreach ( (array) $meta_vars as $key => $value )
-		update_usermeta( $user_id, $key, $value );
+		if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() )
+			update_usermeta( $user_id, $key, $value );
 
 	$user = get_userdata( $user_id );
 
 	// Send Notifcation email if specified
-	if ( $send_email == true )
+	if ( $send_email )
 		$email = hma_email_registration_success( $user, $user_pass );
 
 	// If they chose a password, login them in
@@ -400,7 +401,6 @@ function hma_reset_password( $user_login, $key ) {
 /**
  * Load the reset password email template
  *
- * @access public
  * @param mixed $message
  * @param mixed $new_pass
  * @return null
@@ -503,10 +503,11 @@ function hma_update_user_info( $info ) {
 	unset( $meta_info['user_pass2'] );
 	unset( $meta_info['user_login'] );
 
-	// Anything left gets added to usermeta as a seperate user-meta field
+	// Anything left gets added to usermeta as seperate fields
 	if ( !empty( $meta_info ) )
 		foreach( (array) $meta_info as $key => $value )
-			update_usermeta( $info['ID'], $key, $value );
+			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() );
+				update_usermeta( $info['ID'], $key, $value );
 
 	if ( $user_id )
 		hm_success_message( 'Information successfully updated', 'update-user' );
@@ -550,7 +551,6 @@ function hma_parse_user( $user = null ) {
 /**
  * Return the users avatar
  *
- * @access public
  * @param object $user
  * @param int $width
  * @param int $height
@@ -597,7 +597,6 @@ function hma_get_avatar( $user = null, $width, $height, $crop = true, $try_norma
 /**
  * hma_get_avatar_upload function.
  *
- * @access public
  * @param object $user
  * @param int $width
  * @param int $height
@@ -689,4 +688,46 @@ function hma_unique_username( $base_name ) {
 
 	return $new_name;
 
+}
+
+/**
+ * Register a new profile field
+ * 
+ * @return null
+ */
+function hma_register_profile_field( $field ) {
+	
+	global $hma_profile_fields;
+	
+	if ( empty( $hma_profile_fields ) )
+		$hma_profile_fields = array();
+	
+	$hma_profile_fields[] = $field;
+
+}
+add_action( 'init', 'hma_register_profile_field', 11 );
+
+/**
+ * Get the array of extra profile fields
+ * 
+ * @return null
+ */
+function hma_get_profile_fields() {
+	
+	global $hma_profile_fields;
+	
+	return $hma_profile_fields;
+	
+}
+
+function hma_is_profile_field( $field ) {
+	
+	global $hma_profile_fields;
+	
+	return array_search( $field, $hma_profile_fields );
+	
+}
+
+function hma_get_profile_field_data( $user_id, $field ) {
+	return get_user_meta( $user_id, $field, true );
 }

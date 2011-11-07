@@ -232,6 +232,7 @@ function hma_admin_add_avatar( $user ) { ?>
 
 		    					<?php if ( ! empty( $current_avatar_service ) )
 			    					checked( $avatar_option->service_id, $current_avatar_service );
+			    				
 			    				else
 			    					checked( $avatar_option->service_id, 'gravatar' );  ?>
 			    			/>
