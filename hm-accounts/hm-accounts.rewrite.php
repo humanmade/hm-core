@@ -205,11 +205,11 @@ function hma_restrict_access_for_logged_in_users_to_pages( $template, $rule ) {
 		if ( $_REQUEST['redirect_to'] )
 			$redirect = hm_parse_redirect( urldecode( $_REQUEST['redirect_to'] ) );
 
-		elseif ( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo('login_url', 'display'), get_bloginfo( 'lost_password_url', 'display' ), get_bloginfo( 'register_url', 'display' ) ) ) )
+		elseif ( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo( 'login_url', 'display' ), get_bloginfo( 'lost_password_url', 'display' ), get_bloginfo( 'register_url', 'display' ) ) ) )
 			$redirect = wp_get_referer();
 
 		else
-			$redirect =  get_bloginfo('url');
+			$redirect =  get_bloginfo( 'url' );
 
 		wp_redirect( $redirect );
 		exit;
@@ -229,7 +229,7 @@ function hma_restrict_access_for_logged_out_users_to_pages( $template, $rule ) {
 
 	if ( !is_user_logged_in() && in_array( $template, array( hma_get_edit_profile_template() ) ) ) {
 
-		wp_redirect( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo( 'edit_profile_url', 'display' ) ) ) ? wp_get_referer() : get_bloginfo('url') );
+		wp_redirect( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo( 'edit_profile_url', 'display' ) ) ) ? wp_get_referer() : get_bloginfo( 'url' ) );
 		exit;
 
 	}
