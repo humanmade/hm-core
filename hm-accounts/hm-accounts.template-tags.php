@@ -12,14 +12,28 @@ function hma_get_displayed_user_avatar( $width, $height, $crop = true ) {
 	return hma_get_avatar( hma_get_displayed_user_id(), $width, $height, $crop );
 }
 
-function hma_displayed_user_avatar( $width, $height, $crop = true ) { ?>
-	
-	<img src="<?php echo hma_get_displayed_user_avatar( $width, $height, $crop ); ?>" width="<?php echo $width; ?>" height="<?php echo $height; ?>" class="avatar" />
+function hma_get_current_user_avatar( $width, $height, $crop = true ) {
+	return hma_get_avatar( get_current_user_id(), $width, $height, $crop );
+}
 
+function hma_current_user_avatar( $width, $height, $crop = true ) { ?>
+	<img src="<?php echo hma_get_current_user_avatar( $width, $height, $crop ); ?>" width="<?php echo $width; ?>" height="<?php echo $height; ?>" class="avatar" />
+<?php }
+
+function hma_displayed_user_avatar( $width, $height, $crop = true ) { ?>
+	<img src="<?php echo hma_get_displayed_user_avatar( $width, $height, $crop ); ?>" width="<?php echo $width; ?>" height="<?php echo $height; ?>" class="avatar" />
 <?php }
 
 function hma_get_displayed_user_url() {
 	return hma_get_user_url( hma_get_displayed_user_id() );
+}
+
+function hma_get_current_user_url() {
+	return hma_get_user_url( get_current_user_id() );
+}
+
+function hma_current_user_url() {
+	echo hma_get_current_user_url();
 }
 
 function hma_displayed_user_url() {
@@ -42,12 +56,24 @@ function hma_get_current_user_profile_field_data( $field ) {
 	return hma_get_profile_field_data( get_current_user_id(), $field );
 }
 
+function hma_displayed_user_profile_field_data( $field ) {
+	echo hma_get_displayed_user_profile_field_data( $field );
+}
+
+function hma_current_user_profile_field_data( $field ) {
+	echo hma_get_current_user_profile_field_data( $field );
+}
+
 function hma_get_user_link( $user_id ) {
 	return '<a href="' . hma_get_user_url( $user_id ) . '">' . hma_get_user_name( $user_id ) . '</a>';
 }
 
 function hma_user_link( $user_id ) {
 	echo hma_get_user_link( $user_id );
+}
+
+function hma_current_user_link() {
+	echo hma_get_user_link( get_current_user_id() );
 }
 
 function hma_displayed_user_link() {
@@ -64,6 +90,14 @@ function hma_get_displayed_user_name() {
 
 function hma_displayed_user_name() {
 	echo hma_get_displayed_user_name();
+}
+
+function hma_current_user_name() {
+	echo hma_get_current_user_name();
+}
+
+function hma_get_current_user_name() {
+	return hma_get_user_name( get_current_user_id() );
 }
 
 /**
