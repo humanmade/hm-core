@@ -229,7 +229,7 @@ function hma_restrict_access_for_logged_out_users_to_pages( $template, $rule ) {
 
 	if ( !is_user_logged_in() && in_array( $template, array( hma_get_edit_profile_template() ) ) ) {
 
-		wp_redirect( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo( 'my_profile_url', 'display' ) ) ) ? wp_get_referer() : get_bloginfo('url') );
+		wp_redirect( wp_get_referer() && !in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo( 'edit_profile_url', 'display' ) ) ) ? wp_get_referer() : get_bloginfo('url') );
 		exit;
 
 	}

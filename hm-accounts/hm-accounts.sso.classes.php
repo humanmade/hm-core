@@ -171,7 +171,7 @@ class HMA_SSO_Provider {
 		if ( !is_user_logged_in() )
 			return null;
 		
-		return wp_nonce_url( add_query_arg( 'id', $this->id, get_bloginfo( 'my_profile_url', 'display' ) . 'sso/deauthenticate/' ), 'sso_unlink_from_account_' . $this->id );
+		return wp_nonce_url( add_query_arg( 'id', $this->id, get_bloginfo( 'edit_profile_url', 'display' ) . 'sso/deauthenticate/' ), 'sso_unlink_from_account_' . $this->id );
 	}
 	
 	function get_access_token_string() {
@@ -191,7 +191,7 @@ class HMA_SSO_Provider {
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
 		if ( $result = $this->perform_wordpress_login_from_provider() ) {
-			wp_redirect( get_bloginfo('my_profile_url', 'display') );
+			wp_redirect( get_bloginfo('edit_profile_url', 'display') );
 			exit;
 		}
 		
@@ -306,7 +306,7 @@ class HMA_SSO_Provider {
 			$result = $this->provider_authentication_connect_with_account_completed();
 			do_action( 'hma_sso_connect_with_account_completed', &$this, $result );
 			
-			wp_redirect( get_bloginfo( 'my_profile_url', 'display' ), 303 );
+			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
 			exit;
 		}
 	}
@@ -316,7 +316,7 @@ class HMA_SSO_Provider {
 		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_unlink_from_account_' . $this->id ) ) {
 			$result = $this->unlink();
 			do_action( 'hma_sso_unlink_from_account_completed', &$this, $result );
-			wp_redirect( get_bloginfo( 'my_profile_url', 'display' ), 303 );
+			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
 			exit;
 		}
 	}
@@ -358,7 +358,7 @@ class HMA_SSO_Provider {
 			    elseif ( wp_get_referer() )
 			    	$redirect = wp_get_referer();
 			    else
-			    	$redirect = get_bloginfo('my_profile_url', 'display');
+			    	$redirect = get_bloginfo('edit_profile_url', 'display');
 			    	
 			    wp_redirect( $redirect );
 			    exit;
@@ -378,7 +378,7 @@ class HMA_SSO_Provider {
 	}
 	
 	function _get_provider_authentication_completed_connect_account_redirect_url() {
-		return add_query_arg( 'id', $this->id, get_bloginfo( 'my_profile_url', 'display' ) . 'sso/authenticated/' );
+		return add_query_arg( 'id', $this->id, get_bloginfo( 'edit_profile_url', 'display' ) . 'sso/authenticated/' );
 	}
 	
 	function _get_sso_register_submit_url() {

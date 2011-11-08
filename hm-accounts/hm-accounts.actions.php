@@ -244,7 +244,7 @@ function hma_sso_register_submitted() {
 	    	$redirect = wp_get_referer();
 
 	    else
-	    	$redirect = get_bloginfo('my_profile_url', 'display');
+	    	$redirect = get_bloginfo('edit_profile_url', 'display');
 
 	    wp_redirect( $redirect );
 	    exit;
@@ -298,7 +298,7 @@ function hma_register_submitted() {
 			$redirect = wp_get_referer();
 
 		else
-			$redirect = get_bloginfo( 'my_profile_url', 'display');
+			$redirect = get_bloginfo( 'edit_profile_url', 'display' );
 
 		wp_redirect( $redirect );
 		exit;
@@ -401,7 +401,7 @@ function hma_profile_submitted() {
 	    $redirect = wp_get_referer();
 
 	else
-	    $redirect = get_bloginfo('my_profile_url', 'display');
+	    $redirect = get_bloginfo('edit_profile_url', 'display');
 
 	do_action( 'hma_update_user_profile_completed', $redirect );
 
