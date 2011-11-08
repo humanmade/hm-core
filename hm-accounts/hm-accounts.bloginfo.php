@@ -65,7 +65,7 @@ function hma_blogfilter( $arg, $arg2 ) {
 		case 'logout_url' :
 
 			// TODO couldn't this just add action = logout to the current url?
-			return add_query_arg( 'action', 'logout', home_url( '/' ) );
+			return add_query_arg( 'action', 'logout', hma_get_login_url() );
 
 		break;
 

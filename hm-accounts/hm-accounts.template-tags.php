@@ -143,7 +143,7 @@ function hma_get_login_url( $redirect = null, $message = null ) {
  */
 function hma_get_logout_url( $redirect = null ) {
 
-	$url = add_query_arg( 'action', 'logout', hma_get_login_url() );
+	$url = get_bloginfo( 'login_url', 'display' );
 
 	if ( $redirect )
 		$url = add_query_arg( 'redirect_to', urlencode( $redirect ), $url );
@@ -157,7 +157,7 @@ function hma_get_logout_url( $redirect = null ) {
  * @return string
  */
 function hma_get_lost_password_url() {
-	return hma_get_login_url() . 'lost-password/';
+	return get_bloginfo( 'lost_password_url', 'display' );
 }
 
 /**
@@ -167,7 +167,7 @@ function hma_get_lost_password_url() {
  * @return null
  */
 function hma_get_register_url() {
-	return trailingslashit( get_bloginfo( 'url' ) ) . 'register/';
+	return get_bloginfo( 'register_url', 'display' );
 }
 
 /**
@@ -176,8 +176,7 @@ function hma_get_register_url() {
  * @return bool
  */
 function hma_is_login() {
-	global $wp_the_query;
-	return !empty( $wp_the_query->is_login );
+	return hma_is_( 'is_login' );
 }
 
 /**
@@ -186,8 +185,7 @@ function hma_is_login() {
  * @return bool
  */
 function hma_is_register() {
-	global $wp_the_query;
-	return !empty( $wp_the_query->is_register );
+	return hma_is_( 'register' );
 }
 
 /**
@@ -196,8 +194,7 @@ function hma_is_register() {
  * @return bool
  */
 function hma_is_lost_password() {
-	global $wp_the_query;
-	return !empty( $wp_the_query->is_lost_password );
+	return hma_is_( 'is_lost_password' );
 }
 
 /**
@@ -206,8 +203,12 @@ function hma_is_lost_password() {
  * @return bool
  */
 function hma_is_edit_profile() {
+	return hma_is_( 'is_edit_profile' );
+}
+
+function hma_is_( $query_arg ) {
 	global $wp_the_query;
-	return !empty( $wp_the_query->is_edit_profile );
+	return !empty( $wp_the_query->$query_arg );
 }
 
 /**
@@ -232,6 +233,12 @@ function hma_is_user_profile( $user_id = null ) {
 
 }
 
+/**
+ * Check if we're on the current users profile page
+ * 
+ * @access public
+ * @return bool
+ */
 function hma_is_current_user_profile() {
 	
 	if ( hma_is_user_profile( get_current_user_id() ) )
@@ -265,5 +272,5 @@ function hma_get_user_url( $authordata = null ) {
 
 	$authordata = hma_parse_user( $authordata );
 
-	return get_bloginfo( 'url' ) . '/' . hma_get_user_profile_rewrite_slug() . '/' . $authordata->user_nicename . '/';
+	return home_url( hma_get_user_profile_rewrite_slug() . '/' . $authordata->user_nicename . '/' );
 }
