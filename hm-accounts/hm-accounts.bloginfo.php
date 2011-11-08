@@ -51,10 +51,14 @@ function hma_blogfilter( $arg, $arg2 ) {
 		case 'my_profile_url' :
 
 			_deprecated_argument( __FUNCTION__, '2.0', 'Use edit_profile_url instead of my_profile_url' );
+			
+			return apply_filters( 'hma_my_profile_url', home_url( trailingslashit( hma_get_edit_profile_rewrite_slug() ) ) );
+			
+		break;
 
 		case 'edit_profile_url' :
 
-			return apply_filters( 'hma_my_profile_url', home_url( trailingslashit( hma_get_edit_profile_rewrite_slug() ) ) );
+			return apply_filters( 'hma_edit_profile_url', home_url( trailingslashit( hma_get_edit_profile_rewrite_slug() ) ) );
 
 		break;
 
