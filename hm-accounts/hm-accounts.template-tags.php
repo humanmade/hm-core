@@ -26,14 +26,6 @@ function hma_displayed_user_url() {
 	echo hma_get_displayed_user_url();
 }
 
-function hma_get_displayed_user_display_name() {
-	return get_the_author_meta( 'display_name', hma_get_displayed_user_id() );
-}
-
-function hma_displayed_user_display_name() {
-	echo hma_get_displayed_user_display_name();
-}
-
 function hma_get_displayed_user_login() {
 	return get_the_author_meta( 'user_login', hma_get_displayed_user_id() );
 }
@@ -68,6 +60,10 @@ function hma_get_user_name( $user_id ) {
 
 function hma_get_displayed_user_name() {
 	return hma_get_user_name( hma_get_displayed_user_id() );
+}
+
+function hma_displayed_user_name() {
+	echo hma_get_displayed_user_name();
 }
 
 /**
@@ -224,7 +220,6 @@ function hma_is_facebook_user( $user ) {
 /**
  * Return the users profile url
  *
- * @todo the user profile permalink structure should be filterable
  * @todo refactor out $authordata and hm_parse_user();
  * @param object $authordata. (default: null)
  * @return string
@@ -236,5 +231,5 @@ function hma_get_user_url( $authordata = null ) {
 
 	$authordata = hma_parse_user( $authordata );
 
-	return get_bloginfo( 'url' ) . '/users/' . $authordata->user_nicename . '/';
+	return get_bloginfo( 'url' ) . '/' . hma_get_user_profile_rewrite_slug() . '/' . $authordata->user_nicename . '/';
 }
