@@ -1,8 +1,8 @@
 <?php
+
 /**
- * hm_get_related_posts function.
+ * Generates an array of related posts
  *
- * @access public
  * @param int $limit. (default: 10)
  * @param array $post_types. (default: 'post')
  * @param array $taxonomies. (default: 'post_tag') This is not the taxonomies which are used to compare, it is the taxonomies for the post
@@ -13,32 +13,32 @@ function hm_get_related_posts( $limit = 10, $post_types = array( 'post' ), $taxo
 
 	global $wpdb;
 
-	$default_args = array( 
+	$default_args = array(
 		'post_id' 	=> get_the_id(),
 		'terms'		=> array(),
 		'related_post_taxonomies' => $taxonomies
 	);
-	
+
 	$args = wp_parse_args( $args, $default_args );
-	
+
 	extract( $args );
-	
-	foreach( $related_post_taxonomies as &$related_post_taxonomy ) {
+
+	foreach( $related_post_taxonomies as &$related_post_taxonomy )
 		$related_post_taxonomy = "'" . $related_post_taxonomy . "'";
-	}
 
 	if ( empty( $post_id ) )
 		return;
-	
+
 	$func_args = func_get_args();
-	
+
 	if ( !$related_posts = wp_cache_get( $post_id . '_' . r_implode( '_', $func_args ), 'hm_related_posts' ) ) :
-		
-		if( empty( $terms ) )
+
+		if ( empty( $terms ) )
 			$term_objects = wp_get_object_terms( $post_id, $taxonomies );
+
 		else
 			$term_objects = $terms;
-		
+
 		$terms = array();
 
 		foreach( $term_objects as $term )
@@ -63,10 +63,8 @@ function hm_get_related_posts( $limit = 10, $post_types = array( 'post' ), $taxo
 		if ( !empty( $terms ) )
 			$query[] = "AND t_t.term_id IN ( " . implode( ', ', $terms ) . " ) AND t_t.taxonomy IN ( " . implode( ', ', $related_post_taxonomies ) . " )";
 
-		if ( !empty( $terms_not_in ) ) :
+		if ( !empty( $terms_not_in ) )
 			$query[] = "AND p.ID NOT IN ( SELECT tr.object_id FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.term_id IN (" . implode( ', ', $terms_not_in ) . ") )";
-
-		endif;
 
 		$query[] = "AND ( $post_type_sql )";
 		$query[] = "AND p.ID != $post_id";
