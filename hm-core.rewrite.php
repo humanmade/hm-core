@@ -86,7 +86,7 @@ add_filter( 'query_vars', 'hm_add_custom_page_variables' );
 
 /**
  * Set the current rewrite rule
- * 
+ *
  * @param object $request
  * @return null
  */
@@ -95,7 +95,7 @@ function hm_set_custom_rewrite_rule_current_page( $request ) {
 	global $hm_rewrite_rules, $hm_current_rewrite_rule, $wp_rewrite;
 
 	if ( isset( $hm_rewrite_rules ) && array_key_exists( $request->matched_rule, (array) $hm_rewrite_rules ) ) {
-		
+
 		$hm_current_rewrite_rule = $hm_rewrite_rules[$request->matched_rule];
 
 		do_action_ref_array( 'hm_parse_request_' . $request->matched_rule, array( &$request ) );
@@ -107,7 +107,7 @@ function hm_set_custom_rewrite_rule_current_page( $request ) {
 	if ( isset( $hm_current_rewrite_rule[4] ) && $hm_current_rewrite_rule[4] === $request ) {
 
 		$hm_current_rewrite_rule[3]['parse_query_properties'] = wp_parse_args( ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ? $hm_current_rewrite_rule[3]['parse_query_properties'] : '' ), array( 'is_home' => false ) );
-		
+
 		// Apply some post query stuff to wp_query
 		if ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ) {
 
@@ -135,7 +135,7 @@ function hm_modify_parse_query( $wp_query ) {
 	if ( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
 
 		$hm_current_rewrite_rule[3]['parse_query_properties'] = wp_parse_args( ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ? $hm_current_rewrite_rule[3]['parse_query_properties'] : '' ), array( 'is_home' => false ) );
-		
+
 		// Apply some post query stuff to wp_query
 		if ( isset( $hm_current_rewrite_rule[3]['parse_query_properties'] ) ) {
 
@@ -151,7 +151,7 @@ add_filter( 'parse_query', 'hm_modify_parse_query', 9 );
 
 /**
  * Load the template file of the matched rule
- * 
+ *
  * @param string $template
  * @return string
  */
@@ -162,7 +162,7 @@ function hm_load_custom_templates( $template ) {
 	// Skip 404 template includes
 	if ( is_404() && !isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) )
 		return;
-	
+
 	// Allow 404's to be overridden
 	if ( is_404() && isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) && $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] == false )
 		status_header('200');
@@ -171,17 +171,14 @@ function hm_load_custom_templates( $template ) {
 	if ( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
 
 		// Apply some post query stuff to wp_query
-		if ( isset( $hm_current_rewrite_rule[3]['post_query_properties'] ) ) {
+		if ( isset( $hm_current_rewrite_rule[3]['post_query_properties'] ) )
 
 			// $post_query
-			foreach( wp_parse_args( $hm_current_rewrite_rule[3]['post_query_properties'] ) as $property => $value ) {
+			foreach( wp_parse_args( $hm_current_rewrite_rule[3]['post_query_properties'] ) as $property => $value )
 				$wp_query->$property = $value;
 
-			}
-		}
-
 		if ( !empty( $hm_current_rewrite_rule[2] ) ) {
-			
+
 			do_action( 'hm_load_custom_template', $hm_current_rewrite_rule[2], $hm_current_rewrite_rule );
 
 			if ( empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) && $hm_current_rewrite_rule[1] )
@@ -189,7 +186,7 @@ function hm_load_custom_templates( $template ) {
 
 			include( $hm_current_rewrite_rule[2] );
 			exit;
-		
+
 		// Allow redirect_canonical to be disabled
 		} else if ( !empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) ) {
 			remove_action( 'template_redirect', 'redirect_canonical', 10 );
@@ -204,7 +201,7 @@ add_action( 'template_redirect', 'hm_load_custom_templates', 1 );
 
 /**
  * Add the custom template filename as a body class
- * 
+ *
  * @access public
  * @param mixed $classes
  * @return null
@@ -222,8 +219,8 @@ function hm_custom_rewrite_rule_body_class( $classes ) {
 add_filter( 'body_class', 'hm_custom_rewrite_rule_body_class' );
 
 /**
- * TODO
- * 
+ * TODO Docblock
+ *
  * @param array $args
  * @return null
  */
