@@ -106,7 +106,7 @@ function hma_new_user( $args ) {
 
 	foreach ( (array) $meta_vars as $key => $value )
 		if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() )
-			update_usermeta( $user_id, $key, $value );
+			update_user_meta( $user_id, $key, $value );
 
 	$user = get_userdata( $user_id );
 
@@ -429,7 +429,7 @@ function hma_reset_password_email( $message, $new_pass ) {
  * You can pass any of the default wordpress user fields, you can also pass
  * an avatar to upload or an image url to use as an avatar.
  * You can also pass any amount of additonal fields which will be added to the
- * 'profile_info' usermeta.
+ * 'profile_info' user meta.
  *
  * This function does not do any stripping or sanitizing, all that should be done before the data gets here.
  *
@@ -503,11 +503,11 @@ function hma_update_user_info( $info ) {
 	unset( $meta_info['user_pass2'] );
 	unset( $meta_info['user_login'] );
 
-	// Anything left gets added to usermeta as seperate fields
+	// Anything left gets added to user meta as seperate fields
 	if ( !empty( $meta_info ) )
 		foreach( (array) $meta_info as $key => $value )
 			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() );
-				update_usermeta( $info['ID'], $key, $value );
+				update_user_meta( $info['ID'], $key, $value );
 
 	if ( $user_id )
 		hm_success_message( 'Information successfully updated', 'update-user' );
@@ -645,7 +645,7 @@ function hma_override_reset_password($key, $login) {
 	do_action('password_reset', $user, $new_pass);
 
 	wp_set_password($new_pass, $user->ID);
-	update_usermeta($user->ID, 'default_password_nag', true); //Set up the Password change nag.
+	update_user_meta($user->ID, 'default_password_nag', true); //Set up the Password change nag.
 	$message  = sprintf(__('Username: %s'), $user->user_login) . "\r\n";
 	$message .= sprintf(__('Password: %s'), $new_pass) . "\r\n";
 	$message .= site_url('wp-login.php', 'login') . "\r\n";

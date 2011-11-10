@@ -202,7 +202,7 @@ function hma_admin_add_avatar( $user ) { ?>
 		<table class="form-table">
 
 			<?php $avatar_options = hma_get_avatar_options();
-			$current_avatar_service = get_usermeta( $user->ID, 'user_avatar_option' );
+			$current_avatar_service = get_user_meta( $user->ID, 'user_avatar_option' );
 
 		if ( $current_avatar_service ) :  ?>
 
@@ -288,7 +288,7 @@ function hma_admin_add_avatar_save( $user_id ) {
 		return false;
 
 	if ( isset( $_POST['hma_user_avatar_service'] )  )
-		update_usermeta( $user_id, 'user_avatar_option', $_POST['hma_user_avatar_service'] );
+		update_user_meta( $user_id, 'user_avatar_option', $_POST['hma_user_avatar_service'] );
 
 	if ( isset( $_FILES['hma_user_avatar_file'] ) && $_FILES['hma_user_avatar_file'] != '' ) {
 
@@ -297,8 +297,8 @@ function hma_admin_add_avatar_save( $user_id ) {
 		if ( ! isset( $file['file'] ) )
 			return;
 
-		update_usermeta( $user_id, 'user_avatar_path', str_replace( '\\', '/', $file['file'] ) );
-		update_usermeta( $user_id, 'user_avatar_option', 'uploaded' );
+		update_user_meta( $user_id, 'user_avatar_path', str_replace( '\\', '/', $file['file'] ) );
+		update_user_meta( $user_id, 'user_avatar_option', 'uploaded' );
 
 	}
 
