@@ -326,7 +326,7 @@ function hma_profile_submitted() {
 	// Loop through all data and only user user_* fields
 	foreach( $_POST as $key => $value ) {
 
-		if ( strpos( $key, 'user_' ) !== 0 )
+		if ( strpos( $key, 'user_' ) !== 0 || ! hma_is_profile_field( $key ) )
 			continue;
 
 		$user_data[$key] = is_string( $value ) ? esc_html( $value ) : array_map( 'esc_html', $value );
