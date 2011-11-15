@@ -276,5 +276,5 @@ function hma_get_user_url( $authordata = null ) {
 
 	$authordata = hma_parse_user( $authordata );
 
-	return home_url( hma_get_user_profile_rewrite_slug() . '/' . $authordata->user_nicename . '/' );
+	return apply_filters( 'hma_user_url', home_url( hma_get_user_profile_rewrite_slug() . '/' . $authordata->user_nicename . '/' ) );
 }
