@@ -333,7 +333,7 @@ function hma_profile_submitted() {
 	}
 
 	// Check that the passwords match is they were $_POST'd
-	if ( !empty( $user_data['user_pass'] ) && !empty( $user_data['user_pass2'] ) && ( $user_data['user_pass'] != $user_data['user_pass2'] ) ) {
+	if ( !empty( $user_data['user_pass'] ) && isset( $user_data['user_pass2'] ) && ( $user_data['user_pass'] !== $user_data['user_pass2'] ) ) {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
