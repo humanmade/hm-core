@@ -310,7 +310,6 @@ add_action( 'hma_register_submitted', 'hma_register_submitted' );
 /**
  * Process the edit profile form submission
  *
- * @todo should use esc_attr instead of esc_html
  * @return null
  */
 function hma_profile_submitted() {
@@ -323,53 +322,57 @@ function hma_profile_submitted() {
 	if ( !is_user_logged_in() )
 		return;
 
-	// Loop through all data and only user user_* fields
+	// Loop through all data and only user user_* fields or fields which have been registered using hma_register_profile_field
 	foreach( $_POST as $key => $value ) {
 
 		if ( strpos( $key, 'user_' ) !== 0 || ! hma_is_profile_field( $key ) )
 			continue;
 
-		$user_data[$key] = is_string( $value ) ? esc_html( $value ) : array_map( 'esc_html', $value );
+		$user_data[$key] = is_string( $value ) ? esc_attr( $value ) : array_map( 'esc_attr', $value );
 
 	}
 
-	// Password
-	if ( !empty( $user_data['user_pass'] ) && ( $user_data['user_pass'] != $user_data['user_pass2'] ) ) {
+	// Check that the passwords match is they were $_POST'd
+	if ( !empty( $user_data['user_pass'] ) && !empty( $user_data['user_pass2'] ) && ( $user_data['user_pass'] != $user_data['user_pass2'] ) ) {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
-
+	
+	// Unset user_pass2
 	if ( $user_data['user_pass'] && $user_data['user_pass2'] && ( $user_data['user_pass'] === $user_data['user_pass2'] ) )
 		unset( $user_data['user_pass2'] );
 
 	$user_data['ID'] = $current_user->ID;
 
-	if ( esc_html( $_POST['first_name'] ) )
-		$user_data['first_name'] = esc_html( $_POST['first_name'] );
+	if ( !empty( $_POST['first_name'] ) )
+		$user_data['first_name'] = esc_attr( $_POST['first_name'] );
 
-	if ( esc_html( $_POST['last_name'] ) )
-		$user_data['last_name'] = esc_html( $_POST['last_name'] );
+	if ( !empty( $_POST['last_name'] ) )
+		$user_data['last_name'] = esc_attr( $_POST['last_name'] );
+
+	if ( !empty( $_POST['nickname'] ) )
+		$user_data['nickname'] = esc_attr( $_POST['nickname'] );
 
 	if ( $current_user->user_login )
 		$user_data['user_login'] = $current_user->user_login;
 
-	if ( esc_html( $_POST['description'] ) )
-		$user_data['description'] = esc_html( $_POST['description'] );
+	if ( !empty( $_POST['description'] ) )
+		$user_data['description'] = esc_attr( $_POST['description'] );
 
-	if ( $_POST['display_name'] ) {
+	if ( !empty( $_POST['display_name'] ) ) {
 
 		$name = trim( $_POST['display_name'] );
-		$match = preg_match_all( '/([\S^\,]*)/', $_POST['display_name'], $matches );
+		$match = preg_match_all( '/([\S^\,]*)/', esc_attr( $_POST['display_name'] ), $matches );
 
 		foreach( array_filter( (array) $matches[0] ) as $match )
 			$name = trim( str_replace( $match, $user_data[$match], $name ) );
 
 		$user_data['display_name'] = $name;
-		$user_data['display_name_preference'] = esc_html( $_POST['display_name'] );
+		$user_data['display_name_preference'] = esc_attr( $_POST['display_name'] );
 
 	}
 
-	if ( $_FILES['user_avatar']['name'] )
+	if ( !empty( $_FILES['user_avatar']['name'] ) )
 		$user_data['user_avatar'] = $_FILES['user_avatar'];
 
 	$success = hma_update_user_info( $user_data );
@@ -392,16 +395,16 @@ function hma_profile_submitted() {
 	}
 
 	if ( $_POST['redirect_to'] )
-	    $redirect = $_POST['redirect_to'];
+	    $redirect = esc_attr( $_POST['redirect_to'] );
 
 	elseif ( $_POST['referer'] )
-	    $redirect = $_POST['referer'];
+	    $redirect = esc_attr( $_POST['referer'] );
 
 	elseif ( wp_get_referer() )
 	    $redirect = wp_get_referer();
 
 	else
-	    $redirect = get_bloginfo('edit_profile_url', 'display');
+	    $redirect = get_bloginfo( 'edit_profile_url', 'display' );
 
 	do_action( 'hma_update_user_profile_completed', $redirect );
 

@@ -468,6 +468,9 @@ function hma_update_user_info( $info ) {
 	if ( !empty( $info['last_name'] ) )
 		$userdata['last_name'] = $info['last_name'];
 
+	if ( !empty( $info['nickname'] ) )
+		$userdata['nickname'] = $info['nickname'];
+
 	if ( !empty( $info['description'] ) )
 		$userdata['description'] = $info['description'];
 
@@ -480,9 +483,9 @@ function hma_update_user_info( $info ) {
 	$user_id = wp_update_user( $userdata );
 
 	// User avatar
-	if ( $info['user_avatar'] ) {
+	if ( !empty( $info['user_avatar'] ) ) {
 
-		require_once(ABSPATH . 'wp-admin/includes/admin.php');
+		require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
 		$file = wp_handle_upload( $info['user_avatar'], array( 'test_form' => false ) );
 		$info['user_avatar_path'] = $file['file'];
@@ -492,18 +495,19 @@ function hma_update_user_info( $info ) {
 	}
 
 	// Remove everything we have already used
+	// @todo Couldn't we just trim?
 	foreach ( $info as $key => $inf )
 		if ( is_string( $inf ) && $inf == '' )
 			$info[$key] = ' ';
 
-	$meta_info = array_diff( $info, $userdata );
+	$meta_info = array_diff_key( $info, $userdata );
 
 	// Unset some important fields
 	unset( $meta_info['user_pass'] );
 	unset( $meta_info['user_pass2'] );
 	unset( $meta_info['user_login'] );
 
-	// Anything left gets added to user meta as seperate fields
+	// Anything left gets added to user meta as separate fields
 	if ( !empty( $meta_info ) )
 		foreach( (array) $meta_info as $key => $value )
 			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() );
@@ -729,5 +733,9 @@ function hma_is_profile_field( $field ) {
 }
 
 function hma_get_profile_field_data( $user_id, $field ) {
+	
+	if ( $meta = get_the_author_meta( $field, $user_id ) )
+		return $meta;
+	
 	return get_user_meta( $user_id, $field, true );
 }
