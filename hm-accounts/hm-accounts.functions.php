@@ -426,7 +426,7 @@ function hma_reset_password_email( $message, $new_pass ) {
  *
  * Can take a variety of arguments all in the form of a userinfo array.
  *
- * You can pass any of the default wordpress user fields, you can also pass
+ * You can pass any of the default WordPress user fields, you can also pass
  * an avatar to upload or an image url to use as an avatar.
  * You can also pass any amount of additonal fields which will be added to the
  * 'profile_info' user meta.
