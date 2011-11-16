@@ -439,7 +439,7 @@ function hma_reset_password_email( $message, $new_pass ) {
 function hma_update_user_info( $info ) {
 
 	// If an email was passed, check that it is valid
-	if ( !is_email( $info['user_email'] ) ) {
+	if ( !empty( $info['user_email'] ) && !is_email( $info['user_email'] ) ) {
 		hm_error_message( 'Please enter a valid email address', 'update-user' );
 		return new WP_Error( 'invalid-email', 'Please enter a valid email address' );
 	}
