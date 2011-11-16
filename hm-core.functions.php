@@ -337,11 +337,7 @@ function hm_success_message ( $message, $context = '' ) {
 	hm_add_message( $message, $context, 'success' );;
 }
 
-function hm_add_message( $message, $context, $type ) {
-
-	if ( !$context ) {
-		$context = 'all';
-	}
+function hm_add_message( $message, $context = 'all', $type = 'success' ) {
 
 	if ( defined( 'HM_USE_COOKIES_FOR_MESSAGES') && HM_USE_COOKIES_FOR_MESSAGES ) {
 		$cookie = ( $_COOKIE['hm_messages'] ) ? $_COOKIE['hm_messages'] : "";
