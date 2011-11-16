@@ -510,9 +510,9 @@ function hma_update_user_info( $info ) {
 	// Anything left gets added to user meta as separate fields
 	if ( !empty( $meta_info ) )
 		foreach( (array) $meta_info as $key => $value )
-			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() );
-				update_user_meta( $info['ID'], $key, $value );
-
+			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() )
+				update_user_meta( $user_id, $key, $value );
+	
 	if ( $user_id )
 		hm_success_message( 'Information successfully updated', 'update-user' );
 
@@ -728,7 +728,7 @@ function hma_is_profile_field( $field ) {
 	
 	global $hma_profile_fields;
 	
-	return array_search( $field, $hma_profile_fields );
+	return in_array( $field, (array) $hma_profile_fields );
 	
 }
 
