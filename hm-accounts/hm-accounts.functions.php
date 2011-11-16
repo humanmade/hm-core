@@ -512,7 +512,7 @@ function hma_update_user_info( $info ) {
 		foreach( (array) $meta_info as $key => $value )
 			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() )
 				update_user_meta( $user_id, $key, $value );
-	
+
 	if ( $user_id )
 		hm_success_message( 'Information successfully updated', 'update-user' );
 
@@ -696,16 +696,16 @@ function hma_unique_username( $base_name ) {
 
 /**
  * Register a new profile field
- * 
+ *
  * @return null
  */
 function hma_register_profile_field( $field ) {
-	
+
 	global $hma_profile_fields;
-	
+
 	if ( empty( $hma_profile_fields ) )
 		$hma_profile_fields = array();
-	
+
 	$hma_profile_fields[] = $field;
 
 }
@@ -713,29 +713,45 @@ add_action( 'init', 'hma_register_profile_field', 11 );
 
 /**
  * Get the array of extra profile fields
- * 
+ *
  * @return null
  */
 function hma_get_profile_fields() {
-	
+
 	global $hma_profile_fields;
-	
+
 	return $hma_profile_fields;
-	
+
 }
 
+/**
+ * Check if a field is registered
+ *
+ * @access public
+ * @param mixed $field
+ * @return null
+ */
 function hma_is_profile_field( $field ) {
-	
+
 	global $hma_profile_fields;
-	
+
 	return in_array( $field, (array) $hma_profile_fields );
-	
+
 }
 
+/**
+ * Wrapper for getting a profile field
+ * checks the user object first then
+ * checks usermeta
+ *
+ * @param int $user_id
+ * @param string $field
+ * @return string field value
+ */
 function hma_get_profile_field_data( $user_id, $field ) {
-	
+
 	if ( $meta = get_the_author_meta( $field, $user_id ) )
 		return $meta;
-	
+
 	return get_user_meta( $user_id, $field, true );
 }
