@@ -62,9 +62,10 @@ function hm_get_messages( $context = null, $clear_message = true ) {
 	$all_messages = array();
 	
 	// Show messages for a specific context
-	if ( !empty( $context ) && !empty( $hm_messages[$context] ) ) {
-
-		$all_messages = $hm_messages[$context];
+	if ( ! empty( $context ) ) {
+		
+		if ( isset( $hm_messages[$context] ) )
+			$all_messages = $hm_messages[$context];
 
 		if ( $clear_message )
 			unset( $hm_messages[$context] );
