@@ -570,8 +570,8 @@ function hma_get_avatar( $user = null, $width, $height, $crop = true, $try_norma
 	if ( !empty( $user->user_avatar_option ) ) {
 
 		$hma_avatar_option = hma_get_avatar_option( $user->user_avatar_option );
-		$hma_avatar_option->user = $user;
-
+		$hma_avatar_option->set_user( $user );
+		
 		if ( is_a( $hma_avatar_option, 'hma_SSO_Avatar_Option' ) ) {
 
 			$avatar = $hma_avatar_option->get_avatar( "width=$width&height=$height&crop=$crop" );

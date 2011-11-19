@@ -19,6 +19,10 @@ class HMA_SSO_Avatar_Option {
 		$this->user = wp_get_current_user();
 	}
 	
+	function set_user( $user ) {
+		$this->user = $user;
+	}
+	
 	function get_avatar( $size = null ) {
 		return $this->avatar_url;
 	}
@@ -119,7 +123,6 @@ class HMA_SSO_Provider {
 	}
 	
 	function set_user( $user ) {
-	
 		$this->user = $user;
 		$this->access_token = $this->get_access_token();
 	}

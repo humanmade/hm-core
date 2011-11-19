@@ -529,6 +529,11 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 		$this->service_id = "twitter";
 	}
 	
+	function set_user( $user ) {
+		parent::set_user( $user );
+		$this->sso_provider->set_user( $user );
+	}
+	
 	function get_avatar( $size = null ) {
 		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_twitter_avatar', true ) ) && file_exists( $avatar ) ) {

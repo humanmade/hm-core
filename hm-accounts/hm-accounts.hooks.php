@@ -213,7 +213,7 @@ function hma_admin_add_avatar( $user ) { ?>
 	    		<td>
 					<?php foreach ( $avatar_options as $avatar_option ) {
 
-			    		$avatar_option->user = $user;
+			    		$avatar_option->set_user( $user );
 
 						if ( ! $avatar_option->get_avatar( 60 ) )
 							continue; ?>
