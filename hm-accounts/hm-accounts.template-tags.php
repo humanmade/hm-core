@@ -147,7 +147,7 @@ function hma_get_login_url( $redirect = null, $message = null ) {
  */
 function hma_get_logout_url( $redirect = null ) {
 
-	$url = get_bloginfo( 'login_url', 'display' );
+	$url = get_bloginfo( 'logout_url', 'display' );
 
 	if ( $redirect )
 		$url = add_query_arg( 'redirect_to', urlencode( $redirect ), $url );
