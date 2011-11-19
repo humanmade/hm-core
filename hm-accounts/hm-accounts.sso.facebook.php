@@ -51,14 +51,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->get_user_access_token( $this->user->ID );
 	
 	}
-
-	function get_login_open_authentication_js() {
-		?>
-		<script>
-			jQuery( window ).load( function() { jQuery('.fb_button_medium').click() } );
-		</script>
-		<?php
-	}
 	
 	function get_login_button_image() {
 		return HELPERURL . 'assets/images/facebook-login-button.png';
@@ -246,9 +238,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function check_for_provider_logged_in() {
 		
-		if ( isset( $_REQUEST['sso_registrar_authorized'] ) && $_REQUEST['sso_registrar_authorized'] == $this->id && $_REQUEST['access_token'] )  {
-			$this->access_token = $_REQUEST['access_token'];
-		} elseif ( $access_token = $this->get_access_token_from_cookie_session() ) {
+		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
 		}
 				

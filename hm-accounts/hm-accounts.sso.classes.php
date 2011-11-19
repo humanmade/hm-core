@@ -137,13 +137,6 @@ class HMA_SSO_Provider {
 	}
 	
 	/**
-	 * Outputs the JS needed to fire the popup open when teh login button is clicked.
-	 * 
-	 */
-	function get_login_open_authentication_js() {
-	
-	}
-	/**
 	 * Returns markup for the SSO register button.
 	 * 
 	 * @return string

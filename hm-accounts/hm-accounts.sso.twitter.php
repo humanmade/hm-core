@@ -95,15 +95,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return $this->sign_in_client ;
 	}
 	
-	
-	function get_login_open_authentication_js() {
-		?>
-		<script>
-			jQuery( window ).load( function() { jQuery('.sign-in-with-twitter').click() } );
-		</script>
-		<?php
-	}
-	
 	function get_register_button() {
 		
 		$button = new Twitter_Sign_in( $this->client, $this->usingSession );
