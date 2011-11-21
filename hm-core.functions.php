@@ -1676,3 +1676,29 @@ function hm_get_object_properties_from_array( $array, $property ) {
 	return $properties;
 
 }
+
+
+/**
+ * Automatically pluralize a string. Adds "es" to nouns ending in "s", "ies" for "y", etc
+ *
+ * @param string $str
+ * @return string
+ */
+function hm_pluralize_string( $str ) {
+
+	$endings = array(
+		's' => 'ses',
+		'y' => 'ies'
+	);
+
+	$ending = substr( $str, strlen($str)-1, 1 );
+
+	if( array_key_exists( $ending, $endings ) )
+		$str = substr( $str, 0, strlen( $str ) - 1 ) . $endings[$ending];
+
+	else
+		$str = $str . 's';
+
+	return $str;
+
+}
