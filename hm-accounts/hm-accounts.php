@@ -23,3 +23,11 @@ function hma_init() {
 
 }
 add_action( 'init', 'hma_init' );
+
+function hma_default_profile_fields() {
+	
+	hma_register_profile_field( 'user_avatar_path' );
+	hma_register_profile_field( 'user_avatar_option' );
+	
+}
+add_action( 'init', 'hma_default_profile_fields', 9 );
