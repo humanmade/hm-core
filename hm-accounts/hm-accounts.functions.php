@@ -494,12 +494,6 @@ function hma_update_user_info( $info ) {
 
 	}
 
-	// Remove everything we have already used
-	// @todo Couldn't we just trim?
-	foreach ( $info as $key => $inf )
-		if ( is_string( $inf ) && $inf == '' )
-			$info[$key] = ' ';
-
 	$meta_info = array_diff_key( $info, $userdata );
 
 	// Unset some important fields
