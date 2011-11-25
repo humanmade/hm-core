@@ -325,7 +325,7 @@ function hma_profile_submitted() {
 	// Loop through all data and only user user_* fields or fields which have been registered using hma_register_profile_field
 	foreach( $_POST as $key => $value ) {
 
-		if ( strpos( $key, 'user_' ) !== 0 && ! hma_is_profile_field( $key ) )
+		if ( ( ! hma_is_profile_field( $key ) && hma_get_profile_fields() ) || ( ! hma_get_profile_fields() && strpos( $key, 'user_' ) !== 0 ) )
 			continue;
 
 		$user_data[$key] = is_string( $value ) ? esc_attr( $value ) : array_map( 'esc_attr', $value );
