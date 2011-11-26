@@ -503,7 +503,12 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 			return new WP_Error( 'can-not-publish' );
 
 		// TODO Trim to 140 (excluding links)	
-		return $this->client->post('statuses/update', array('status' => $data['message'], 'wrap_links' => true, 'short_url_length' => 19 ) );
+		if ( !empty( $data['link_url'] ) )
+			$tweet = $data['message'] . ' | ' . $data['link_url'];
+		else
+			$tweet = $data['message'];
+		
+		return $this->client->post('statuses/update', array('status' => $tweet, 'wrap_links' => true, 'short_url_length' => 19 ) );
 
 	}
 }
