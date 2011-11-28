@@ -189,7 +189,7 @@ function hma_is_login() {
  * @return bool
  */
 function hma_is_register() {
-	return hma_is_( 'register' );
+	return hma_is_( 'is_register' );
 }
 
 /**
