@@ -107,6 +107,7 @@ class HMA_SSO_Provider {
 	public $id;
 	public $name;
 	public $supports_publishing;
+	public $user_info;
 	
 	function __construct() {
 		
@@ -126,6 +127,7 @@ class HMA_SSO_Provider {
 	
 	function set_user( $user ) {
 		$this->user = $user;
+		$this->user_info = null;
 		$this->access_token = $this->get_access_token();
 	}
 	
