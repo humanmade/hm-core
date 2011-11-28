@@ -74,10 +74,10 @@ class HMA_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	function get_avatar( $size ) {
 		
-		if ( empty( $this->user->user_avatar_path ) )
+		if ( ! hma_get_avatar_upload_path( $this->user ) )
 			return null;
 		
-		return wpthumb( $this->user->user_avatar_path, $size );
+		return wpthumb( hma_get_avatar_upload_path( $this->user ), $size );
 	}
 }
 

@@ -488,7 +488,7 @@ function hma_update_user_info( $info ) {
 		require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
 		$file = wp_handle_upload( $info['user_avatar'], array( 'test_form' => false ) );
-		$info['user_avatar_path'] = $file['file'];
+		$info['user_avatar_path'] = str_replace( ABSPATH, '', $file['file'] );
 		$info['user_avatar_option'] = 'uploaded';
 		unset( $info['user_avatar'] );
 
@@ -603,9 +603,20 @@ function hma_get_avatar( $user = null, $width, $height, $crop = true, $try_norma
  */
 function hma_get_avatar_upload( $user, $width, $height, $crop ) {
 
-	if ( !empty( $user->user_avatar_path ) )
-		return wpthumb( $user->user_avatar_path, $width, $height, $crop );
+	if ( $path = hma_get_avatar_upload_path( $user ) )
+		return wpthumb( $path, $width, $height, $crop );
+		
+	return '';
 
+}
+
+function hma_get_avatar_upload_path( $user ) {
+	
+	if ( empty( $user->user_avatar_path ) )
+		return '';
+		
+	return ABSPATH . str_replace( ABSPATH, '', $user->user_avatar_path );
+	
 }
 
 /**
