@@ -532,6 +532,8 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 	
 	function get_avatar( $size = null ) {
 		
+		$this->avatar_path = null;
+		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_twitter_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 		    

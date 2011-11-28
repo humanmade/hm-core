@@ -20,6 +20,8 @@ class HMA_SSO_Avatar_Option {
 	}
 	
 	function set_user( $user ) {
+		$this->avatar_path = null;
+		$this->avatar_url = null;
 		$this->user = $user;
 	}
 	

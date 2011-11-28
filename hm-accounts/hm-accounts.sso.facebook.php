@@ -476,7 +476,9 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 	}
 	
 	function get_avatar( $size = null ) {			
-
+		
+		$this->avatar_path = null;
+		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 
@@ -488,7 +490,6 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 		    
 		    update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
 		}
-		
 		
 		return wpthumb( $this->avatar_path, $size );
 	}
