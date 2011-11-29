@@ -456,28 +456,28 @@ function hma_update_user_info( $info ) {
 	// Prepare the array for wp_update_user
 	$userdata['ID'] = $info['ID'];
 
-	if ( !empty( $info['user_email'] ) )
+	if ( isset( $info['user_email'] ) )
 		$userdata['user_email'] = $info['user_email'];
 
-	if ( !empty( $info['display_name'] ) )
+	if ( isset( $info['display_name'] ) )
 		$userdata['display_name'] = $info['display_name'];
 
-	if ( !empty( $info['first_name'] ) )
+	if ( isset( $info['first_name'] ) )
 		$userdata['first_name'] = $info['first_name'];
 
-	if ( !empty( $info['last_name'] ) )
+	if ( isset( $info['last_name'] ) )
 		$userdata['last_name'] = $info['last_name'];
 
-	if ( !empty( $info['nickname'] ) )
+	if ( isset( $info['nickname'] ) )
 		$userdata['nickname'] = $info['nickname'];
 
-	if ( !empty( $info['description'] ) )
+	if ( isset( $info['description'] ) )
 		$userdata['description'] = $info['description'];
 
-	if ( !empty( $info['user_pass'] ) )
+	if ( isset( $info['user_pass'] ) )
 		$userdata['user_pass'] = $info['user_pass'];
 
-	if ( !empty( $info['user_url'] ) )
+	if ( isset( $info['user_url'] ) )
 		$userdata['user_url'] = $info['user_url'];
 
 	$user_id = wp_update_user( $userdata );
@@ -504,7 +504,6 @@ function hma_update_user_info( $info ) {
 	// Anything left gets added to user meta as separate fields
 	if ( !empty( $meta_info ) )
 		foreach( (array) $meta_info as $key => $value )
-			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() )
 				update_user_meta( $user_id, $key, $value );
 
 	if ( $user_id )

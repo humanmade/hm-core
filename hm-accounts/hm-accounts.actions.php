@@ -344,22 +344,21 @@ function hma_profile_submitted() {
 
 	$user_data['ID'] = $current_user->ID;
 
-	if ( !empty( $_POST['first_name'] ) )
+	if ( isset( $_POST['first_name'] ) )
 		$user_data['first_name'] = esc_attr( $_POST['first_name'] );
 
-	if ( !empty( $_POST['last_name'] ) )
+	if ( isset( $_POST['last_name'] ) )
 		$user_data['last_name'] = esc_attr( $_POST['last_name'] );
 
-	if ( !empty( $_POST['nickname'] ) )
+	if ( isset( $_POST['nickname'] ) )
 		$user_data['nickname'] = esc_attr( $_POST['nickname'] );
 
-	if ( $current_user->user_login )
-		$user_data['user_login'] = $current_user->user_login;
+	$user_data['user_login'] = $current_user->user_login;
 
-	if ( !empty( $_POST['description'] ) )
+	if ( isset( $_POST['description'] ) )
 		$user_data['description'] = esc_attr( $_POST['description'] );
 
-	if ( !empty( $_POST['display_name'] ) ) {
+	if ( isset( $_POST['display_name'] ) ) {
 
 		$name = trim( $_POST['display_name'] );
 		$match = preg_match_all( '/([\S^\,]*)/', esc_attr( $_POST['display_name'] ), $matches );
