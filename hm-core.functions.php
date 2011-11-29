@@ -1554,6 +1554,7 @@ function hm_post_pagination() {
  * @access public
  * @param array $classes
  * @param object $item
+ * @todo not sure this actually works?
  * @return null
  */
 function hm_submenu_class( $classes, $item ) {
