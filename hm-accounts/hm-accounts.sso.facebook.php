@@ -51,10 +51,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->get_user_access_token( $this->user->ID );
 	
 	}
-	
-	function get_login_button_image() {
-		return HELPERURL . 'assets/images/facebook-login-button.png';
-	}
 
 	function register_sso_submitted() {
 		
@@ -391,13 +387,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		//redirect can be relitive, make it not so
 		$redirect = get_bloginfo( 'url' ) . str_replace( get_bloginfo( 'url' ), '', $redirect );
-		
+		/*
 		//only redirect to facebook is is logged in with a cookie
 		if ( $this->client->getUser() ) {
 			wp_redirect( $this->client->getLogoutUrl( array( 'next' => $redirect ) ), 303 );
 			exit;
 		}
-		
+		*/
 		return true;
 	
 	}
@@ -476,7 +472,9 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 	}
 	
 	function get_avatar( $size = null ) {			
-
+		
+		$this->avatar_path = null;
+		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 
@@ -488,7 +486,6 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 		    
 		    update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
 		}
-		
 		
 		return wpthumb( $this->avatar_path, $size );
 	}
