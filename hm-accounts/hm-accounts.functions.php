@@ -729,6 +729,12 @@ function hma_get_profile_fields() {
 
 }
 
+function hma_custom_profile_fields() {
+	
+	return array_diff( hma_get_profile_fields(), hma_default_profile_fields );
+	
+}
+
 /**
  * Check if a field is registered
  *
