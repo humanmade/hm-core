@@ -95,15 +95,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return $this->sign_in_client ;
 	}
 	
-	
-	function get_login_open_authentication_js() {
-		?>
-		<script>
-			jQuery( window ).load( function() { jQuery('.sign-in-with-twitter').click() } );
-		</script>
-		<?php
-	}
-	
 	function get_register_button() {
 		
 		$button = new Twitter_Sign_in( $this->client, $this->usingSession );
@@ -512,7 +503,12 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 			return new WP_Error( 'can-not-publish' );
 
 		// TODO Trim to 140 (excluding links)	
-		return $this->client->post('statuses/update', array('status' => $data['message'], 'wrap_links' => true, 'short_url_length' => 19 ) );
+		if ( !empty( $data['link_url'] ) )
+			$tweet = $data['message'] . ' | ' . $data['link_url'];
+		else
+			$tweet = $data['message'];
+		
+		return $this->client->post('statuses/update', array('status' => $tweet, 'wrap_links' => true, 'short_url_length' => 19 ) );
 
 	}
 }
@@ -529,7 +525,14 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 		$this->service_id = "twitter";
 	}
 	
+	function set_user( $user ) {
+		parent::set_user( $user );
+		$this->sso_provider->set_user( $user );
+	}
+	
 	function get_avatar( $size = null ) {
+		
+		$this->avatar_path = null;
 		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_twitter_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;

@@ -3,19 +3,30 @@
 class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	public $facebook_uid;
+	private static $instance;
+	
+	static function instance() {
+		
+		if ( empty( self::$instance ) ) {
+			$className = __CLASS__;
+            self::$instance = new $className();
+		}
+		
+		return self::$instance;
+		
+	}
 	
 	function __construct() {
 	
 		parent::__construct();
 		
-		if ( !defined( 'HMA_SSO_FACEBOOK_APP_ID' ) || !defined( 'HMA_SSO_FACEBOOK_APPLICATION_SECRET' ) || !defined( 'HMA_SSO_FACEBOOK_API_KEY' ) )
+		if ( !defined( 'HMA_SSO_FACEBOOK_APP_ID' ) || !defined( 'HMA_SSO_FACEBOOK_APPLICATION_SECRET' ) )
 			return new WP_Error( 'constants-not-defined' );
 		
 		$this->id = 'facebook';
 		$this->name = 'Facebook';
 		$this->app_id = HMA_SSO_FACEBOOK_APP_ID;
 		$this->application_secret = HMA_SSO_FACEBOOK_APPLICATION_SECRET;
-		$this->api_key = HMA_SSO_FACEBOOK_API_KEY;
 		$this->facebook_uid = null;
 		$this->supports_publishing = true;
 		$this->set_user( wp_get_current_user() );
@@ -41,138 +52,10 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	}
 	
-	function get_login_button() {
-		
-		$output = '
-		
-		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
-		  	
-		  	FB.getLoginStatus( function( response ) {
-		  		if( response.status == "connected" )
-		  			FB.logout();
-		  	} );
-		  	
-		  	FB.Event.subscribe("auth.login", function() {
-				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
-  			});
-
-		</script>';
-		
-		$output .= '<fb:login-button scope="offline_access" width=100></fb:login-button>';
-		
-		return $output;
-	
-	}
-	
-	function get_init_js() {
-		$output = '
-		
-		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
-			
-			FB.getLoginStatus( function( response ) {
-		  		if( response.status == "connected" )
-		  			FB.logout();
-		  	} );
-		  	  
-			FB.Event.subscribe("auth.login", function() {
-				document.location = "' . $this->_get_sso_login_submit_url() . '&rand=" + new Date().getTime();
-  			});
-
-		</script>';
-		
-		return $output;
-	}
-	
-	function get_init_js_connect_with_account() {
-		$output = '
-		
-		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
-		  	
-		  	FB.getLoginStatus( function( response ) {
-		  		if( response.status == "connected" )
-		  			FB.logout();
-		  	} );
-		  	
-		  	
-		  	FB.Event.subscribe("auth.login", function() {
-		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
-		 	});
-		 	
-		 	function SignInWithFacebookClicked( elem ) {
-
-				FB.login( function() {}, { scope:"read_stream,publish_stream,offline_access,user_about_me,user_birthday,user_location,user_website,email"} );
-				return false;
-			}
-		</script>';
-		
-						
-		return $output;
-	}
-	
-	function get_login_open_authentication_js() {
-		?>
-		<script>
-			jQuery( window ).load( function() { jQuery('.fb_button_medium').click() } );
-		</script>
-		<?php
-	}
-	
 	function get_login_button_image() {
 		return HELPERURL . 'assets/images/facebook-login-button.png';
 	}
 
-	
-	function get_register_button() {
-		
-		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
-		
-		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
-		  	
-		  	FB.getLoginStatus(function(response) {
-			 	if (response.status == "connected") {
-			    	// logged in and connected user, someone you know
-			    	parent.jQuery.fancybox.showActivity();
-					document.location = "' . $this->_get_provider_authentication_completed_register_redirect_url() . '&rand=" + new Date().getTime();
-			  	}
-			});
-			
-		  	FB.Event.subscribe("auth.login", function() {
-		 		parent.jQuery.fancybox.showActivity();
-		 		document.location = "' . $this->_get_provider_authentication_completed_register_redirect_url() . '&rand=" + new Date().getTime();
-		 	});
-		</script>';
-		
-		$output .= '<fb:login-button scope="offline_access" width=100></fb:login-button>';
-		
-		return $output;		
-	}
-	
-	function get_connect_with_account_button() {
-		
-		$output = '<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script><div id="fb-root"></div>
-		
-		<script type="text/javascript">
-		  	FB.init({appId: ' . $this->client->getAppId() . ', status: true, cookie: true, xfbml: true, oauth: true });
-		  	
-		  	//log them for for easy of use
-		  	if ( FB._userStatus == "connected" ) {
-				FB.logout();
-		  	}
-		  	
-		  	FB.Event.subscribe("auth.login", function() {
-		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
-		 	});
-		</script>';
-		
-		$output .= '<fb:login-button scope="offline_access" width=100></fb:login-button>';
-						
-		return $output;
-	}
-	
 	function register_sso_submitted() {
 		
 		return $this->perform_wordpress_register_from_provider();
@@ -238,6 +121,20 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		hm_success_message( 'Successfully connected the Facebook account "' . $info['name'] . '" with your profile.', 'update-user' );
 		
 		return true;
+	}
+	
+	public function connect() {
+		
+		if( !$this->client->getUser() )
+			return new WP_Error( 'not-logged-in-to-facebook' );
+		
+		$fb_uid = $this->client->getUser();
+		$this->access_token = $this->client->getAccessToken();
+		
+		update_user_meta( $this->user->ID, '_fb_access_token', $this->access_token );
+		update_user_meta( $this->user->ID, '_fb_uid', $fb_uid );
+		
+		return $this->user->ID;
 	}
 	
 	function unlink() {
@@ -341,9 +238,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function check_for_provider_logged_in() {
 		
-		if ( isset( $_REQUEST['sso_registrar_authorized'] ) && $_REQUEST['sso_registrar_authorized'] == $this->id && $_REQUEST['access_token'] )  {
-			$this->access_token = $_REQUEST['access_token'];
-		} elseif ( $access_token = $this->get_access_token_from_cookie_session() ) {
+		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
 		}
 				
@@ -367,7 +262,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			return null;
 
 		if ( !$this->client->getUser() ) {
-			$this->log( 'get_access_token_from_cookie_session: ' . '$this->client->getUser() failed for object:' );
 			return null;
 		}
 				
@@ -409,10 +303,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		global $wpdb;
 		
 		$fb_uid = $this->client->getUser();
-		
-		if ( !$fb_uid ) {
-			$this->log( 'perform_wordpress_login_from_provider: ' . 'check_for_provider_logged_in() returned true, but client->getUser() returning an empty FB UID' );
-		}
 		
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$fb_uid}'" );
 		
@@ -489,7 +379,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $result;	
 	}
 	
-	function _validate_hma_new_user( $result ) {
+	public function _validate_hma_new_user( $result ) {
 
 		if( is_wp_error( $result ) && $result->get_error_code() == 'invalid-email' )
 			return null;
@@ -580,8 +470,15 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 
 	}
 	
+	function set_user( $user ) {
+		parent::set_user( $user );
+		$this->sso_provider->set_user( $user );
+	}
+	
 	function get_avatar( $size = null ) {			
-
+		
+		$this->avatar_path = null;
+		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 
@@ -593,7 +490,6 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 		    
 		    update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
 		}
-		
 		
 		return wpthumb( $this->avatar_path, $size );
 	}
