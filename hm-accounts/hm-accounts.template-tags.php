@@ -85,7 +85,11 @@ function hma_displayed_user_link() {
 }
 
 function hma_get_user_name( $user_id ) {
-	return get_the_author_meta( 'display_name', $user_id );
+	return apply_filters( 'hma_get_user_name', get_the_author_meta( 'display_name', $user_id ), $user_id );
+}
+
+function hma_user_name( $user_id ) {
+	echo hma_get_user_name( $user_id );
 }
 
 function hma_get_displayed_user_name() {
