@@ -387,13 +387,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		//redirect can be relitive, make it not so
 		$redirect = get_bloginfo( 'url' ) . str_replace( get_bloginfo( 'url' ), '', $redirect );
-		
+		/*
 		//only redirect to facebook is is logged in with a cookie
 		if ( $this->client->getUser() ) {
 			wp_redirect( $this->client->getLogoutUrl( array( 'next' => $redirect ) ), 303 );
 			exit;
 		}
-		
+		*/
 		return true;
 	
 	}
