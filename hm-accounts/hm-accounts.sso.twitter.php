@@ -35,7 +35,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		parent::set_user( $user );
 		
 		if ( $this->is_authenticated() ) {
-			$this->access_token = get_user_meta( $this->user->ID, '_twitter_access_token', true );
+			$this->access_token = get_user_meta( $this->user->ID, '_twitter_oauth_token', true );
 			$this->client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
 		} else {
 			$this->client = new TwitterOAuth( $this->api_key, $this->consumer_secret );
@@ -47,45 +47,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 		return $this->user ? get_user_meta( $this->user->ID, '_twitter_access_token', true ) : null;
 	
-	}
-	
-	function get_login_button() {
-	
-		$button = new Twitter_Sign_in( $this->client, $this->usingSession );
-		
-		$output = '
-		<script type="text/javascript">
-			function TwitterSignInCompleted() {
-				parent.jQuery.fancybox.showActivity();
-		 		document.location = "' . $this->_get_sso_login_submit_url() . '";
-			}
-		</script>
-		';
-		
-		$output .= $button->get_login_link();		
-				
-		return $output;
-		
-	}
-	
-	function get_init_js_connect_with_account() {
-		
-		$button = new Twitter_Sign_in( $this->client, $this->usingSession );
-		
-		$output = '
-		<script type="text/javascript">
-			function TwitterSignInCompleted() {
-		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
-			}
-			function SignInWithTwitterClicked( e ) {
-				window.open("' . $this->get_login_popup_url() . '","Sign In With Twitter","width=800,height=400");
-				return false;
-			}
-		</script>
-		';
-		
-		return $output;
-
 	}
 	
 	function get_sign_in_client() {
@@ -112,23 +73,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 				
 		return $output;
 	}
-	
-	function get_connect_with_account_button() {
-		$button = new Twitter_Sign_in( $this->client, $this->usingSession );
 		
-		$output = '
-		<script type="text/javascript">
-			function TwitterSignInCompleted() {
-		 		document.location = "' . $this->_get_provider_authentication_completed_connect_account_redirect_url() . '";
-			}
-		</script>
-		';
-		
-		$output .= $button->get_login_link();		
-				
-		return $output;
-	}
-	
 	function check_for_provider_logged_in() {
 		
 		if ( empty( $this->access_token ) )
@@ -158,7 +103,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	}
 	
 	function get_twitter_user_info() {
-		
+
 		if ( empty( $this->user_info ) ) {
 			
 			$this->client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
@@ -185,6 +130,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		//we are in the popup were (seperate window)
 		if ( $this->usingSession ) {
 			$this->access_token = $_SESSION['twitter_oauth_token'];
+			unset( $_SESSION['twitter_oauth_token'] );
 		} else {
 			$this->access_token = unserialize( base64_decode( $_COOKIE['twitter_oauth_token'] ) );
 			setcookie( 'twitter_oauth_token', '', time() - 100, COOKIEPATH );
@@ -241,6 +187,14 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 	function perform_wordpress_register_from_provider() {
 		
+		if ( $this->usingSession && !empty( $_SESSION['twitter_oauth_token'] ) ) {
+			$this->access_token = $_SESSION['twitter_oauth_token'];
+			unset( $_SESSION['twitter_oauth_token'] );
+		} elseif ( !empty(  $_COOKIE['twitter_oauth_token'] ) ) {
+			$this->access_token = unserialize( base64_decode( $_COOKIE['twitter_oauth_token'] ) );
+			setcookie( 'twitter_oauth_token', '', time() - 100, COOKIEPATH );
+		}
+		
 		$_info = $this->get_twitter_user_info();
 
 		$info = $this->get_user_info();
@@ -278,8 +232,14 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		define( 'WP_IMPORTING', true );
 
 	 	$result = hma_new_user( $userdata );
+	 	
+	 	// Set_user() will wide access token
+	 	$token = $this->access_token;
 	 	$user = get_userdata( $result );
 	 	$this->set_user( $user );
+	 	$this->access_token = $token;
+	 	
+	 	$this->update_user_twitter_information();
  		
 		//set the avatar to their twitter avatar if registration completed
 		if ( !is_wp_error( $result ) && is_numeric( $result ) ) {
@@ -287,6 +247,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 		
+		wp_set_auth_cookie( $user->ID, false );
+		set_current_user( $user->ID );
+				
 		return $result;	
 	}
 	
@@ -400,8 +363,10 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		delete_user_meta( $this->user->ID, '_twitter_oauth_token' );
 		delete_user_meta( $this->user->ID, '_twitter_oauth_token_secret' );	
 		delete_user_meta( $this->user->ID, '_twitter_data' );
+		delete_user_meta( $this->user->ID, 'twitter_username' );
 		
-		if ( !$this->userSession ) {
+		
+		if ( !$this->usingSession ) {
 			setcookie('twitter_oauth_token', '', time() - 100, COOKIEPATH);
 			setcookie('twitter_oauth_token_secret', '', time() - 100, COOKIEPATH);
 		}
@@ -447,7 +412,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	public function is_authenticated() {
 		if ( !$this->user )
 			return false;
-		
 		
 		$twitter_uid = get_user_meta( $this->user->ID, '_twitter_uid', true );
 		$access_token = get_user_meta( $this->user->ID, '_twitter_access_token', true );

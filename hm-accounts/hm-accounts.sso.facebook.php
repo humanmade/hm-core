@@ -51,10 +51,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->get_user_access_token( $this->user->ID );
 	
 	}
-	
-	function get_login_button_image() {
-		return HELPERURL . 'assets/images/facebook-login-button.png';
-	}
 
 	function register_sso_submitted() {
 		
