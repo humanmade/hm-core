@@ -229,13 +229,11 @@ function hma_is_( $query_arg ) {
  */
 function hma_is_user_profile( $user_id = null ) {
 
-	global $wp_the_query;
-
-	if ( !empty( $wp_the_query->is_user_profile ) && !empty( $user_id ) && $user_id == get_query_var( 'author' ) )
+	if ( hma_is_( 'is_user_profile' ) && ! empty( $user_id ) && $user_id == get_query_var( 'author' ) )
 		return true;
 
 	elseif ( empty( $user_id ) )
-		return !empty( $wp_the_query->is_user_profile );
+		return hma_is_( 'is_user_profile' );
 		
 	return false;
 
@@ -253,6 +251,21 @@ function hma_is_current_user_profile() {
 		return true;
 		
 	return false;
+	
+}
+
+function hma_is_user_author( $user_id ) {
+	
+	if ( ! empty( $user_id ) && $user_id == get_query_var( 'author' ) )
+		return true;
+		
+	return false;
+	
+}
+
+function hma_is_current_user_author() {
+	
+	return hma_is_user_author( get_current_user_id() );
 	
 }
 
