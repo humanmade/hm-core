@@ -190,14 +190,7 @@ add_filter( 'hma_registration_info', 'hma_validate_registration' );
  */
 function hma_email_registration_success( $user, $user_pass ) {
 
-	if ( file_exists( $file = get_stylesheet_directory() . '/email.register.php' ) ) {
-
-		ob_start();
-		include( $file );
-		$message = ob_get_contents();
-		ob_end_clean();
-
-	} elseif ( file_exists( $file = 'tt-accounts.email.register.php' ) ) {
+	if ( file_exists( $file = apply_filters( 'hma_email_registration_success_email_template', get_stylesheet_directory() . '/email.register.php' ) ) ) {
 
 		ob_start();
 		include( $file );
@@ -214,7 +207,7 @@ function hma_email_registration_success( $user, $user_pass ) {
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
-
+	
 	return wp_mail( $user->user_email, apply_filters( 'hma_register_email_subject', 'New account registered for ' . get_bloginfo() ), $message, 'content-type=text/html' );
 
 }
