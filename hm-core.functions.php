@@ -1231,7 +1231,7 @@ function wp_mail_content_type_html( $content_type ) {
 }
 
 function hm_wp_mail_from( $mail ) {
-	return str_replace( 'wordpress@', 'noreply@', $mail );
+	return apply_filters( 'hm_wp_mail_from', str_replace( 'wordpress@', 'noreply@', $mail ) );
 }
 
 function hm_array_value( $array, $key ) {
@@ -1239,7 +1239,7 @@ function hm_array_value( $array, $key ) {
 }
 
 function hm_wp_mail_from_name() {
-	return get_bloginfo();
+	return apply_filters( 'hm_wp_mail_from_name', get_bloginfo( 'name' ) );
 }
 /**
  * Insert a variable into an array at a givven position, shunting keys down.

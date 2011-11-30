@@ -190,14 +190,7 @@ add_filter( 'hma_registration_info', 'hma_validate_registration' );
  */
 function hma_email_registration_success( $user, $user_pass ) {
 
-	if ( file_exists( $file = get_stylesheet_directory() . '/email.register.php' ) ) {
-
-		ob_start();
-		include( $file );
-		$message = ob_get_contents();
-		ob_end_clean();
-
-	} elseif ( file_exists( $file = 'tt-accounts.email.register.php' ) ) {
+	if ( file_exists( $file = apply_filters( 'hma_email_registration_success_email_template', get_stylesheet_directory() . '/email.register.php' ) ) ) {
 
 		ob_start();
 		include( $file );
@@ -214,7 +207,7 @@ function hma_email_registration_success( $user, $user_pass ) {
 	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
-
+	
 	return wp_mail( $user->user_email, apply_filters( 'hma_register_email_subject', 'New account registered for ' . get_bloginfo() ), $message, 'content-type=text/html' );
 
 }
@@ -456,28 +449,28 @@ function hma_update_user_info( $info ) {
 	// Prepare the array for wp_update_user
 	$userdata['ID'] = $info['ID'];
 
-	if ( !empty( $info['user_email'] ) )
+	if ( isset( $info['user_email'] ) )
 		$userdata['user_email'] = $info['user_email'];
 
-	if ( !empty( $info['display_name'] ) )
+	if ( isset( $info['display_name'] ) )
 		$userdata['display_name'] = $info['display_name'];
 
-	if ( !empty( $info['first_name'] ) )
+	if ( isset( $info['first_name'] ) )
 		$userdata['first_name'] = $info['first_name'];
 
-	if ( !empty( $info['last_name'] ) )
+	if ( isset( $info['last_name'] ) )
 		$userdata['last_name'] = $info['last_name'];
 
-	if ( !empty( $info['nickname'] ) )
+	if ( isset( $info['nickname'] ) )
 		$userdata['nickname'] = $info['nickname'];
 
-	if ( !empty( $info['description'] ) )
+	if ( isset( $info['description'] ) )
 		$userdata['description'] = $info['description'];
 
-	if ( !empty( $info['user_pass'] ) )
+	if ( isset( $info['user_pass'] ) )
 		$userdata['user_pass'] = $info['user_pass'];
 
-	if ( !empty( $info['user_url'] ) )
+	if ( isset( $info['user_url'] ) )
 		$userdata['user_url'] = $info['user_url'];
 
 	$user_id = wp_update_user( $userdata );
@@ -504,7 +497,6 @@ function hma_update_user_info( $info ) {
 	// Anything left gets added to user meta as separate fields
 	if ( !empty( $meta_info ) )
 		foreach( (array) $meta_info as $key => $value )
-			if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() )
 				update_user_meta( $user_id, $key, $value );
 
 	if ( $user_id )
@@ -727,6 +719,12 @@ function hma_get_profile_fields() {
 
 	return $hma_profile_fields;
 
+}
+
+function hma_custom_profile_fields() {
+	
+	return array_diff( hma_get_profile_fields(), hma_default_profile_fields );
+	
 }
 
 /**

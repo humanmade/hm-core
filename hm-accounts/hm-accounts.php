@@ -21,13 +21,12 @@ function hma_init() {
 	if ( function_exists( 'fbc_get_fbconnect_user' ) )
 		include_once( 'hm-accounts.sso.facebook.php' );
 
+	foreach( hma_default_profile_fields() as $field )
+		hma_register_profile_field( $field );
+
 }
-add_action( 'init', 'hma_init' );
+add_action( 'init', 'hma_init', 9 );
 
 function hma_default_profile_fields() {
-	
-	hma_register_profile_field( 'user_avatar_path' );
-	hma_register_profile_field( 'user_avatar_option' );
-	
+	return array( 'user_avatar_path', 'user_avatar_option' );
 }
-add_action( 'init', 'hma_default_profile_fields', 9 );
