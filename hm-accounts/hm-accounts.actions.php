@@ -341,6 +341,9 @@ function hma_profile_submitted() {
 	// Unset user_pass2
 	if ( $user_data['user_pass'] && $user_data['user_pass2'] && ( $user_data['user_pass'] === $user_data['user_pass2'] ) )
 		unset( $user_data['user_pass2'] );
+		
+	if ( empty( $user_data['user_pass'] ) )
+		unset( $user_data['user_pass'] );
 
 	$user_data['ID'] = $current_user->ID;
 
