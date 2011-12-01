@@ -2,10 +2,10 @@
 
 function hma_add_sso_fields_to_edit_profile( $user ) {
 
-	if ( hma_get_sso_providers_for_user( $user->ID ) ) : ?>
+	if ( $sso_providers = hma_get_sso_providers_for_user( $user->ID ) ) : ?>
 
 		<h3>Single Sign-on Providers</h3>
-
+		
 		<?php foreach( $sso_providers as $sso_provider ) : ?>
 
 		<table class="form-table">

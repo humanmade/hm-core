@@ -103,7 +103,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	}
 	
 	function get_twitter_user_info() {
-
+		
 		if ( empty( $this->user_info ) ) {
 			
 			$this->client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
@@ -507,9 +507,13 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 		    $this->avatar_path = $avatar;
 		    
 		} elseif ( $this->sso_provider->is_authenticated() ) {
-			$user_info = $this->sso_provider->get_twitter_user_info();
-			$image_url = "http://img.tweetimag.es/i/{$user_info->screen_name}_o";
-			
+			$user_info = $this->sso_provider->user_info();
+
+			if ( empty( $user_info['screen_name'] ) )
+				return null;
+				
+			$image_url = "http://img.tweetimag.es/i/{$user_info['screen_name']}_o";
+
 			$this->avatar_path = $this->save_avatar_locally( $image_url, 'png' ) ;
 			
 			// saving teh image failed

@@ -42,6 +42,11 @@ class HMA_SSO_Avatar_Option {
 			$ext = strtolower( end( explode( '.', $url ) ) );
 		
 		$image_path = $avatar_dir . '/' . $this->user->ID . '-' . $this->service_id . '.' . $ext;
+		
+		// Remove old one if was there
+		if ( file_exists( $image_path ) )
+			unlink( $image_path );
+		
 		file_put_contents( $image_path, file_get_contents( $url ) );
 		
 		//check that the image saved ok, if not then remove it and return null
