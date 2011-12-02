@@ -19,6 +19,12 @@ class HMA_SSO_Avatar_Option {
 		$this->user = wp_get_current_user();
 	}
 	
+	function set_user( $user ) {
+		$this->avatar_path = null;
+		$this->avatar_url = null;
+		$this->user = $user;
+	}
+	
 	function get_avatar( $size = null ) {
 		return $this->avatar_url;
 	}
@@ -36,6 +42,11 @@ class HMA_SSO_Avatar_Option {
 			$ext = strtolower( end( explode( '.', $url ) ) );
 		
 		$image_path = $avatar_dir . '/' . $this->user->ID . '-' . $this->service_id . '.' . $ext;
+		
+		// Remove old one if was there
+		if ( file_exists( $image_path ) )
+			unlink( $image_path );
+		
 		file_put_contents( $image_path, file_get_contents( $url ) );
 		
 		//check that the image saved ok, if not then remove it and return null
@@ -68,10 +79,10 @@ class HMA_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 	
 	function get_avatar( $size ) {
 		
-		if ( empty( $this->user->user_avatar_path ) )
+		if ( ! hma_get_avatar_upload_path( $this->user ) )
 			return null;
 		
-		return wpthumb( $this->user->user_avatar_path, $size );
+		return wpthumb( hma_get_avatar_upload_path( $this->user ), $size );
 	}
 }
 
@@ -101,6 +112,7 @@ class HMA_SSO_Provider {
 	public $id;
 	public $name;
 	public $supports_publishing;
+	public $user_info;
 	
 	function __construct() {
 		
@@ -108,60 +120,22 @@ class HMA_SSO_Provider {
 		$hma_sso_providers[] = &$this;
 		add_action( 'wp_footer', array( &$this, '_run_logged_out_js' ) );
 		
-		add_action( 'init', array( &$this, '_check_sso_registrar_submitted' ) );
 		add_action( 'init', array( &$this, '_check_for_oauth_register_completed' ) );
 		add_action( 'init', array( &$this, '_check_wordpress_login_and_connect_provider_with_account_submitted' ) );
 
 		add_action( 'hm_parse_request_^login/sso/authenticated/?$', array( &$this, '_check_sso_login_submitted' ) );
+		add_action( 'hm_parse_request_^register/sso/authenticated/?$', array( &$this, '_check_sso_register_submitted' ) );
 		add_action( 'hm_parse_request_^profile/sso/authenticated/?$', array( &$this, '_check_sso_connect_with_account_submitted' ) );
 		add_action( 'hm_parse_request_^profile/sso/deauthenticate/?$', array( &$this, '_check_sso_unlink_from_account_submitted' ) );
 
 	}
 	
 	function set_user( $user ) {
-	
 		$this->user = $user;
+		$this->user_info = null;
 		$this->access_token = $this->get_access_token();
 	}
-	
-	/**
-	 * Returns markup for the SSO login button.
-	 * 
-	 * @return string
-	 */
-	function get_login_button() {
-	
-	}
-	
-	/**
-	 * Outputs the JS needed to fire the popup open when teh login button is clicked.
-	 * 
-	 */
-	function get_login_open_authentication_js() {
-	
-	}
-	/**
-	 * Returns markup for the SSO register button.
-	 * 
-	 * @return string
-	 */
-	function get_register_button() {
-		return $this->get_login_button();
-	}
-	
-	function get_login_button_image() {
-		return '';
-	}
-	
-	/**
-	 * Returns markup for the SSO "connect with account" button.
-	 * 
-	 * @return string
-	 */
-	function get_connect_with_account_button() {
-		return $this->get_login_button();
-	}
-	
+
 	function get_user_info() {
 	
 	}
@@ -280,10 +254,10 @@ class HMA_SSO_Provider {
 	
 	function login_link_submitted() {
 		$return = $this->perform_wordpress_login_from_provider();
-		
+
 		// If ther account was not connected, and we have register on login enabled, do that
 		if( is_wp_error( $return ) && in_array( $return->get_error_code(), array( 'twitter-account-not-connected', 'facebook-account-not-connected' ) ) && defined( 'HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN' ) && HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN ) {
-			
+
 			hm_clear_messages( 'login' );
 			$return = $this->perform_wordpress_register_from_provider();
 			hm_clear_messages( 'register' );
@@ -294,10 +268,33 @@ class HMA_SSO_Provider {
 		hma_do_login_redirect( $return );
 	}
 	
-	function _check_sso_login_submitted() {
+	function register_link_submitted() {
 	
+		$return = $this->perform_wordpress_register_from_provider();
+		
+		do_action( 'hma_sso_register_attempt_completed', &$this, $return );
+		
+		if ( is_wp_error( $return ) )
+			wp_redirect( get_bloginfo( 'register_url', 'display' ), 303 );
+		
+		wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
+		
+		exit;
+	}
+	
+	function _check_sso_login_submitted() {
+		
 		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id )
 			$this->login_link_submitted();
+		
+	}
+	
+	function _check_sso_register_submitted() {
+	
+		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id )
+			$this->register_link_submitted();
+		
+		
 	}
 	
 	function _check_sso_connect_with_account_submitted() {
@@ -319,11 +316,6 @@ class HMA_SSO_Provider {
 			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
 			exit;
 		}
-	}
-	
-	function _check_sso_registrar_submitted() {
-		if ( isset( $_GET['sso_registrar_submitted'] ) && $_GET['sso_registrar_submitted'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_registrar_submitted_' . $this->id ) )
-			$this->register_oauth_submitted();
 	}
 	
 	function _check_wordpress_login_and_connect_provider_with_account_submitted() {
@@ -377,14 +369,16 @@ class HMA_SSO_Provider {
 		return $url;
 	}
 	
-	function _get_provider_authentication_completed_connect_account_redirect_url() {
+	function get_connect_with_account_submit_url() {
 		return add_query_arg( 'id', $this->id, get_bloginfo( 'edit_profile_url', 'display' ) . 'sso/authenticated/' );
 	}
 	
 	function _get_sso_register_submit_url() {
 		
-		return html_entity_decode( wp_nonce_url( add_query_arg( 'sso_registrar_submitted', $this->id, get_bloginfo( 'register_url', 'display' ) ), 'sso_registrar_submitted_' . $this->id ) );
+		$url = add_query_arg( 'id', $this->id, get_bloginfo( 'register_url', 'display' ) . 'sso/authenticated/' );
+		$url = add_query_arg( $_GET, $url );
 		
+		return $url;		
 	}
 	
 	function _get_provider_authentication_completed_register_redirect_url() {
@@ -406,16 +400,12 @@ class HMA_SSO_Provider {
 	}
 	
 	function user_info() {
-		
 		return $this->get_user_info();
-		
 	}
 	
 	//Puishing
-	function can_publish() {
-	
+	function can_publish() {	
 		return $this->supports_publishing && $this->user && $this->is_authenticated();
-	
 	}
 	
 	

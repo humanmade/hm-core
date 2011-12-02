@@ -213,7 +213,7 @@ function hma_admin_add_avatar( $user ) { ?>
 	    		<td>
 					<?php foreach ( $avatar_options as $avatar_option ) {
 
-			    		$avatar_option->user = $user;
+			    		$avatar_option->set_user( $user );
 
 						if ( ! $avatar_option->get_avatar( 60 ) )
 							continue; ?>
@@ -297,7 +297,7 @@ function hma_admin_add_avatar_save( $user_id ) {
 		if ( ! isset( $file['file'] ) )
 			return;
 
-		update_user_meta( $user_id, 'user_avatar_path', str_replace( '\\', '/', $file['file'] ) );
+		update_user_meta( $user_id, 'user_avatar_path', str_replace( array( ABSPATH, '\\' ), array( ABSPATH, '/' ), $file['file'] ) );
 		update_user_meta( $user_id, 'user_avatar_option', 'uploaded' );
 
 	}

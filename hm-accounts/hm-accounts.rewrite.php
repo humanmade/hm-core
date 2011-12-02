@@ -19,10 +19,10 @@ function hma_rewrite_rules() {
 		hm_add_rewrite_rule( '^' . hma_get_lost_password_rewrite_slug() . '/?$', 'is_lost_password=1',  $lost_pass, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_lost_password' => true ) ) );
 
 	if ( file_exists( $lost_pass_inline =  hma_get_lost_password_inline_template() ) )
-		hm_add_rewrite_rule( '^' . hma_get_lost_password_inline_rewrite_slug . '/?$', 'is_lost_password=1',  $lost_pass_inline, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_lost_password' => true ) ) );
+		hm_add_rewrite_rule( '^' . hma_get_lost_password_inline_rewrite_slug() . '/?$', 'is_lost_password=1',  $lost_pass_inline, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_lost_password' => true ) ) );
 
 	if ( file_exists( $register = hma_get_register_template() ) )
-		hm_add_rewrite_rule( '^' . hma_get_register_rewrite_slug . '/?$', 'is_register=1', $register, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ) ) );
+		hm_add_rewrite_rule( '^' . hma_get_register_rewrite_slug() . '/?$', 'is_register=1', $register, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ) ) );
 
 	if ( file_exists( $register_inline = hma_get_register_inline_template() ) )
 		hm_add_rewrite_rule( '^' . hma_get_register_inline_rewrite_slug() . '/?$', 'is_register=1', $register_inline, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ) ) );
@@ -37,6 +37,8 @@ function hma_rewrite_rules() {
 	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/?$', 'is_login=1&is_twitter_popup=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
 	hm_add_rewrite_rule( '^login/sso/twitter/authenticate/callback/?$', 'is_login=1&is_twitter_popup=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
 	hm_add_rewrite_rule( '^login/sso/authenticated/?$', 'is_login=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
+	hm_add_rewrite_rule( '^register/sso/authenticated/?$', 'is_register=1', null, array( 'post_query_properties' => array( 'is_register' => true ) ) );
+
 
 	hm_add_rewrite_rule( '^profile/sso/authenticated/?$', 'is_login=1' );
 	hm_add_rewrite_rule( '^profile/sso/deauthenticate/?$', 'is_login=1' );

@@ -1236,7 +1236,7 @@ function wp_mail_content_type_html( $content_type ) {
 }
 
 function hm_wp_mail_from( $mail ) {
-	return str_replace( 'wordpress@', 'noreply@', $mail );
+	return apply_filters( 'hm_wp_mail_from', str_replace( 'wordpress@', 'noreply@', $mail ) );
 }
 
 function hm_array_value( $array, $key ) {
@@ -1244,7 +1244,7 @@ function hm_array_value( $array, $key ) {
 }
 
 function hm_wp_mail_from_name() {
-	return get_bloginfo();
+	return apply_filters( 'hm_wp_mail_from_name', get_bloginfo( 'name' ) );
 }
 /**
  * Insert a variable into an array at a givven position, shunting keys down.
@@ -1559,6 +1559,7 @@ function hm_post_pagination() {
  * @access public
  * @param array $classes
  * @param object $item
+ * @todo not sure this actually works?
  * @return null
  */
 function hm_submenu_class( $classes, $item ) {
@@ -1679,5 +1680,31 @@ function hm_get_object_properties_from_array( $array, $property ) {
 	}
 
 	return $properties;
+
+}
+
+
+/**
+ * Automatically pluralize a string. Adds "es" to nouns ending in "s", "ies" for "y", etc
+ *
+ * @param string $str
+ * @return string
+ */
+function hm_pluralize_string( $str ) {
+
+	$endings = array(
+		's' => 'ses',
+		'y' => 'ies'
+	);
+
+	$ending = substr( $str, strlen($str)-1, 1 );
+
+	if( array_key_exists( $ending, $endings ) )
+		$str = substr( $str, 0, strlen( $str ) - 1 ) . $endings[$ending];
+
+	else
+		$str = $str . 's';
+
+	return $str;
 
 }

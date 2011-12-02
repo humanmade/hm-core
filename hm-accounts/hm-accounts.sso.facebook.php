@@ -52,18 +52,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	}
 
-	function get_login_open_authentication_js() {
-		?>
-		<script>
-			jQuery( window ).load( function() { jQuery('.fb_button_medium').click() } );
-		</script>
-		<?php
-	}
-	
-	function get_login_button_image() {
-		return HELPERURL . 'assets/images/facebook-login-button.png';
-	}
-
 	function register_sso_submitted() {
 		
 		return $this->perform_wordpress_register_from_provider();
@@ -246,9 +234,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function check_for_provider_logged_in() {
 		
-		if ( isset( $_REQUEST['sso_registrar_authorized'] ) && $_REQUEST['sso_registrar_authorized'] == $this->id && $_REQUEST['access_token'] )  {
-			$this->access_token = $_REQUEST['access_token'];
-		} elseif ( $access_token = $this->get_access_token_from_cookie_session() ) {
+		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
 		}
 				
@@ -336,6 +322,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function perform_wordpress_register_from_provider() {
 		
+		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
+		if ( $result = $this->perform_wordpress_login_from_provider() ) {
+			return $result;
+		}
+		
 		try {
 			$fb_profile_data = $this->get_user_info();
 			$_fb_profile_data = $this->get_facebook_user_info();
@@ -401,13 +392,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		//redirect can be relitive, make it not so
 		$redirect = get_bloginfo( 'url' ) . str_replace( get_bloginfo( 'url' ), '', $redirect );
-		
+		/*
 		//only redirect to facebook is is logged in with a cookie
 		if ( $this->client->getUser() ) {
 			wp_redirect( $this->client->getLogoutUrl( array( 'next' => $redirect ) ), 303 );
 			exit;
 		}
-		
+		*/
 		return true;
 	
 	}
@@ -480,8 +471,15 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 
 	}
 	
+	function set_user( $user ) {
+		parent::set_user( $user );
+		$this->sso_provider->set_user( $user );
+	}
+	
 	function get_avatar( $size = null ) {			
-
+		
+		$this->avatar_path = null;
+		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
 		    $this->avatar_path = $avatar;
 
@@ -493,7 +491,6 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 		    
 		    update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
 		}
-		
 		
 		return wpthumb( $this->avatar_path, $size );
 	}

@@ -85,7 +85,11 @@ function hma_displayed_user_link() {
 }
 
 function hma_get_user_name( $user_id ) {
-	return get_the_author_meta( 'display_name', $user_id );
+	return apply_filters( 'hma_get_user_name', get_the_author_meta( 'display_name', $user_id ), $user_id );
+}
+
+function hma_user_name( $user_id ) {
+	echo hma_get_user_name( $user_id );
 }
 
 function hma_get_displayed_user_name() {
@@ -147,7 +151,7 @@ function hma_get_login_url( $redirect = null, $message = null ) {
  */
 function hma_get_logout_url( $redirect = null ) {
 
-	$url = get_bloginfo( 'login_url', 'display' );
+	$url = get_bloginfo( 'logout_url', 'display' );
 
 	if ( $redirect )
 		$url = add_query_arg( 'redirect_to', urlencode( $redirect ), $url );
@@ -189,7 +193,7 @@ function hma_is_login() {
  * @return bool
  */
 function hma_is_register() {
-	return hma_is_( 'register' );
+	return hma_is_( 'is_register' );
 }
 
 /**
@@ -225,13 +229,11 @@ function hma_is_( $query_arg ) {
  */
 function hma_is_user_profile( $user_id = null ) {
 
-	global $wp_the_query;
-
-	if ( !empty( $wp_the_query->is_user_profile ) && !empty( $user_id ) && $user_id == get_query_var( 'author' ) )
+	if ( hma_is_( 'is_user_profile' ) && ! empty( $user_id ) && $user_id == get_query_var( 'author' ) )
 		return true;
 
 	elseif ( empty( $user_id ) )
-		return !empty( $wp_the_query->is_user_profile );
+		return hma_is_( 'is_user_profile' );
 		
 	return false;
 
@@ -249,6 +251,21 @@ function hma_is_current_user_profile() {
 		return true;
 		
 	return false;
+	
+}
+
+function hma_is_user_author( $user_id ) {
+	
+	if ( ! empty( $user_id ) && $user_id == get_query_var( 'author' ) )
+		return true;
+		
+	return false;
+	
+}
+
+function hma_is_current_user_author() {
+	
+	return hma_is_user_author( get_current_user_id() );
 	
 }
 

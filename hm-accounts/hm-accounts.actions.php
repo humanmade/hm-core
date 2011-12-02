@@ -325,7 +325,7 @@ function hma_profile_submitted() {
 	// Loop through all data and only user user_* fields or fields which have been registered using hma_register_profile_field
 	foreach( $_POST as $key => $value ) {
 
-		if ( strpos( $key, 'user_' ) !== 0 && ! hma_is_profile_field( $key ) )
+		if ( ( ! hma_is_profile_field( $key ) && hma_custom_profile_fields() ) || ( ! hma_custom_profile_fields() && strpos( $key, 'user_' ) !== 0 ) )
 			continue;
 
 		$user_data[$key] = is_string( $value ) ? esc_attr( $value ) : array_map( 'esc_attr', $value );
@@ -341,25 +341,27 @@ function hma_profile_submitted() {
 	// Unset user_pass2
 	if ( $user_data['user_pass'] && $user_data['user_pass2'] && ( $user_data['user_pass'] === $user_data['user_pass2'] ) )
 		unset( $user_data['user_pass2'] );
+		
+	if ( empty( $user_data['user_pass'] ) )
+		unset( $user_data['user_pass'] );
 
 	$user_data['ID'] = $current_user->ID;
 
-	if ( !empty( $_POST['first_name'] ) )
+	if ( isset( $_POST['first_name'] ) )
 		$user_data['first_name'] = esc_attr( $_POST['first_name'] );
 
-	if ( !empty( $_POST['last_name'] ) )
+	if ( isset( $_POST['last_name'] ) )
 		$user_data['last_name'] = esc_attr( $_POST['last_name'] );
 
-	if ( !empty( $_POST['nickname'] ) )
+	if ( isset( $_POST['nickname'] ) )
 		$user_data['nickname'] = esc_attr( $_POST['nickname'] );
 
-	if ( $current_user->user_login )
-		$user_data['user_login'] = $current_user->user_login;
+	$user_data['user_login'] = $current_user->user_login;
 
-	if ( !empty( $_POST['description'] ) )
+	if ( isset( $_POST['description'] ) )
 		$user_data['description'] = esc_attr( $_POST['description'] );
 
-	if ( !empty( $_POST['display_name'] ) ) {
+	if ( isset( $_POST['display_name'] ) ) {
 
 		$name = trim( $_POST['display_name'] );
 		$match = preg_match_all( '/([\S^\,]*)/', esc_attr( $_POST['display_name'] ), $matches );
