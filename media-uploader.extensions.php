@@ -180,7 +180,7 @@ function hm_add_extra_media_buttons( $form_fields, $media ) {
 
 	$thumbnail = '';
 
-	if ( isset( $type ) && 'image' == $type && current_theme_supports( 'post-thumbnails' ) && get_post_image_id( $_GET['post_id'] ) != $media->ID )
+	if ( isset( $type ) && 'image' == $type && current_theme_supports( 'post-thumbnails' ) && hm_get_post_image_id( $_GET['post_id'] ) != $media->ID )
 		$thumbnail = "<a class='wp-post-thumbnail' href='#' onclick='WPSetAsThumbnail(\"$media->ID\");return false;'>" . esc_html__( "Use as thumbnail" ) . "</a>";
 
 	// Create the buttons array

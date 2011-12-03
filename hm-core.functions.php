@@ -1151,11 +1151,12 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 	$query = wp_parse_args( $wp_query->query );
 	$orders = explode( ' ', isset( $query['orderby'] ) ? $query['orderby'] : '' );
 
-	if ( count( $orders ) <= 1  )
+	if( count( $orders ) <= 1  )
 		return $orderby;
 
 	// Some internal WordPress queries incorrectly add DESC or ASC to the orderby instead of order
 	foreach( $orders as $key => $order ) :
+		$order = rtrim( $order, ',' );
 		if ( in_array( strtoupper( $order ), array( 'DESC', 'ASC' ) ) ) :
 			$orders[$key - 1] .= ' ' . strtoupper( $order );
 			unset( $orders[$key] );
@@ -1163,27 +1164,31 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 	endforeach;
 
 	$one_before = '';
-
+	
 	foreach( $orders as $key => $order ) {
 
 		$order = str_replace( $wpdb->posts . '.post_', '', $order );
 
-		$table_column = in_array( $order, array( 'menu_order' ) ) ? $order : 'post_' . $order;
+		$table_column = in_array( reset( explode( ' ', $order ) ), array( 'menu_order', 'ID' ) ) ? $order : 'post_' . $order;
 
-		if (  strpos( $orderby, $wpdb->posts . '.post_' . $order ) !== false ) {
+		if( strpos( $orderby, $wpdb->posts . '.' . $table_column ) !== false ) {
 			$one_before = $order;
 			continue;
 		}
 
-		if ( strpos( $orderby, $wpdb->posts . '.post_' . $order ) === false ) {
-			if ( $one_before )
+		if( strpos( $orderby, $wpdb->posts . '.post_' . $order ) === false ) {
+			if( $one_before )
 				$orderby = str_replace( $wpdb->posts . '.' . $one_before,  $wpdb->posts . '.post_' . $one_before . ', ' . $wpdb->posts . '.' . $table_column, $orderby );
 			else
 				$orderby =  $wpdb->posts . '.' . $table_column . ', ' . $orderby;
 		}
 	}
 
-	$orderby = str_replace( ', ,', ', ', $orderby );
+	while( strpos( $orderby, ', ,' ) !== false )
+		$orderby = str_replace( ', ,', ', ', $orderby );
+	
+	while( strpos( $orderby, ',,' ) !== false )
+	$orderby = str_replace( ',,', ', ', $orderby );
 
 	return $orderby;
 }
