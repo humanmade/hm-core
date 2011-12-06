@@ -349,26 +349,29 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		$userdata['override_nonce'] = true;
 		$userdata['do_login'] = true;
-		$userdata['_fb_access_token'] = $this->access_token;
 		$userdata['do_redirect'] = false;
 		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
 		$userdata['gender'] = $_fb_profile_data['gender'];
-		$userdata['facebook_url'] = $_fb_profile_data['link'];
 		$userdata['url'] = $_fb_profile_data['website'];
 		$userdata['location'] = $_fb_profile_data['location']['name'];
 		$userdata['age'] = ( (int) date('Y') ) - ( (int) date( 'Y', strtotime( $_fb_profile_data['birthday'] ) ) );
-		$userdata['_facebook_data'] = $_fb_profile_data;
 		
 		// Lets us skip email check from wp_insert_user()
 		define( 'WP_IMPORTING', true );
 		
-	 	$result = hma_new_user( $userdata );
+	 	$result = $user_id = hma_new_user( $userdata );
 	 	
 	 	if ( is_wp_error( $result ) )
 			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 	 	
-	 	$this->set_user( get_userdata( $result ) ); 
+	 	// Set_user() will wide access token
+	 	$token = $this->access_token;
+	 	$user = get_userdata( $result );
+	 	$this->set_user( get_userdata( $result ) );
+	 	$this->access_token = $token;
+	 	
+	 	$this->update_user_facebook_information();
 	 	
 	 	//set the avatar to their twitter avatar if registration completed
 		if ( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated() ) {
@@ -378,6 +381,17 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		}
 		
 		return $result;	
+	}
+	
+	private function update_user_facebook_information() {
+		
+		$info = $this->get_facebook_user_info();
+		$user_id = $this->user->ID;
+		update_user_meta( $user_id, '_fb_access_token', $this->access_token );
+		update_user_meta( $user_id, 'facebook_url', $this->access_token );
+		update_user_meta( $user_id, '_facebook_data', $this->get_facebook_user_info() );
+		update_user_meta( $user_id, '_fb_uid', $info['id'] );
+	
 	}
 	
 	public function _validate_hma_new_user( $result ) {
