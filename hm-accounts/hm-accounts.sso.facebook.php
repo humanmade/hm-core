@@ -302,9 +302,16 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$fb_uid}'" );
 		
+		
 		if ( !$user_id ) {
-			hm_error_message( 'This Facebook account has not been linked to an account on this site.', 'login' );
-			return new WP_Error( 'facebook-account-not-connected' );
+			
+			$fb_info = $this->get_facebook_user_info();
+			$user_id = $this->_get_user_id_from_sso_id( $fb_info['username'] );
+
+			if ( ! $user_id ) {
+				hm_error_message( 'This Facebook account has not been linked to an account on this site.', 'login' );
+				return new WP_Error( 'facebook-account-not-connected' );
+			}
 		}
 		
 		//Update their access token incase it has changed
@@ -391,6 +398,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		update_user_meta( $user_id, 'facebook_url', $this->access_token );
 		update_user_meta( $user_id, '_facebook_data', $this->get_facebook_user_info() );
 		update_user_meta( $user_id, '_fb_uid', $info['id'] );
+		update_user_meta( $user_id, 'facebook_username', $info['username'] );
 	
 	}
 	
@@ -419,7 +427,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function _get_user_id_from_sso_id( $sso_id ) {
 		global $wpdb;
-		return $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$sso_id}'" );
+		
+		if( $sso_id && $var = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE ( meta_key = '_facebook_uid' OR meta_key = 'facebook_username' ) AND meta_value = '{$sso_id}'" ) ) {
+			return $var;
+		}
+		
 	}
 	
 	
@@ -520,3 +532,22 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 	}
 	
 }
+
+
+/**
+ * _facebook_add_username_to_editprofile_contact_info function.
+ * 
+ * @access private
+ * @param mixed $methods
+ * @param mixed $user
+ * @return null
+ */
+function _facebook_add_username_to_editprofile_contact_info( $methods, $user ) {
+
+	if( empty( $methods['facebook_username'] ) )
+		$methods['facebook_username'] = __( 'Facebook Username' );
+	
+	return $methods;
+
+}
+add_filter( 'user_contactmethods', '_facebook_add_username_to_editprofile_contact_info', 10, 2 );
