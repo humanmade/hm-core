@@ -39,7 +39,6 @@ function hma_rewrite_rules() {
 	hm_add_rewrite_rule( '^login/sso/authenticated/?$', 'is_login=1', null, array( 'post_query_properties' => array( 'is_login' => true ) ) );
 	hm_add_rewrite_rule( '^register/sso/authenticated/?$', 'is_register=1', null, array( 'post_query_properties' => array( 'is_register' => true ) ) );
 
-
 	hm_add_rewrite_rule( '^profile/sso/authenticated/?$', 'is_login=1' );
 	hm_add_rewrite_rule( '^profile/sso/deauthenticate/?$', 'is_login=1' );
 
