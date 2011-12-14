@@ -215,8 +215,11 @@ function hma_is_edit_profile() {
 }
 
 function hma_is_( $query_arg ) {
+
 	global $wp_the_query;
-	return !empty( $wp_the_query->$query_arg );
+
+	return ! empty( $wp_the_query->$query_arg );
+
 }
 
 /**

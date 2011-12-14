@@ -103,10 +103,13 @@ function hma_new_user( $args ) {
 
 	// Get any remaining variable that were passed
 	$meta_vars = array_diff_key( $original_args, $defaults, $checks, $user_vars );
+	
+	foreach ( (array) $meta_vars as $key => $value ) {
 
-	foreach ( (array) $meta_vars as $key => $value )
-		if ( hma_is_profile_field( $key ) || ! hma_get_profile_fields() )
+		if ( hma_is_profile_field( $key ) || ! hma_custom_profile_fields() ) {
 			update_user_meta( $user_id, $key, $value );
+		}
+	}
 
 	$user = get_userdata( $user_id );
 
@@ -723,7 +726,7 @@ function hma_get_profile_fields() {
 
 function hma_custom_profile_fields() {
 	
-	return array_diff( hma_get_profile_fields(), hma_default_profile_fields );
+	return array_diff( hma_get_profile_fields(), hma_default_profile_fields() );
 	
 }
 

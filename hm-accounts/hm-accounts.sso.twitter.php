@@ -188,7 +188,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	function perform_wordpress_register_from_provider() {
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if ( $result = $this->perform_wordpress_login_from_provider() ) {
+		if ( ( $result = $this->perform_wordpress_login_from_provider() ) && !is_wp_error( $result ) ) {
 			return $result;
 		}
 		
