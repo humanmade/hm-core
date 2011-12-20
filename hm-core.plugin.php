@@ -24,6 +24,7 @@ include_once( HM_CORE_PATH . 'hm-core.debug.php' );
 include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
+include_once( HM_CORE_PATH . 'hm-core.classes.php' );
 
 // Related posts function
 // @todo wrap in theme-supports?
