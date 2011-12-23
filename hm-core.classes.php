@@ -13,7 +13,7 @@ class HM_Feature_Image_Meta_Box {
 		$this->link_image_to_gallery_tab = $link_image_to_gallery_tab;
 		$this->show_watermark_on_thumbnail = $show_watermark_on_thumbnail;
 		
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX && isset( $_POST['action'] ) && $_POST['action'] == 'set-post-thumbnail' ) {
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX && isset( $_POST['action'] ) && ( $_POST['action'] == 'set-post-thumbnail' || $_POST['action'] == 'wpthumb_watermark_save' ) ) {
 			$this->post = get_post( $_POST['post_id'] );
 			$this->setup_hooks();
 		}
