@@ -1164,7 +1164,7 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 	endforeach;
 
 	$one_before = '';
-	
+
 	foreach( $orders as $key => $order ) {
 
 		$order = str_replace( $wpdb->posts . '.post_', '', $order );
@@ -1186,7 +1186,7 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
 	while( strpos( $orderby, ', ,' ) !== false )
 		$orderby = str_replace( ', ,', ', ', $orderby );
-	
+
 	while( strpos( $orderby, ',,' ) !== false )
 	$orderby = str_replace( ',,', ', ', $orderby );
 
@@ -1706,5 +1706,22 @@ function hm_pluralize_string( $str ) {
 		$str = $str . 's';
 
 	return $str;
+
+}
+
+/**
+ * Echo html class attribute with <code>$classes</code> if <code>$bool</code> is true
+ *
+ * @param string $classes
+ * @param bool $bool
+ * @return null
+ */
+function hma_class( $classes, $bool ) {
+
+	if ( $bool ) { ?>
+
+	 class="<?php echo $classes; ?>"
+
+	<?php }
 
 }
