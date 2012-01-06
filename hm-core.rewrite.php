@@ -282,10 +282,7 @@ function hm_restrict_access_to_rule( $template, $rule ) {
 
 	// If there is a "redirect_to" redirect there
 	if ( ! empty( $_REQUEST['redirect_to'] ) )
-	    $redirect = hm_parse_redirect( urldecode( $_REQUEST['redirect_to'] ) );
-
-	elseif ( wp_get_referer() && ! in_array( preg_replace( '/\?[\s\S]*/', '', wp_get_referer() ), array( get_bloginfo( 'login_url', 'display' ), get_bloginfo( 'lost_password_url', 'display' ), get_bloginfo( 'register_url', 'display' ) ) ) )
-	    $redirect = wp_get_referer();
+	    $redirect = hm_parse_redirect( urldecode( esc_url( $_REQUEST['redirect_to'] ) ) );
 
 	wp_redirect( $redirect );
 
