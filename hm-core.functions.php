@@ -1024,7 +1024,7 @@ add_filter( 'posts_where', 'hm_add_multiple_meta_to_wp_query', 10, 2 );
 
 /**
  * Allows the user of orderby=post__in to oder the posts in the order you queried by
- * 
+ *
  * @access public
  * @param string $sortby
  * @param object $thequery
@@ -1033,7 +1033,7 @@ add_filter( 'posts_where', 'hm_add_multiple_meta_to_wp_query', 10, 2 );
 function hma_sort_query_by_post_in( $sortby, $thequery ) {
 	if ( !empty($thequery->query['post__in']) && isset($thequery->query['orderby']) && $thequery->query['orderby'] == 'post__in' )
 		$sortby = "find_in_set(ID, '" . implode( ',', $thequery->query['post__in'] ) . "')";
-	
+
 	return $sortby;
 }
 add_filter( 'posts_orderby', 'hma_sort_query_by_post_in', 10, 2 );
@@ -1539,7 +1539,7 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
  */
 function hm_disable_admin_bar_for_subscribers() {
 
-	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && key( wp_get_current_user()->data->wp_capabilities ) == 'subscriber' ) :
+	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && in_array( 'subscriber', wp_get_current_user()->roles ) ) :
 		show_admin_bar( false );
 		remove_action( 'wp_head', '_admin_bar_bump_cb' );
 		wp_dequeue_script( 'admin-bar' );
