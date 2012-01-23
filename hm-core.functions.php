@@ -1022,128 +1022,21 @@ function hm_add_multiple_meta_to_wp_query( $where, $wp_query ) {
 
 add_filter( 'posts_where', 'hm_add_multiple_meta_to_wp_query', 10, 2 );
 
-function hm_add_multiple_taxonomy_to_parse_query() {
+/**
+ * Allows the user of orderby=post__in to oder the posts in the order you queried by
+ *
+ * @access public
+ * @param string $sortby
+ * @param object $thequery
+ * @return string
+ */
+function hma_sort_query_by_post_in( $sortby, $thequery ) {
+	if ( !empty($thequery->query['post__in']) && isset($thequery->query['orderby']) && $thequery->query['orderby'] == 'post__in' )
+		$sortby = "find_in_set(ID, '" . implode( ',', $thequery->query['post__in'] ) . "')";
 
-	global $wp_query;
-
-	$custom_taxonomies = get_taxonomies( array( '_builtin' => false ) );
-	$queried_taxonomies = array();
-
-	foreach ( $custom_taxonomies as $taxonomy )
-		if ( array_key_exists( $taxonomy, $wp_query->query_vars ) )
-			$queried_taxonomies[] = $taxonomy;
-
-	if ( count( $queried_taxonomies ) === 1 ) :
-		$wp_query->query_vars['taxonomy'] = reset( $queried_taxonomies );
-		$wp_query->query_vars['term'] = get_term( $wp_query->query_vars[reset( $queried_taxonomies )], reset( $queried_taxonomies ) )->slug;
-		unset( $wp_query->query_vars[reset( $queried_taxonomies )] );
-
-	elseif ( count( $queried_taxonomies ) ) :
-
-
-		foreach( $queried_taxonomies as $taxonomy ) :
-
-			$wp_query->query_vars['hm_taxonomy_' . $taxonomy . '__in'] = $wp_query->query_vars[$taxonomy];
-			unset( $wp_query->query_vars[$taxonomy] );
-
-		endforeach;
-
-		unset( $wp_query->query_vars['taxonomy'] );
-		unset( $wp_query->query_vars['term'] );
-
-	endif;
-
+	return $sortby;
 }
-//add_action( 'parse_query', 'hm_add_multiple_taxonomy_to_parse_query' );
-
-function hm_add_multiple_taxonomy_to_where( $where, $wp_query ) {
-
-	global $wpdb;
-
-	$taxonomy__in = $taxonomy__and = $taxonomy__and_in = array();
-
-	foreach ( $wp_query->query_vars as $var => $value ) {
-		if ( preg_match( '|^hm_taxonomy_([\s\S]*?)__([\s\S]*?)$|', $var, $matches ) ) {
-
-			if ( $matches[2] == 'in' || $matches[2] == 'and' || $matches[2] == 'and_in' ) {
-				$query_var = 'taxonomy__' . $matches[2];
-				$$query_var = array_merge( (array)$$query_var, array( $matches[1] => $value ) );
-			}
-		}
-
-	}
-
-	$taxonomy__in = array_filter( (array) $taxonomy__in );
-	$taxonomy__and = array_filter( (array) $taxonomy__and );
-	$taxonomy__and_in = array_filter( (array) $taxonomy__and_in );
-
-	if ( !empty( $taxonomy__in ) ) {
-
-		$where .= " AND ( 1 = 1 ";
-
-		foreach( $taxonomy__in as $taxonomy => $terms ) {
-
-			// Allow for comma sepped lists and arrays
-			if ( is_string( $terms ) )
-				$terms = explode( ',', $terms );
-
-			foreach( $terms as $key => $term )
-				$where .= " AND $wpdb->posts.ID IN ( SELECT hm_{$taxonomy}_tr.object_id FROM $wpdb->term_relationships AS hm_{$taxonomy}_tr INNER JOIN $wpdb->term_taxonomy AS hm_{$taxonomy}_tt ON hm_{$taxonomy}_tr.term_taxonomy_id = hm_{$taxonomy}_tt.term_taxonomy_id WHERE hm_{$taxonomy}_tt.taxonomy = '$taxonomy' AND hm_{$taxonomy}_tt.term_id = $term )";
-
-		}
-
-		$where .= " ) ";
-
-	}
-
-	if ( !empty( $taxonomy__and ) ) {
-
-		$where .= " AND ( 1 = 1 ";
-
-		foreach ( $taxonomy__and as $taxonomy => $terms ) {
-
-			// Allow for comma sepped lists and arrays
-			if ( is_string( $terms ) )
-				$terms = explode( ',', $terms );
-
-			$where__and = array();
-
-			foreach( $terms as $key => $term )
-				$where__and[] = " $wpdb->posts.ID IN ( SELECT hm_{$taxonomy}_tr.object_id FROM $wpdb->term_relationships AS hm_{$taxonomy}_tr INNER JOIN $wpdb->term_taxonomy AS hm_{$taxonomy}_tt ON hm_{$taxonomy}_tr.term_taxonomy_id = hm_{$taxonomy}_tt.term_taxonomy_id WHERE hm_{$taxonomy}_tt.taxonomy = '$taxonomy' AND hm_{$taxonomy}_tt.term_id = $term )";
-
-			if ( !empty( $where__and ) )
-				$where .= ' AND ' . implode( ' OR ', $where__and );
-
-		}
-
-		$where .= " ) ";
-
-	}
-
-	if ( !empty( $taxonomy__and_in ) ) {
-
-		$where .= " AND ( 1 = 1 ";
-
-		foreach ( $taxonomy__and_in as $taxonomy => $taxonomy_groups ) {
-			foreach( $taxonomy_groups as $terms ) {
-
-				$where__and_in = array();
-
-				foreach( $terms as $key => $term )
-					$where__and_in[] = " $wpdb->posts.ID IN ( SELECT hm_{$taxonomy}_tr.object_id FROM $wpdb->term_relationships AS hm_{$taxonomy}_tr INNER JOIN $wpdb->term_taxonomy AS hm_{$taxonomy}_tt ON hm_{$taxonomy}_tr.term_taxonomy_id = hm_{$taxonomy}_tt.term_taxonomy_id WHERE hm_{$taxonomy}_tt.taxonomy = '$taxonomy' AND hm_{$taxonomy}_tt.term_id = $term )";
-
-				if ( !empty( $where__and_in ) )
-					$where .= ' AND ' . implode( ' OR ', $where__and_in );
-			}
-		}
-
-		$where .= " ) ";
-
-	}
-	return $where;
-
-}
-//add_filter( 'posts_where', 'hm_add_multiple_taxonomy_to_where', 10, 2 );
+add_filter( 'posts_orderby', 'hma_sort_query_by_post_in', 10, 2 );
 
 function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
@@ -1648,7 +1541,7 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
  */
 function hm_disable_admin_bar_for_subscribers() {
 
-	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && key( wp_get_current_user()->data->wp_capabilities ) == 'subscriber' ) :
+	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && in_array( 'subscriber', wp_get_current_user()->roles ) ) :
 		show_admin_bar( false );
 		remove_action( 'wp_head', '_admin_bar_bump_cb' );
 		wp_dequeue_script( 'admin-bar' );
