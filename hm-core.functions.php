@@ -1367,6 +1367,7 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 	$defaults = array(
 		'next_text' => 'Next &raquo;',
 		'prev_text' => '&laquo; Prev',
+		'show_all' => false
 	);
 
 	$args = wp_parse_args( $args, $defaults );
@@ -1407,6 +1408,7 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 		'current' => $current_page,
 		'mid_size' => $mid_size,
 		'end_size' => 1,
+		'show_all' => $args['show_all'], 
 		'type' => 'array'
 	) );
 
@@ -1436,7 +1438,7 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $args['prev_text'] ) && $current_page == 4 ) )
 			$real_counter--;
 
-		if ( $real_counter >= 6 && strpos( $pagination_item, $args['next_text'] ) === false )
+		if ( $real_counter >= 6 && strpos( $pagination_item, $args['next_text'] ) === false && $args['show_all'] === false )
 			continue;
 
 		$real_counter++;
