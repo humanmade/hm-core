@@ -1301,11 +1301,11 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 		'current' => $current_page,
 		'mid_size' => $mid_size,
 		'end_size' => 1,
-		'show_all' => $args['show_all'], 
+		'show_all' => $args['show_all'],
 		'type' => 'array'
 	) );
 
-	if ( !is_array( $page_links ) || empty( $page_links ) )
+	if ( ! is_array( $page_links ) || empty( $page_links ) )
 		return;
 
 	foreach ( $page_links as &$page_link ) {
@@ -1324,11 +1324,11 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 
 	foreach( $page_links as $counter => $pagination_item ) :
 
-		if ( ( strpos($pagination_item, '...') && $counter == 2) || ( $counter == 1 && strpos($page_links[2], '...' ) ) || ( $counter == 1 && $current_page == 4 ) )
+		if ( ( strpos( $pagination_item, '...' ) && $counter == 2 ) || ( $counter == 1 && strpos( $page_links[2], '...' ) ) || ( $counter == 1 && $current_page == 4 && $args['show_all'] === false ) )
 			continue;
 
 		// Strip ..., last page
-		if ( strpos( $pagination_item, '...') || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $args['prev_text'] ) && $current_page == 4 ) )
+		if ( strpos( $pagination_item, '...' ) || ( strpos( $page_links[$counter ? $counter - 1 : 0], '...') && $counter == count( $page_links ) - 2 ) || ( $counter == 1 && strpos( $page_links[ 2 ], '...' ) ) || ( $counter == 1 && strpos( $page_links[0], $args['prev_text'] ) && $current_page == 4 ) )
 			$real_counter--;
 
 		if ( $real_counter >= 6 && strpos( $pagination_item, $args['next_text'] ) === false && $args['show_all'] === false )
@@ -1366,6 +1366,7 @@ function hm_pagination() {
  * @return string - pagination html
  */
 function hm_get_post_pagination( $post = null, $current_page = null ) {
+
 	global $numpages;
 
 	// set number_pages to the global if we are using global $post
