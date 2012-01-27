@@ -231,58 +231,62 @@ function hm_add_args_to_current_rule( $args ) {
 	$hm_current_rewrite_rule[3] = array_merge_recursive( $hm_current_rewrite_rule[3], $args );
 
 }
-function hm_add_page_rule( $regex, $files, $name, $logged_in = null, $redirect = false, $query_vars = array(), $query = array() ) {
 
-	_depreciated_function( __FUNCTION__, '1.0', 'Use hm_add_rewrite instead' );
+/**
+ * Check the permissions for the current rule and redirect as needed
+ *
+ * Supported permission values are
+ *
+ *	logged_out_only
+ * 	logged_in_only
+ *	displayed_user_only => relies on get_query_var( 'author' )
+ *
+ * @param string $template
+ * @param string $rule
+ * @return null
+ */
+function hm_restrict_access_to_rule( $template, $rule ) {
 
-	$base = parse_url( get_bloginfo( 'url' ) );
-
-	$url = substr( $_SERVER['REQUEST_URI'], strlen( isset( $base['path'] ) ? $base['path'] : 0 ) );
-	$url = strpos( $url, '/' ) === 0 ? $url : '/' . $url;
-
-
-	if ( !preg_match( '#' . $regex . '(\?[\s\S]*)?$' . '#', $url, $matches ) ) {
+	if ( empty( $rule[3]['permission'] ) )
 		return;
+
+	$permission = $rule[3]['permission'];
+
+	$redirect = false;
+
+	switch ( $permission ) {
+
+		case 'logged_out_only' :
+
+			$redirect = is_user_logged_in();
+
+		break;
+
+		case 'logged_in_only' :
+
+			$redirect = ! is_user_logged_in();
+
+		break;
+
+		case 'displayed_user_only' :
+
+			$redirect = get_query_var( 'author' ) != get_current_user_id();
+
+		break;
 	}
 
-	elseif ( $logged_in === true && !is_user_logged_in() ) {
-		wp_redirect( $redirect );
-		exit;
-	}
-	elseif ( $logged_in === false && is_user_logged_in() ) {
-		wp_redirect( $redirect );
-		exit;
-	}
-	$files = (array) $files;
-	foreach( $files as $file ) : if ( file_exists( $file ) ) {
+	if ( ! $redirect )
+		return;
 
-		global $wp_query;
+    $redirect = home_url( '/' );
 
-		if ( $query ) {
+	// If there is a "redirect_to" redirect there
+	if ( ! empty( $_REQUEST['redirect_to'] ) )
+	    $redirect = hm_parse_redirect( urldecode( esc_url( $_REQUEST['redirect_to'] ) ) );
 
-			foreach( $query as $q => $number ) {
-				$query_gen[$q] = is_int($number) ? $matches[$number + 1] : $number;
-			}
+	wp_redirect( $redirect );
 
-			global $wpdb;
-			$wp_query = new WP_Query($query_gen);
-		}
-
-		if ( is_array($query_vars) ) {
-			//set any query_vars
-			foreach( $query_vars as $var => $count ) {
-				if ( is_int($count) )
-					$wp_query->$var = $matches[$count + 1];
-				else
-					$wp_query->$var = $count;
-			}
-			$wp_query->is_home = '';
-		}
-		$wp_query->is_404 = '';
-
-		header('HTTP/1.1 200 OK');
-		include_once($file);
-		exit;
-	} endforeach;
+	exit;
 
 }
+add_action( 'hm_load_custom_template', 'hm_restrict_access_to_rule', 10, 2 );
