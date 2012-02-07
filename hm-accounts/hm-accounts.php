@@ -1,7 +1,6 @@
 <?php
 
 include_once( 'hm-accounts.functions.php' );
-include_once( 'hm-accounts.message.functions.php' );
 include_once( 'hm-accounts.template-tags.php' );
 include_once( 'hm-accounts.rewrite.php' );
 include_once( 'hm-accounts.hooks.php' );

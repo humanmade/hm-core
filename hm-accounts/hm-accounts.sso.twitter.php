@@ -49,31 +49,13 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 	}
 	
-	function get_sign_in_client() {
+	public function get_sign_in_client() {
 		if ( !$this->sign_in_client )
 			$this->sign_in_client = new Twitter_Sign_in( $this->client, $this->usingSession );
 
 		return $this->sign_in_client ;
 	}
-	
-	function get_register_button() {
-		
-		$button = new Twitter_Sign_in( $this->client, $this->usingSession );
-		
-		$output = '
-		<script type="text/javascript">
-			function TwitterSignInCompleted() {
-				parent.jQuery.fancybox.showActivity();
-		 		document.location = "' . $this->_get_provider_authentication_completed_register_redirect_url() . '";
-			}
-		</script>
-		';
-		
-		$output .= $button->get_login_link();		
-				
-		return $output;
-	}
-		
+			
 	function check_for_provider_logged_in() {
 		
 		if ( empty( $this->access_token ) )
@@ -125,7 +107,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return $user_id;
 	}
 	
-	function perform_wordpress_login_from_provider() {
+	public function login() {
 		
 		//we are in the popup were (seperate window)
 		if ( $this->usingSession ) {
@@ -165,7 +147,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$this->update_user_twitter_information();
 		
 		wp_set_auth_cookie( $user_id, false );
-		set_current_user( $user_id );
+		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);
 		do_action( 'hma_login_submitted_success' );
@@ -173,22 +155,10 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return true;
 	}
 	
-	function register_sso_submitted( ) {
-		
-		$this->access_token = unserialize( base64_decode( $_POST['access_token'] ) );
-
-		$result = $this->perform_wordpress_register_from_provider();
-		
-		if ( is_wp_error( $result ) )
-			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
-		
-		return $result;
-	}
-	
-	function perform_wordpress_register_from_provider() {
+	public function register() {
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if ( ( $result = $this->perform_wordpress_login_from_provider() ) && !is_wp_error( $result ) ) {
+		if ( ( $result = $this->login() ) && !is_wp_error( $result ) ) {
 			return $result;
 		}
 		
@@ -253,7 +223,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		}
 		
 		wp_set_auth_cookie( $user->ID, false );
-		set_current_user( $user->ID );
+		wp_set_current_user( $user->ID );
 				
 		return $result;	
 	}
@@ -266,7 +236,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return $result;
 	}
 	
-	function logout( $redirect ) {
+	public function logout( $redirect ) {
 		
 		if ( !empty( $_COOKIE['twitter_anywhere_identity'] ) )
 			setcookie( 'twitter_anywhere_identity', '', time() - 100, COOKIEPATH );
@@ -284,40 +254,13 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		update_user_meta( $this->user->ID, '_twitter_data', $info );
 	}
 	
-	
 	/**
-	 * Gets the access token and fires any errors before showing the Register With This SSO form.
+	 * Link the current Twitter with $this->user
 	 * 
-	 * @return wp_error || true on success
+	 * @access public
+	 * @return true | WP_Error on failure
 	 */
-	function provider_authentication_register_completed() {
-
-		//we are in the popup were (seperate window)
-		if ( $this->usingSession ) {
-			$this->access_token = $_SESSION['twitter_oauth_token'];
-		} else {
-			$this->access_token = unserialize( base64_decode( $_COOKIE['twitter_oauth_token'] ) );
-			setcookie( 'twitter_oauth_token', '', time() - 100, COOKIEPATH );
-		}
-		
-		$info = $this->get_user_info();
-
-		//Check if this twitter account has already been connected with an account, if so log them in and dont register
-		if ( !empty( $info['_twitter_uid'] ) && $this->_get_user_id_from_sso_id( $info['_twitter_uid'] ) ) {
-
-			$result = $this->perform_wordpress_login_from_provider();
-			do_action( 'hma_sso_register_completed', &$this );
-		} elseif ( empty( $info['_twitter_uid'] ) ) {
-			
-			hm_error_message( 'There was a problem communication with Twitter, please try again.', 'register' );
-			return new WP_Error( 'twitter-connection-error' );
-			
-		}
-		
-		return true;
-	}
-	
-	function provider_authentication_connect_with_account_completed() {
+	function link() {
 		
 		if ( !is_user_logged_in() )
 			return new WP_Error( 'user-logged-in' );
@@ -358,7 +301,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return true;
 	}
 	
-	function unlink() {
+	public function unlink() {
 		
 		if ( !$this->user->ID )
 			return new WP_Error( 'user-not-logged-in' );
@@ -369,7 +312,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		delete_user_meta( $this->user->ID, '_twitter_oauth_token_secret' );	
 		delete_user_meta( $this->user->ID, '_twitter_data' );
 		delete_user_meta( $this->user->ID, 'twitter_username' );
-		
 		
 		if ( !$this->usingSession ) {
 			setcookie('twitter_oauth_token', '', time() - 100, COOKIEPATH);
@@ -383,14 +325,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		hm_success_message( 'Successfully unlinked Twitter from your account.', 'update-user' );
 		
 		return true;
-	}
-	
-	
-	function register_form_fields() {
-		?>
-		<input type="hidden" name="sso_registrar_authorized" value="<?php echo $this->id ?>" />
-		<input type="hidden" name="access_token" value="<?php echo $this->get_access_token_string() ?>" />
-		<?php
 	}
 	
 	function get_access_token_string() {

@@ -161,8 +161,17 @@ function hma_init_avatar_options() {
 		
 	new hma_Gravatar_Avatar_Option();
 	
-	new hma_SSO_Facebook();
-	new hma_SSO_Twitter();
+	try {
+		new HMA_SSO_Facebook();
+	} catch( Exception $e ) {
+	
+	}
+	
+	try {
+		new hma_SSO_Twitter();
+	} catch( Exception $e ) {
+	
+	}
 }
 add_action( 'init', 'hma_init_avatar_options', 1 );
 

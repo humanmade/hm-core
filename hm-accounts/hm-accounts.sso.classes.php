@@ -87,7 +87,7 @@ class HMA_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 }
 
 
-class hma_Gravatar_Avatar_Option extends hma_SSO_Avatar_Option {
+class HMA_Gravatar_Avatar_Option extends HMA_SSO_Avatar_Option {
 
 	function __construct() {
 		
@@ -118,10 +118,6 @@ class HMA_SSO_Provider {
 		
 		global $hma_sso_providers;
 		$hma_sso_providers[] = &$this;
-		add_action( 'wp_footer', array( &$this, '_run_logged_out_js' ) );
-		
-		add_action( 'init', array( &$this, '_check_for_oauth_register_completed' ) );
-		add_action( 'init', array( &$this, '_check_wordpress_login_and_connect_provider_with_account_submitted' ) );
 
 		add_action( 'hm_parse_request_^login/sso/authenticated/?$', array( &$this, '_check_sso_login_submitted' ) );
 		add_action( 'hm_parse_request_^register/sso/authenticated/?$', array( &$this, '_check_sso_register_submitted' ) );
@@ -158,63 +154,18 @@ class HMA_SSO_Provider {
 	 *
 	 * @return bool
 	 */
-	function perform_wordpress_register_from_provider() {
+	public function register() {
 	
 		if ( !$this->check_for_provider_logged_in() )
 			return null;
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if ( $result = $this->perform_wordpress_login_from_provider() ) {
+		if ( $result = $this->login() ) {
 			wp_redirect( get_bloginfo('edit_profile_url', 'display') );
 			exit;
 		}
 		
 	}
-	
-	/**
-	 * Logs a user in based off a login form and connects their sso provider (which was just authencated) with it.
-	 * 
-	 * @return true | wp_error
-	 */
-	function perform_wordpress_login_from_site_and_connect_provider_with_account() {
-				
-		$wp_login_details = array( 'username' => $_POST['user_login'], 'password' => $_POST['user_pass'], 'remember' => ( !empty( $_POST['remember'] ) ? true : false ) );
-		
-		$login_status = hma_log_user_in( $wp_login_details );
-		
-		if ( is_wp_error( $login_status ) || !$login_status ) {
-			return $login_status;
-		}
-		
-		$connect_status = $this->provider_authentication_connect_with_account_completed();
-		
-		if ( is_wp_error( $connect_status ) ) {
-			//connect failed, log them out
-			wp_logout();
-			
-			return $connect_status;
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Handles logging the user our of the provider. I.e. destroying a cookie, or redirecting to the provider for logout.
-	 * 
-	 * @return void
-	 */
-	function logout_from_provider() {
-		setcookie( "hma_sso_logged_out", $this->id, 0, COOKIEPATH );
-	}
-	
-	
-	
-	/**
-	 * Gets the access token and fires any errors before showing the Register With This SSO form.
-	 * 
-	 * @return wp_error || true on success
-	 */
-	function provider_authentication_register_completed() {}
 	
 	//is functions
 	
@@ -229,37 +180,15 @@ class HMA_SSO_Provider {
 		
 		return !empty( $this->avatar_option );
 	}
-		
-	//internal
-	function _run_logged_out_js() {
-		if ( isset( $_COOKIE['hma_sso_logged_out'] ) && $_COOKIE['hma_sso_logged_out'] == $this->id ) {
-			setcookie( 'hma_sso_logged_out', '', time() - 3600, COOKIEPATH );
-			$this->logged_out_js();
-		}
-	}
-	
-	function _check_for_oauth_register_completed() {
 
-		if ( isset( $_GET['sso_registrar_authorized'] ) && $_GET['sso_registrar_authorized'] == $this->id ) {
-			$result = $this->provider_authentication_register_completed();
-			
-			//show the register step 2 page
-			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
-			add_action( 'hma_sso_register_form', array( &$this, 'register_form_fields' ) );
-			do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$this, $result );
-			
-			exit;
-		}
-	}
-	
 	function login_link_submitted() {
-		$return = $this->perform_wordpress_login_from_provider();
+		$return = $this->login();
 
 		// If ther account was not connected, and we have register on login enabled, do that
 		if( is_wp_error( $return ) && in_array( $return->get_error_code(), array( 'twitter-account-not-connected', 'facebook-account-not-connected' ) ) && defined( 'HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN' ) && HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN ) {
 
 			hm_clear_messages( 'login' );
-			$return = $this->perform_wordpress_register_from_provider();
+			$return = $this->register();
 			hm_clear_messages( 'register' );
 		}
 		
@@ -270,7 +199,7 @@ class HMA_SSO_Provider {
 	
 	function register_link_submitted() {
 	
-		$return = $this->perform_wordpress_register_from_provider();
+		$return = $this->register();
 		
 		do_action( 'hma_sso_register_attempt_completed', &$this, $return );
 		
@@ -300,7 +229,7 @@ class HMA_SSO_Provider {
 	function _check_sso_connect_with_account_submitted() {
 	
 		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id ) {
-			$result = $this->provider_authentication_connect_with_account_completed();
+			$result = $this->link();
 			do_action( 'hma_sso_connect_with_account_completed', &$this, $result );
 			
 			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
@@ -316,50 +245,6 @@ class HMA_SSO_Provider {
 			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
 			exit;
 		}
-	}
-	
-	function _check_wordpress_login_and_connect_provider_with_account_submitted() {
-		if ( isset( $_POST['sso_wordpress_login_connect_provider_with_account'] ) && $_POST['sso_wordpress_login_connect_provider_with_account'] == $this->id && check_admin_referer( 'hma_login_form_connect_with_sso_' . $this->id ) ) {
-			
-			$result = $this->perform_wordpress_login_from_site_and_connect_provider_with_account();
-						
-			if ( ( !$result ) || is_wp_error( $result ) ) {
-				
-				//set the access token for the hooks below
-				$this->access_token = $this->get_access_token_from_string( $_POST['access_token'] );
-				
-				add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
-				add_action( 'hma_sso_register_form', array( &$this, 'register_form_fields' ) );
-				
-			    do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$this, $result );
-			    
-			    if ( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
-				    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' );	    
-			    else
-				    wp_redirect( get_bloginfo( 'register_url', 'display' ) . '?message=' );
-			    exit;
-			}
-			else {
-				
-				do_action( 'hma_sso_register_completed', &$this, $result );
-				
-			    if ( $_POST['redirect_to'] )
-			    	$redirect = $_POST['redirect_to'];
-			    elseif ( $_POST['referer'] )
-			    	$redirect = $_POST['referer'];
-			    elseif ( wp_get_referer() )
-			    	$redirect = wp_get_referer();
-			    else
-			    	$redirect = get_bloginfo('edit_profile_url', 'display');
-			    	
-			    wp_redirect( $redirect );
-			    exit;
-			}
-		}
-	}
-	
-	function get_access_token_from_string( $string ) {
-		return $string;
 	}
 	
 	function _get_sso_login_submit_url() {
@@ -383,20 +268,6 @@ class HMA_SSO_Provider {
 	
 	function _get_provider_authentication_completed_register_redirect_url() {
 		return html_entity_decode( wp_nonce_url( add_query_arg( 'sso_registrar_authorized', $this->id, get_bloginfo( 'register_url', 'display' ) ), 'sso_registrar_authorized_' . $this->id ) );
-	}
-	
-	//form hooks
-	function wordpress_login_and_connect_provider_with_account_form_field() {
-		
-		if ( empty( $this->access_token ) )
-			return;
-		
-		?>
-		<input type="hidden" name="sso_wordpress_login_connect_provider_with_account" value="<?php echo $this->id ?>" />
-		<input type="hidden" name="sso_provider_authorized" value="<?php echo $this->id ?>" />
-		<input type="hidden" name="access_token" value="<?php echo $this->get_access_token_string() ?>" />
-		<?php wp_nonce_field( 'hma_login_form_connect_with_sso_' . $this->id ) ?>
-		<?php
 	}
 	
 	function user_info() {
@@ -427,8 +298,8 @@ class HMA_SSO_Avatar_Options {
 		$this->avatar_options = array();
 	}
 	
-	function register_avatar_option( $hma_SSO_Avatar ) {
-		$this->avatar_options[] = $hma_SSO_Avatar;
+	function register_avatar_option( $HMA_SSO_Avatar ) {
+		$this->avatar_options[] = $HMA_SSO_Avatar;
 	}
 
 }

@@ -35,7 +35,7 @@ function hma_do_login_redirect( $return ) {
 		if ( !empty( $_REQUEST['redirect_to'] ) )
 			add_query_arg( 'redirect_to', $_REQUEST['redirect_to'], $redirect );
 
-		if ( $_REQUEST['referer'] )
+		if ( ! empty( $_REQUEST['referer'] ) )
 			$redirect = add_query_arg( 'referer', $_REQUEST['referer'], $redirect );
 
 		elseif ( wp_get_referer() )
@@ -46,10 +46,10 @@ function hma_do_login_redirect( $return ) {
 
 	} else {
 
-		if ( $_REQUEST['redirect_to'] )
+		if ( ! empty( $_REQUEST['redirect_to'] ) )
 			$redirect = urldecode( $_REQUEST['redirect_to'] );
 
-		elseif ( $_POST['referer'] ) //success
+		elseif ( ! empty( $_POST['referer'] ) ) //success
 			$redirect = $_POST['referer'];
 
 		else
@@ -73,7 +73,7 @@ function hma_check_for_sso_providers_logged_in() {
 
 	foreach ( hma_get_sso_providers() as $sso_provider )
 		if ( $sso_provider->check_for_provider_logged_in() )
-			if ( $sso_provider->perform_wordpress_login_from_provider() )
+			if ( $sso_provider->login() )
 				return true;
 
 }
@@ -105,7 +105,7 @@ function hma_login_in_user_from_sso_providers() {
 
 	foreach ( hma_get_sso_providers() as $sso_provider )
 		if ( $sso_provider->check_for_provider_logged_in() )
-			if ( $sso_provider->perform_wordpress_login_from_provider() )
+			if ( $sso_provider->login() )
 				return true;
 
 }
@@ -143,7 +143,7 @@ function hma_logout() {
 		// Fire the WordPress logout
 		wp_logout();
 
-		if ( $_GET['redirect_to'] ) {
+		if ( ! empty( $_GET['redirect_to'] ) ) {
 		    $redirect = $_GET['redirect_to'];
 
 		} else {
@@ -202,57 +202,6 @@ function hma_lost_password_submitted() {
 	}
 }
 add_action( 'hma_lost_password_submitted', 'hma_lost_password_submitted' );
-
-/**
- * Process the SSO form submission
- *
- * @return null
- */
-function hma_sso_register_submitted() {
-
-	$registered_with_sso_provider = hma_check_for_sso_providers_registered();
-
-	if ( !$registered_with_sso_provider )
-		return;
-
-	$result = $registered_with_sso_provider->register_sso_submitted();
-
-	if ( ( !$result ) || is_wp_error( $result ) ) {
-
-		add_action( 'hma_sso_register_form', array( &$registered_with_sso_provider, 'register_form_fields' ) );
-	    do_action( 'hma_sso_provider_register_submitted_with_erroneous_details', &$registered_with_sso_provider, $result );
-
-	    if ( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
-		    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' );
-
-	    else
-		    wp_redirect( get_bloginfo( 'register_url', 'display' ) . '?message=' );
-
-	    exit;
-
-	} else {
-
-		do_action( 'hma_sso_register_completed', &$registered_with_sso_provider, $result );
-
-	    if ( $_POST['redirect_to'] )
-	    	$redirect = $_POST['redirect_to'];
-
-	    elseif ( $_POST['referer'] )
-	    	$redirect = $_POST['referer'];
-
-	    elseif ( wp_get_referer() )
-	    	$redirect = wp_get_referer();
-
-	    else
-	    	$redirect = get_bloginfo('edit_profile_url', 'display');
-
-	    wp_redirect( $redirect );
-	    exit;
-
-	}
-
-}
-add_action( 'hma_sso_register_submitted', 'hma_sso_register_submitted' );
 
 /**
  * Process the registration form submission

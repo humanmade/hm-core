@@ -20,8 +20,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 		parent::__construct();
 		
-		if ( !defined( 'HMA_SSO_FACEBOOK_APP_ID' ) || !defined( 'HMA_SSO_FACEBOOK_APPLICATION_SECRET' ) )
+		if ( !defined( 'HMA_SSO_FACEBOOK_APP_ID' ) || !defined( 'HMA_SSO_FACEBOOK_APPLICATION_SECRET' ) ) {
+			
+			throw new Exception( 'constants-not-defined' );
 			return new WP_Error( 'constants-not-defined' );
+		}
 		
 		$this->id = 'facebook';
 		$this->name = 'Facebook';
@@ -43,56 +46,29 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 							
 	}
 	
+	/**
+	 * Gets the facebook access token for $this->user
+	 * 
+	 * @access public
+	 * @return null
+	 */
 	public function get_access_token() {
 	
-		if( !$this->user )
+		if( ! $this->user )
 			return null;
 
 		return $this->get_user_access_token( $this->user->ID );
-	
 	}
 
-	function register_sso_submitted() {
-		
-		return $this->perform_wordpress_register_from_provider();
-	
-	}
-	
 	/**
-	 * Gets the access token and fires any errors before showing the Register With This SSO form.
+	 * Link the current Facebook with $this->user
 	 * 
-	 * @return wp_error || true on success
+	 * @access public
+	 * @return true | WP_Error on failure
 	 */
-	function provider_authentication_register_completed() {
+	public function link() {
 		
-		//try to use the fb cookie first
-		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
-			$this->access_token = $access_token;
-		} else {
-
-			return new WP_Error( 'no-access-token' );
-		}
-		
-		$info = $info = $this->get_user_info();
-		
-		//Check if this facebook account has already been connected with an account, if so log them in and dont register
-		if ( !empty( $info['_fb_uid'] ) && $this->_get_user_id_from_sso_id( $info['_fb_uid'] ) ) {
-
-			$result = $this->perform_wordpress_login_from_provider();
-			do_action( 'hma_sso_register_completed', &$this );
-		} elseif ( empty( $info['_fb_uid'] ) ) {
-			
-			hm_error_message( 'There was a problem communication with Facebook, please try again.', 'register' );
-			return new WP_Error( 'facebook-connection-error' );
-			
-		}
-		
-		return true;
-	}
-	
-	function provider_authentication_connect_with_account_completed() {
-		
-		if ( !is_user_logged_in() )
+		if ( ! is_user_logged_in() )
 			return new WP_Error( 'user-logged-in' );
 		
 		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
@@ -104,10 +80,10 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		$info = $this->get_facebook_user_info();
 
-		//Check if this twitter account has already been connected with an account, if so log them in and dont register
+		//Check if this facebook account has already been connected with an account, if so log them in and dont register
 		if ( $this->_get_user_id_from_sso_id( $info->id ) ) {
 			
-			hm_error_message( 'This Twitter account is already linked with another account, please try a different one.', 'update-user' );
+			hm_error_message( 'This Facebook account is already linked with another account, please try a different one.', 'update-user' );
 			return new WP_Error( 'sso-provider-already-linked' );
 		}
 		
@@ -119,26 +95,12 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return true;
 	}
 	
-	public function connect() {
+	public function unlink() {
 		
-		if( !$this->client->getUser() )
-			return new WP_Error( 'not-logged-in-to-facebook' );
+		if ( ! $this->user )
+			return new WP_Error( 'no-user-set' );
 		
-		$fb_uid = $this->client->getUser();
-		$this->access_token = $this->client->getAccessToken();
-		
-		update_user_meta( $this->user->ID, '_fb_access_token', $this->access_token );
-		update_user_meta( $this->user->ID, '_fb_uid', $fb_uid );
-		
-		return $this->user->ID;
-	}
-	
-	function unlink() {
-		
-		if ( !$this->user )
-			return new WP_Error( 'user-not-logged-in' );
-		
-		if ( !get_user_meta( $this->user->ID, '_fb_uid', true ) ) {
+		if ( ! get_user_meta( $this->user->ID, '_fb_uid', true ) ) {
 			return true;	
 		}
 		
@@ -152,9 +114,9 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->logout( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
 	}
 	
-	function is_authenticated() {
+	public function is_authenticated() {
 		
-		if( !$this->user )
+		if( ! $this->user )
 			return false;
 		
 		$access_token = get_user_meta( $this->user->ID, '_fb_access_token', true );
@@ -232,7 +194,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return 'https://graph.facebook.com/oauth/authorize?client_id=' . $this->api_key . '&redirect_uri=' . $this->_get_oauth_redirect_url();
 	}
 	
-	function check_for_provider_logged_in() {
+	public function check_for_provider_logged_in() {
 		
 		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
@@ -241,18 +203,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return (bool) $this->access_token;
 	}
 	
-	function register_form_fields() {
-		
-		if ( empty( $this->access_token ) )
-			return;
-		
-		?>
-		<input type="hidden" name="sso_registrar_authorized" value="<?php echo $this->id ?>" />
-		<input type="hidden" name="access_token" value="<?php echo $this->access_token ?>" />
-		<?php
-	}
-	
-	function get_access_token_from_cookie_session() {
+	private function get_access_token_from_cookie_session() {
 		
 		if ( empty( $this->client ) )
 			return null;
@@ -291,17 +242,17 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	}
 	
 	
-	function perform_wordpress_login_from_provider() {
+	public function login() {
 		
-		if ( !$this->check_for_provider_logged_in() )
+		if ( ! $this->check_for_provider_logged_in() ) {
+			hm_error_message( 'You are not logged in to Facebook', 'login' );
 			return new WP_Error( 'no-logged-in-to-facebook' );
+		}
 		
 		global $wpdb;
 		
 		$fb_uid = $this->client->getUser();
-		
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$fb_uid}'" );
-		
 		
 		if ( !$user_id ) {
 			
@@ -318,19 +269,18 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		update_user_meta( $user_id, '_fb_access_token', $this->get_access_token_from_cookie_session() );		
 		
 		wp_set_auth_cookie( $user_id, false );
-		set_current_user( $user_id );
+		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);
 		do_action( 'hma_login_submitted_success' );
 		
 		return true;
-		
 	}
 	
-	function perform_wordpress_register_from_provider() {
+	public function register() {
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if ( ( $result = $this->perform_wordpress_login_from_provider() ) && !is_wp_error( $result ) ) {
+		if ( ( $result = $this->login() ) && !is_wp_error( $result ) ) {
 			return $result;
 		}
 		
@@ -355,22 +305,19 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user' ),11 );
 		
 		$userdata['override_nonce'] = true;
-		$userdata['do_login'] = true;
-		$userdata['do_redirect'] = false;
-		$userdata['unique_email'] = false;
-		$userdata['send_email'] = true;
-		$userdata['gender'] = $_fb_profile_data['gender'];
-		$userdata['url'] = $_fb_profile_data['website'];
-		$userdata['location'] = $_fb_profile_data['location']['name'];
-		$userdata['age'] = ( (int) date('Y') ) - ( (int) date( 'Y', strtotime( $_fb_profile_data['birthday'] ) ) );
+		$userdata['do_login'] 		= true;
+		$userdata['do_redirect'] 	= false;
+		$userdata['unique_email']	= false;
+		$userdata['send_email'] 	= true;
+		$userdata['gender'] 		= $_fb_profile_data['gender'];
+		$userdata['url'] 			= $_fb_profile_data['website'];
+		$userdata['location'] 		= $_fb_profile_data['location']['name'];
+		$userdata['age'] 			= ( (int) date('Y') ) - ( (int) date( 'Y', strtotime( $_fb_profile_data['birthday'] ) ) );
 		
 		// Lets us skip email check from wp_insert_user()
 		define( 'WP_IMPORTING', true );
 		
 	 	$result = $user_id = hma_new_user( $userdata );
-	 	
-	 	if ( is_wp_error( $result ) )
-			add_action( 'hma_sso_login_connect_provider_with_account_form', array( &$this, 'wordpress_login_and_connect_provider_with_account_form_field' ) );
 	 	
 	 	// Set_user() will wide access token
 	 	$token = $this->access_token;
@@ -381,7 +328,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	 	$this->update_user_facebook_information();
 	 	
 	 	//set the avatar to their twitter avatar if registration completed
-		if ( !is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated() ) {
+		if ( ! is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated() ) {
 			
 			$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
@@ -433,7 +380,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		}
 		
 	}
-	
 	
 	function _get_facebook_username() {
 	
