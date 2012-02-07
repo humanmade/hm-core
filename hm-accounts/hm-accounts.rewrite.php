@@ -28,8 +28,21 @@ function hma_rewrite_rules() {
 		hm_add_rewrite_rule( '^' . hma_get_register_inline_rewrite_slug() . '/?$', 'is_register=1', $register_inline, array( 'post_query_properties' => array( 'is_home' => false, 'is_404' => false, 'is_register' => true ), 'permission' => 'logged_out_only' ) );
 
 	if ( file_exists( $edit_profile = hma_get_edit_profile_template() ) )
-		hm_add_rewrite_rule( '^' . hma_get_edit_profile_rewrite_slug() . '/?$', 'author_name=$matches[1]&is_profile=1', $edit_profile, array( 'post_query_properties' => array( 'is_home' => false, 'is_edit_profile' => true ), 'permission' => 'displayed_user_only' ) );
-
+		hm_add_rewrite_rule( 
+			'^' . hma_get_edit_profile_rewrite_slug() . '/?$', 
+			'author_name=$matches[1]&is_profile=1', 
+			$edit_profile, 
+			array( 
+				'post_query_properties' => array( 'is_home' => false, 'is_edit_profile' => true ), 
+				'permission' => 'displayed_user_only',
+				'request_callback' => function( $request ) {
+					
+					if ( is_user_logged_in() )
+						$request->query_vars['author'] = get_current_user_id();
+				}
+			 )
+		);
+		
 	if ( file_exists( $profile = hma_get_user_profile_template() ) )
 		hm_add_rewrite_rule( '^' . hma_get_user_profile_rewrite_slug() . '/([^\/]*)(/page/([\d]*))?/?$', 'author_name=$matches[1]&paged=$matches[3]', $profile, array( 'post_query_properties' => array( 'is_home' => false, 'is_user_profile' => true ) ) );
 

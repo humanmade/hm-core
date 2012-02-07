@@ -97,7 +97,10 @@ function hm_set_custom_rewrite_rule_current_page( $request ) {
 	if ( isset( $hm_rewrite_rules ) && array_key_exists( $request->matched_rule, (array) $hm_rewrite_rules ) ) {
 
 		$hm_current_rewrite_rule = $hm_rewrite_rules[$request->matched_rule];
-
+		
+		if ( ! empty( $hm_current_rewrite_rule[3]['request_callback'] ) && is_callable( $hm_current_rewrite_rule[3]['request_callback'] ) )
+			call_user_func( $hm_current_rewrite_rule[3]['request_callback'], $request );
+		
 		do_action_ref_array( 'hm_parse_request_' . $request->matched_rule, array( &$request ) );
 
 		$hm_current_rewrite_rule[4] = $request->query_vars;
