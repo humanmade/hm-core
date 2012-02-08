@@ -155,7 +155,7 @@ function hm_setcookie_js( $hm_messages ) {
 	$cookie = json_encode( $hm_messages ); ?>
 	
 	<script type="text/javascript">
-		document.cookie = 'hm_messages=<?php echo $cookie; ?>; path=/';
+		document.cookie = 'hm_messages=<?php echo $cookie; ?>; path=<?php echo COOKIEPATH; ?>';
 	</script>
 	
 <?php }
