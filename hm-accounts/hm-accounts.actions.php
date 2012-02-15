@@ -281,18 +281,14 @@ function hma_profile_submitted() {
 
 	}
 
-	// Check that the passwords match is they were $_POST'd
-	if ( !empty( $user_data['user_pass'] ) && isset( $user_data['user_pass2'] ) && ( $user_data['user_pass'] !== $user_data['user_pass2'] ) ) {
+	// Check that the passwords match if they were $_POST'd
+	if ( ! empty( $_POST['user_pass'] ) && isset( $_POST['user_pass2'] ) && ( $_POST['user_pass'] !== $_POST['user_pass2'] ) ) {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
-	
-	// Unset user_pass2
-	if ( $user_data['user_pass'] && $user_data['user_pass2'] && ( $user_data['user_pass'] === $user_data['user_pass2'] ) )
-		unset( $user_data['user_pass2'] );
-		
-	if ( empty( $user_data['user_pass'] ) )
-		unset( $user_data['user_pass'] );
+
+	if ( ! empty( $_POST['user_pass'] ) )
+		$user_data['user_pass'] = esc_attr( $_POST['user_pass'] );
 
 	$user_data['ID'] = $current_user->ID;
 
@@ -324,12 +320,12 @@ function hma_profile_submitted() {
 	}
 
 	if ( !empty( $_FILES['user_avatar']['name'] ) )
-		$user_data['user_avatar'] = $_FILES['user_avatar'];
+		$user_data['user_avatar'] = esc_attr( $_FILES['user_avatar'] );
 
 	$success = hma_update_user_info( $user_data );
 
 	// Unlink any SSO providers
-	if ( !is_wp_error( $success ) && !empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
+	if ( ! is_wp_error( $success ) && ! empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
 
 		if ( empty( $user_data['user_pass'] ) ) {
 			hm_error_message( 'The social network(s) could not be unlinked because you did not enter your password', 'update-user' );
