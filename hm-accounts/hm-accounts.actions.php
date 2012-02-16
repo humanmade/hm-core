@@ -56,7 +56,9 @@ function hma_do_login_redirect( $return ) {
 			$redirect = get_bloginfo('url');
 
 		do_action( 'hma_login_submitted_success', $redirect );
-
+		
+		$redirect = apply_filters( 'hma_login_redirect', $redirect_to, $user );
+		
 		wp_redirect( hm_parse_redirect( $redirect ), 303 );
 		exit;
 	}
