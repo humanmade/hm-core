@@ -57,7 +57,7 @@ function hma_do_login_redirect( $return ) {
 
 		do_action( 'hma_login_submitted_success', $redirect );
 		
-		$redirect = apply_filters( 'hma_login_redirect', $redirect_to, $user );
+		$redirect = apply_filters( 'hma_login_redirect', $redirect, $user );
 		
 		wp_redirect( hm_parse_redirect( $redirect ), 303 );
 		exit;
