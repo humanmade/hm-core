@@ -26,6 +26,12 @@ include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
 include_once( HM_CORE_PATH . 'hm-core.classes.php' );
 
+// Load Custom Metaboxes and Fields for WordPress
+function hm_initialize_cmb_meta_boxes() {
+	include_once( HM_CORE_PATH . '/Custom-Metaboxes-and-Fields-for-WordPress/init.php' );
+}
+add_action( 'init', 'hm_initialize_cmb_meta_boxes', 9999 );
+
 // Related posts function
 // @todo wrap in theme-supports?
 include_once( HM_CORE_PATH . 'hm-core.related-posts.php' );
