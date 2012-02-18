@@ -1639,3 +1639,16 @@ function unregister_post_type( $post_type ) {
 }
 
 endif;
+
+if ( ! function_exists( 'is_login' ) ) :
+
+/**
+ * Simple way to check whether you are on the login page
+ * 
+ * @return bool
+ */
+function is_login() {
+    return in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) );
+}
+
+endif;
