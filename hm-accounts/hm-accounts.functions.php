@@ -245,7 +245,8 @@ function hma_log_user_in( $args ) {
 
 	$defaults = array(
 		'remember' => false,
-		'allow_email_login' => true
+		'allow_email_login' => true,
+		'password_hashed' => false
 	);
 
 	// Strip any tags then may have been put into the array

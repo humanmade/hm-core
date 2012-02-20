@@ -56,7 +56,9 @@ function hma_do_login_redirect( $return ) {
 			$redirect = get_bloginfo('url');
 
 		do_action( 'hma_login_submitted_success', $redirect );
-
+		
+		$redirect = apply_filters( 'hma_login_redirect', $redirect, $user );
+		
 		wp_redirect( hm_parse_redirect( $redirect ), 303 );
 		exit;
 	}
@@ -281,18 +283,17 @@ function hma_profile_submitted() {
 
 	}
 
-	// Check that the passwords match is they were $_POST'd
-	if ( !empty( $user_data['user_pass'] ) && isset( $user_data['user_pass2'] ) && ( $user_data['user_pass'] !== $user_data['user_pass2'] ) ) {
+	// Check that the passwords match if they were $_POST'd
+	if ( ! empty( $_POST['user_pass'] ) && isset( $_POST['user_pass2'] ) && ( $_POST['user_pass'] !== $_POST['user_pass2'] ) ) {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
-	
-	// Unset user_pass2
-	if ( $user_data['user_pass'] && $user_data['user_pass2'] && ( $user_data['user_pass'] === $user_data['user_pass2'] ) )
-		unset( $user_data['user_pass2'] );
+
+	if ( ! empty( $_POST['user_pass'] ) )
+		$user_data['user_pass'] = esc_attr( $_POST['user_pass'] );
 		
-	if ( empty( $user_data['user_pass'] ) )
-		unset( $user_data['user_pass'] );
+	if ( ! empty( $_POST['user_email'] ) )
+		$user_data['user_email'] = esc_attr( $_POST['user_email'] );
 
 	$user_data['ID'] = $current_user->ID;
 
@@ -324,7 +325,7 @@ function hma_profile_submitted() {
 	}
 
 	if ( !empty( $_FILES['user_avatar']['name'] ) )
-		$user_data['user_avatar'] = $_FILES['user_avatar'];
+		$user_data['user_avatar'] = esc_attr( $_FILES['user_avatar'] );
 
 	$success = hma_update_user_info( $user_data );
 

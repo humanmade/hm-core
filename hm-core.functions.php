@@ -1655,3 +1655,16 @@ function hm_remove_wp_links() {
 	} );
 
 }
+
+if ( ! function_exists( 'is_login' ) ) :
+
+/**
+ * Simple way to check whether you are on the login page
+ * 
+ * @return bool
+ */
+function is_login() {
+    return in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) );
+}
+
+endif;

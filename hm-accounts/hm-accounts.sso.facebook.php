@@ -297,7 +297,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		} catch(Exception $e) {
 			return new WP_Error( 'facebook-exception', $e->getMessage() );
 		}
-				
+		
 		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, $_fb_profile_data, &$this );
 		
 		if ( !empty( $_POST['user_login'] ) )
