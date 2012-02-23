@@ -56,10 +56,11 @@ function hma_do_login_redirect( $return ) {
 			$redirect = get_bloginfo('url');
 
 		do_action( 'hma_login_submitted_success', $redirect );
-		
+
 		$redirect = apply_filters( 'hma_login_redirect', $redirect, $user );
-		
-		wp_redirect( hm_parse_redirect( $redirect ), 303 );
+
+		// we have to use header: location as wp_redirect messes up arrays in GET params
+		header( 'Location: ' . hm_parse_redirect( $redirect ), true, 303 );
 		exit;
 	}
 
@@ -212,7 +213,7 @@ add_action( 'hma_lost_password_submitted', 'hma_lost_password_submitted' );
  */
 function hma_register_submitted() {
 
-	$hm_return = hma_new_user( array(
+	$hm_return = hma_new_user( apply_filters( 'hma_register_args', array(
 	    'user_login' 	=> $_POST['user_login'],
 	    'user_email'	=> $_POST['user_email'],
 	    'use_password' 	=> true,
@@ -223,7 +224,7 @@ function hma_register_submitted() {
 	    'do_redirect'	=> false,
 	    'send_email'	=> true,
 	    'override_nonce'=> true
-	) );
+	) ) );
 
 	if ( is_wp_error( $hm_return ) ) {
 
@@ -288,7 +289,7 @@ function hma_profile_submitted() {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
-
+	
 	if ( ! empty( $_POST['user_pass'] ) )
 		$user_data['user_pass'] = esc_attr( $_POST['user_pass'] );
 		
@@ -330,7 +331,7 @@ function hma_profile_submitted() {
 	$success = hma_update_user_info( $user_data );
 
 	// Unlink any SSO providers
-	if ( ! is_wp_error( $success ) && ! empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
+	if ( !is_wp_error( $success ) && !empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
 
 		if ( empty( $user_data['user_pass'] ) ) {
 			hm_error_message( 'The social network(s) could not be unlinked because you did not enter your password', 'update-user' );
