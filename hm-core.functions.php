@@ -413,11 +413,12 @@ add_action( 'init', 'hm_add_term_meta_table' );
 /**
  * Creates the termmeta table if it deos not exist
  *
+ * @todo this causes database error on sites which have termmeta already
  */
 function hm_create_term_meta_table() {
 	global $wpdb;
-	// check if the table is already exists
 
+	// check if the table is already exists
 	if ( get_option( 'hm_created_term_meta_table' ) )
 		return;
 
