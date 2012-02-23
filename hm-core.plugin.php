@@ -25,6 +25,7 @@ include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
 include_once( HM_CORE_PATH . 'hm-core.classes.php' );
+include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
 
 // Load Custom Metaboxes and Fields for WordPress
 function hm_initialize_cmb_meta_boxes() {

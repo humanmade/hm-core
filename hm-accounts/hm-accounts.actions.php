@@ -56,7 +56,7 @@ function hma_do_login_redirect( $return ) {
 			$redirect = get_bloginfo('url');
 
 		do_action( 'hma_login_submitted_success', $redirect );
-		
+
 		$redirect = apply_filters( 'hma_login_redirect', $redirect, $user );
 		
 		wp_redirect( hm_parse_redirect( $redirect ), 303 );
@@ -288,7 +288,7 @@ function hma_profile_submitted() {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
-
+	
 	if ( ! empty( $_POST['user_pass'] ) )
 		$user_data['user_pass'] = esc_attr( $_POST['user_pass'] );
 		
