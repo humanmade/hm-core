@@ -25,6 +25,7 @@ include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
 include_once( HM_CORE_PATH . 'hm-core.classes.php' );
+include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
 
 // Load Custom Metaboxes and Fields for WordPress
 function hm_initialize_cmb_meta_boxes() {
@@ -79,8 +80,8 @@ if ( ( ! defined( 'HM_ENABLE_PHPTHUMB' ) || HM_ENABLE_PHPTHUMB ) && ! function_e
 	add_action( 'init', 'hm_deactivate_conflicts' );
 
 // New style of loading stuff based off theme supports
-add_action( 'plugins_loaded', function() {
-	
+function hm_theme_supports() {
+
 	// Related posts function
 	if ( current_theme_supports( 'hm-related-posts' ) ) {
 		include_once( HM_CORE_PATH . 'hm-core.related-posts.php' );
@@ -93,4 +94,5 @@ add_action( 'plugins_loaded', function() {
 		}
 	
 	}
-}, 9 );
+}
+add_action( 'plugins_loaded', 'hm_theme_supports', 9 );

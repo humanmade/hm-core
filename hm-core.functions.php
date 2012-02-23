@@ -704,7 +704,8 @@ function hm_get_post_external_image( $post_id = null ) {
 }
 
 function hm_remote_get_file( $url, $cache = true ) {
-
+	
+	
 	//check for stuff
 	$upload_dir = wp_upload_dir();
 	$dest_folder = $upload_dir['basedir'] . '/remote_files/';
@@ -720,10 +721,12 @@ function hm_remote_get_file( $url, $cache = true ) {
 		mkdir( $dest_folder );
 	}
 
-	if ( file_exists( $dest_file ) && file_get_contents( $dest_file ) && $cache === true )
+	if ( file_exists( $dest_file ) && file_get_contents( $dest_file ) && $cache === true ) {
 		return $dest_file;
-
-
+	}
+	
+	do_action( 'start_operation', $operation = ( 'Remote get file: ' . $url ) );
+	
 	if ( $fp = @fopen($url, 'r') ) {
    		$content = '';
    		// keep reading until there's nothing left
@@ -735,6 +738,7 @@ function hm_remote_get_file( $url, $cache = true ) {
    	if ( empty( $content ) ) {
    		$file_404s[$url] = time();
 		update_option( 'remote_404s', $file_404s );
+		do_action( 'end_operation', $operation );
    		return null;
    	}
 
@@ -742,13 +746,13 @@ function hm_remote_get_file( $url, $cache = true ) {
 
 	$image_data = substr($content, - $parts[1]);
 
-
-
 	$ptr = fopen($dest_file, 'wb');
 
 	fwrite($ptr, $image_data);
 	fclose($ptr);
-
+	
+	do_action( 'end_operation', $operation );
+	
 	return $dest_file;
 }
 
