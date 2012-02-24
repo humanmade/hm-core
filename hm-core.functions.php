@@ -1652,12 +1652,19 @@ endif;
  */
 function hm_remove_wp_links() {
 
-	add_action( 'admin_menu', function() {
-	
-		remove_menu_page( 'link-manager.php' );
-	
-	} );
+	add_action( 'admin_menu', '_hm_remove_wp_link_callback' );
 
+}
+
+/**
+ * Inermal callback function used in hm-remove_wp_link
+ * 
+ * @access private
+ */
+function _hm_remove_wp_link_callback() {
+
+	remove_menu_page( 'link-manager.php' );
+	
 }
 
 if ( ! function_exists( 'is_login' ) ) :
