@@ -87,9 +87,11 @@ function hm_theme_supports() {
 	
 	} else {
 		
-		// We create a mock function to alert client code that theme supports is needed for this
-		function hm_get_related_posts() {
-			throw new Exception( 'hm_related_posts is not available, you must add theme supports for "hm-related-posts"' );
+		if ( ! function_exists( 'hm_get_relared_posts' ) ) {
+			// We create a mock function to alert client code that theme supports is needed for this
+			function hm_get_related_posts() {
+				throw new Exception( 'hm_related_posts is not available, you must add theme supports for "hm-related-posts"' );
+			}
 		}
 	
 	}
