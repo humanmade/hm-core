@@ -246,8 +246,17 @@ class HMA_SSO_Provider {
 	
 	function _get_sso_login_submit_url() {
 		$url = add_query_arg( 'id', $this->id, get_bloginfo( 'login_url', 'display' ) . 'sso/authenticated/' );
-		$url = add_query_arg( $_GET, $url );
+		$args = $_GET;
 		
+		//re-urlencode redirect_to
+		if ( ! empty( $args['redirect_to'] ) ) {
+			
+			$url = add_query_arg( 'redirect_to', urlencode( $args['redirect_to'] ), $url );
+			unset( $args['redirect_to'] );
+		}
+		
+		$url = add_query_arg( $args, $url );
+
 		return $url;
 	}
 	
