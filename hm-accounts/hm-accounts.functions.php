@@ -199,15 +199,16 @@ function hma_email_registration_success( $user, $user_pass ) {
 		include( $file );
 		$message = ob_get_contents();
 		ob_end_clean();
-
+		
+		add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
+	
 	} else {
 
 		wp_new_user_notification( $user->ID, $user_pass );
 		return;
 
 	}
-
-	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
+	
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
 	
@@ -328,7 +329,6 @@ function hma_lost_password( $email ) {
 	ob_end_clean();
 
 	add_filter( 'retrieve_password_message', 'hma_lost_password_email', 10, 2 );
-	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
 
@@ -362,6 +362,8 @@ function hma_lost_password_email( $message, $key ) {
 		include( $file );
 		$message = ob_get_contents();
 		ob_end_clean();
+		
+		add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	}
 
 	return $message;
@@ -378,7 +380,6 @@ function hma_lost_password_email( $message, $key ) {
 function hma_reset_password( $user_login, $key ) {
 
 	add_filter( 'password_reset_message', 'hma_reset_password_email', 10, 2 );
-	add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	add_filter( 'wp_mail_from', 'hm_wp_mail_from' );
 	add_filter( 'wp_mail_from_name', 'hm_wp_mail_from_name'  );
 
@@ -412,6 +413,8 @@ function hma_reset_password_email( $message, $new_pass ) {
 		include( $file );
 		$message = ob_get_contents();
 		ob_end_clean();
+		
+		add_filter( 'wp_mail_content_type', 'wp_mail_content_type_html' );
 	}
 
 	return $message;

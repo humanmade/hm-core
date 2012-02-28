@@ -25,7 +25,6 @@ include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
 include_once( HM_CORE_PATH . 'hm-core.classes.php' );
-include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
 
 // Load Custom Metaboxes and Fields for WordPress
 function hm_initialize_cmb_meta_boxes() {
@@ -88,11 +87,17 @@ function hm_theme_supports() {
 	
 	} else {
 		
-		// We create a mock function to alert client code that theme supports is needed for this
-		function hm_get_related_posts() {
-			throw new Exception( 'hm_related_posts is not available, you must add theme supports for "hm-related-posts"' );
+		if ( ! function_exists( 'hm_get_relared_posts' ) ) {
+			// We create a mock function to alert client code that theme supports is needed for this
+			function hm_get_related_posts() {
+				throw new Exception( 'hm_related_posts is not available, you must add theme supports for "hm-related-posts"' );
+			}
 		}
 	
 	}
+	
+	// hm cron
+	if ( current_theme_supports( 'hm-cron' ) )
+		include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
 }
 add_action( 'plugins_loaded', 'hm_theme_supports', 9 );
