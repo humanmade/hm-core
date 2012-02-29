@@ -43,7 +43,8 @@ function hma_do_login_redirect( $return ) {
 
 		$redirect = apply_filters( 'hma_login_redirect', $redirect, $user );
 
-		wp_redirect( hm_parse_redirect( $redirect ), 303 );
+		// we have to use header: location as wp_redirect messes up arrays in GET params
+		header( 'Location: ' . hm_parse_redirect( $redirect ), true, 303 );
 		exit;
 	}
 
