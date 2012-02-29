@@ -1680,3 +1680,22 @@ function is_login() {
 }
 
 endif;
+
+
+/**
+ * Like get_template_part() put lets you pass args to the template file 
+ * Args are available in the tempalte as $template_args array
+ * @param string filepart
+ * @param mixed wp_args style argument list
+ */
+function hm_get_template_part( $file, $template_args = array() ) {
+	
+	$template_args = wp_parse_args( $template_args );
+	
+	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) )
+		require( get_stylesheet_directory() . '/' . $file . '.php' );
+	
+	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
+		require( get_template_directory() . '/' . $file . '.php' ); 
+
+}
