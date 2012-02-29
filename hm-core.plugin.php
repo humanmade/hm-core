@@ -61,7 +61,7 @@ endif;
 
 /**
  * Deactivate conflicting plugins
- * 
+ *
  * @return null
  */
 function hm_deactivate_conflicts() {
@@ -84,20 +84,23 @@ function hm_theme_supports() {
 	// Related posts function
 	if ( current_theme_supports( 'hm-related-posts' ) ) {
 		include_once( HM_CORE_PATH . 'hm-core.related-posts.php' );
-	
+
 	} else {
-		
-		if ( ! function_exists( 'hm_get_relared_posts' ) ) {
+
+		if ( ! function_exists( 'hm_get_related_posts' ) ) {
+
 			// We create a mock function to alert client code that theme supports is needed for this
 			function hm_get_related_posts() {
 				throw new Exception( 'hm_related_posts is not available, you must add theme supports for "hm-related-posts"' );
 			}
+
 		}
-	
+
 	}
-	
+
 	// hm cron
 	if ( current_theme_supports( 'hm-cron' ) )
 		include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
+
 }
-add_action( 'plugins_loaded', 'hm_theme_supports', 9 );
+add_action( 'after_setup_theme', 'hm_theme_supports', 11 );
