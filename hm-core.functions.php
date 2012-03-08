@@ -612,7 +612,7 @@ function hm_get_post_attached_images_id( $post = null ) {
 
     $images = array();
     foreach( hm_get_post_attached_images($post) as $attachment ) {
-    	$images = $attachment->ID;
+    	$images[] = $attachment->ID;
     }
     return $images;
 }
