@@ -603,7 +603,7 @@ function hm_get_post_attached_images( $post = null ) {
     foreach( (array) get_children( array( 'post_parent' => $post->ID, 'post_type' => 'attachment', 'orderby' => 'menu_order', 'order' => 'ASC' ) ) as $attachment ) {
     	if ( !wp_attachment_is_image( $attachment->ID ) || !file_exists( get_attached_file( $attachment->ID ) ) )
     		continue;
-    	$images =  $attachment;
+    	$images[] =  $attachment;
     }
     return $images;
 }
@@ -611,7 +611,7 @@ function hm_get_post_attached_images( $post = null ) {
 function hm_get_post_attached_images_id( $post = null ) {
 
     $images = array();
-    foreach( hm_get_post_attached_images($post) as $attachment ) {
+    foreach( hm_get_post_attached_images( $post ) $attachment ) {
     	$images[] = $attachment->ID;
     }
     return $images;
