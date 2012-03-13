@@ -207,20 +207,23 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		if ( empty( $this->client ) )
 			return null;
-
+		
+		if ( ! empty( $_REQUEST['access_token'] ) )
+			$this->client->setAccessToken( $_REQUEST['access_token'] );
+		
 		if ( !$this->client->getUser() ) {
 			return null;
 		}
-				
+	
 		return $this->client->getAccessToken();
 	}
 	
-	function get_user_info() {
+	protected function get_user_info() {
 
 		$fb_profile_data = $this->get_facebook_user_info();
 			
 		$userdata = array( 
- 			'user_login'	=> sanitize_title( $fb_profile_data['name'] ),
+ 			'user_login'	=> hma_unique_username( sanitize_title( $fb_profile_data['name'] ) ),
 			'first_name' 	=> $fb_profile_data['first_name'],
 			'last_name'		=> $fb_profile_data['last_name'],
 			'description'	=> $fb_profile_data['bio'],
@@ -235,7 +238,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	function get_facebook_user_info() {
 		
 		if ( empty( $this->user_info ) ) {
-			$this->user_info = @$this->client->api('me', 'GET', array( 'access_token' => $this->access_token ));
+			try {
+				$this->user_info = @$this->client->api('me', 'GET', array( 'access_token' => $this->access_token ));
+			} catch( Exception $e ) {
+			
+			}
 		}
 		
 		return $this->user_info;
@@ -278,7 +285,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	}
 	
 	public function register() {
-		
+				
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
 		if ( ( $result = $this->login() ) && !is_wp_error( $result ) ) {
 			return $result;
@@ -303,7 +310,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		//Don't use such strict validation for registration via facebook
 		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user' ),11 );
-		
+
 		$userdata['override_nonce'] = true;
 		$userdata['do_login'] 		= true;
 		$userdata['do_redirect'] 	= false;
@@ -318,7 +325,10 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		define( 'WP_IMPORTING', true );
 		
 	 	$result = $user_id = hma_new_user( $userdata );
-	 	
+
+	 	if ( is_wp_error( $result ) )
+	 		return $result;
+	 		
 	 	// Set_user() will wide access token
 	 	$token = $this->access_token;
 	 	$user = get_userdata( $result );

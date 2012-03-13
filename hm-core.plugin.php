@@ -28,13 +28,9 @@ include_once( HM_CORE_PATH . 'hm-core.classes.php' );
 
 // Load Custom Metaboxes and Fields for WordPress
 function hm_initialize_cmb_meta_boxes() {
-	include_once( HM_CORE_PATH . '/Custom-Metaboxes-and-Fields-for-WordPress/init.php' );
+	include_once( HM_CORE_PATH . 'Custom-Metaboxes-and-Fields-for-WordPress/init.php' );
 }
 add_action( 'init', 'hm_initialize_cmb_meta_boxes', 9999 );
-
-// Related posts function
-// @todo wrap in theme-supports?
-include_once( HM_CORE_PATH . 'hm-core.related-posts.php' );
 
 // Load the custom media button support unless it's specifically disabled
 if ( ! defined( 'HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS' ) || HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS )
@@ -65,7 +61,7 @@ endif;
 
 /**
  * Deactivate conflicting plugins
- * 
+ *
  * @return null
  */
 function hm_deactivate_conflicts() {
@@ -81,3 +77,30 @@ function hm_deactivate_conflicts() {
 
 if ( ( ! defined( 'HM_ENABLE_PHPTHUMB' ) || HM_ENABLE_PHPTHUMB ) && ! function_exists( 'wpthumb' ) )
 	add_action( 'init', 'hm_deactivate_conflicts' );
+
+// New style of loading stuff based off theme supports
+function hm_theme_supports() {
+
+	// Related posts function
+	if ( current_theme_supports( 'hm-related-posts' ) ) {
+		include_once( HM_CORE_PATH . 'hm-core.related-posts.php' );
+
+	} else {
+
+		if ( ! function_exists( 'hm_get_related_posts' ) ) {
+
+			// We create a mock function to alert client code that theme supports is needed for this
+			function hm_get_related_posts() {
+				throw new Exception( 'hm_related_posts is not available, you must add theme supports for "hm-related-posts"' );
+			}
+
+		}
+
+	}
+
+	// hm cron
+	if ( current_theme_supports( 'hm-cron' ) )
+		include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
+
+}
+add_action( 'after_setup_theme', 'hm_theme_supports', 11 );

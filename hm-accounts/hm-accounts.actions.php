@@ -26,23 +26,7 @@ function hma_do_login_redirect( $return ) {
 
 		do_action( 'hma_login_submitted_error', $return );
 
-		if ( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
-			$redirect = add_query_arg( 'message', $return->get_error_code(), get_bloginfo( 'login_inline_url', 'display' ) );
-
-		else
-			$redirect = add_query_arg( 'message', $return->get_error_code(), get_bloginfo( 'login_url', 'display' ) );
-
-		if ( !empty( $_REQUEST['redirect_to'] ) )
-			add_query_arg( 'redirect_to', $_REQUEST['redirect_to'], $redirect );
-
-		if ( ! empty( $_REQUEST['referer'] ) )
-			$redirect = add_query_arg( 'referer', $_REQUEST['referer'], $redirect );
-
-		elseif ( wp_get_referer() )
-			$redirect = add_query_arg( 'referer', wp_get_referer(), $redirect );
-
-		wp_redirect( hm_parse_redirect( $redirect ), 303 );
-		exit;
+		return;
 
 	} else {
 
@@ -56,10 +40,11 @@ function hma_do_login_redirect( $return ) {
 			$redirect = get_bloginfo('url');
 
 		do_action( 'hma_login_submitted_success', $redirect );
-		
+
 		$redirect = apply_filters( 'hma_login_redirect', $redirect, $user );
-		
-		wp_redirect( hm_parse_redirect( $redirect ), 303 );
+
+		// we have to use header: location as wp_redirect messes up arrays in GET params
+		header( 'Location: ' . hm_parse_redirect( $redirect ), true, 303 );
 		exit;
 	}
 
@@ -181,13 +166,7 @@ function hma_lost_password_submitted() {
 
 		do_action( 'hma_lost_password_submitted_error', $success );
 
-		if ( isset( $_REQUEST['login_source'] ) && $_REQUEST['login_source'] == 'popup' )
-			wp_redirect( get_bloginfo( 'lost_password_inline_url', 'display' ) . '?message=' . $success->get_error_code() );
-
-		else
-			wp_redirect( get_bloginfo( 'lost_password_url', 'display' ) . '?message=' . $success->get_error_code() );
-
-		exit;
+		return;
 
 	} else {
 
@@ -212,7 +191,7 @@ add_action( 'hma_lost_password_submitted', 'hma_lost_password_submitted' );
  */
 function hma_register_submitted() {
 
-	$hm_return = hma_new_user( array(
+	$hm_return = hma_new_user( apply_filters( 'hma_register_args', array(
 	    'user_login' 	=> $_POST['user_login'],
 	    'user_email'	=> $_POST['user_email'],
 	    'use_password' 	=> true,
@@ -223,17 +202,12 @@ function hma_register_submitted() {
 	    'do_redirect'	=> false,
 	    'send_email'	=> true,
 	    'override_nonce'=> true
-	) );
+	) ) );
 
 	if ( is_wp_error( $hm_return ) ) {
 
-		if ( isset( $_REQUEST['register_source'] ) && $_REQUEST['register_source'] == 'popup' )
-		    wp_redirect( get_bloginfo( 'register_inline_url', 'display' ) . '?message=' . $hm_return->get_error_code() );
-
-	    else
-		    wp_redirect( get_bloginfo( 'register_url', 'display' ) . '?message=' . $hm_return->get_error_code() );
-
-	    exit;
+		do_action( 'hma_register_submitted_error', $hm_return );
+		return;
 
 	} else {
 
@@ -288,7 +262,7 @@ function hma_profile_submitted() {
 		hm_error_message( 'The passwords you entered do not match', 'update-user' );
 		return;
 	}
-
+	
 	if ( ! empty( $_POST['user_pass'] ) )
 		$user_data['user_pass'] = esc_attr( $_POST['user_pass'] );
 		
@@ -330,7 +304,7 @@ function hma_profile_submitted() {
 	$success = hma_update_user_info( $user_data );
 
 	// Unlink any SSO providers
-	if ( ! is_wp_error( $success ) && ! empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
+	if ( !is_wp_error( $success ) && !empty( $_POST['unlink_sso_providers'] ) && array_filter( (array) $_POST['unlink_sso_providers'] ) ) {
 
 		if ( empty( $user_data['user_pass'] ) ) {
 			hm_error_message( 'The social network(s) could not be unlinked because you did not enter your password', 'update-user' );
@@ -346,6 +320,13 @@ function hma_profile_submitted() {
 		}
 	}
 
+	if ( is_wp_error( $success ) ) {
+		
+		do_action( 'hma_update_user_profile_error', $success );
+		return;
+
+	} else {
+
 	if ( $_POST['redirect_to'] )
 	    $redirect = esc_attr( $_POST['redirect_to'] );
 
@@ -360,7 +341,10 @@ function hma_profile_submitted() {
 
 	do_action( 'hma_update_user_profile_completed', $redirect );
 
-	wp_redirect( add_query_arg( 'message', is_wp_error( $success ) ? $success->get_error_code() : '1', $redirect ) );
+		wp_redirect( $redirect, 303 /* 303 means redirect for form submission - remove this comment */ );
 	exit;
+
+	}
+
 }
 add_action( 'hma_profile_submitted', 'hma_profile_submitted' );

@@ -131,10 +131,6 @@ class HMA_SSO_Provider {
 		$this->user_info = null;
 		$this->access_token = $this->get_access_token();
 	}
-
-	function get_user_info() {
-	
-	}
 	
 	function get_unlink_from_account_url() {
 		
@@ -204,9 +200,10 @@ class HMA_SSO_Provider {
 		do_action( 'hma_sso_register_attempt_completed', &$this, $return );
 		
 		if ( is_wp_error( $return ) )
-			wp_redirect( get_bloginfo( 'register_url', 'display' ), 303 );
+			wp_redirect( wp_get_referer(), 303 );
 		
-		wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
+		else
+			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
 		
 		exit;
 	}
@@ -249,8 +246,17 @@ class HMA_SSO_Provider {
 	
 	function _get_sso_login_submit_url() {
 		$url = add_query_arg( 'id', $this->id, get_bloginfo( 'login_url', 'display' ) . 'sso/authenticated/' );
-		$url = add_query_arg( $_GET, $url );
+		$args = $_GET;
 		
+		//re-urlencode redirect_to
+		if ( ! empty( $args['redirect_to'] ) ) {
+			
+			$url = add_query_arg( 'redirect_to', urlencode( $args['redirect_to'] ), $url );
+			unset( $args['redirect_to'] );
+		}
+		
+		$url = add_query_arg( $args, $url );
+
 		return $url;
 	}
 	
@@ -270,9 +276,6 @@ class HMA_SSO_Provider {
 		return html_entity_decode( wp_nonce_url( add_query_arg( 'sso_registrar_authorized', $this->id, get_bloginfo( 'register_url', 'display' ) ), 'sso_registrar_authorized_' . $this->id ) );
 	}
 	
-	function user_info() {
-		return $this->get_user_info();
-	}
 	
 	//Puishing
 	function can_publish() {	
