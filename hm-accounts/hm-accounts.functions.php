@@ -613,9 +613,14 @@ function hma_get_avatar_upload_path( $user ) {
 	
 	if ( empty( $user->user_avatar_path ) )
 		return '';
-		
-	return ABSPATH . str_replace( ABSPATH, '', $user->user_avatar_path );
 	
+	return $user->user_avatar_path;
+	
+	//windows hackery
+	if ( strpos( $user->user_avatar_path, untrailingslashit( ABSPATH ) ) === 0 )
+		return $user->user_avatar_path;
+	
+	return ABSPATH . $user->user_avatar_path;
 }
 
 /**
