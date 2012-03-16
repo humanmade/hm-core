@@ -10,9 +10,22 @@
  * @param array $args. (default: array())
  * @return null
  */
-function hm_add_rewrite_rule( $rule, $query, $template = null, $args = array() ) {
+function hm_add_rewrite_rule( $rule, $query = '', $template = null, $args = array() ) {
 
 	global $hm_rewrite_rules;
+
+	if ( is_array( $rule ) ) {
+
+		$arr 	= $rule;
+		$rule 	= $arr['rewrite'];
+		$template = $arr['template'];
+		$query 	= $arr['query'];
+		$args 	= $arr;
+	}
+
+	// default to template_directory as base
+	if ( $template && strpos( $template, '/' ) !== 0 )
+		$template = get_template_directory() . '/' . $template;
 
 	$hm_rewrite_rules[ $rule ] = array( $rule, $query, $template, wp_parse_args( $args ) );
 
