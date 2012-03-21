@@ -190,7 +190,7 @@ class HMA_SSO_Provider {
 		
 		do_action( 'hma_sso_login_attempt_completed', &$this, $return );
 		
-		hma_do_login_redirect( $return );
+		hma_do_login_redirect( $return, true );
 	}
 	
 	function register_link_submitted() {

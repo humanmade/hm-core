@@ -20,12 +20,17 @@ add_action( 'hma_login_submitted', 'hma_login_submitted' );
  * @param mixed $return
  * @return null
  */
-function hma_do_login_redirect( $return ) {
+function hma_do_login_redirect( $return, $do_redirect_on_error = false ) {
 
 	if ( is_wp_error( $return ) ) {
 
 		do_action( 'hma_login_submitted_error', $return );
-
+		
+		if ( $do_redirect_on_error ) {
+			wp_redirect( wp_get_referer(), 303 );
+			exit;
+		}
+		
 		return;
 
 	} else {
