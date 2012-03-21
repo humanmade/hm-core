@@ -121,7 +121,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		$access_token = get_user_meta( $this->user->ID, '_fb_access_token', true );
 		
-		if ( !$access_token )
+		if ( ! $access_token )
 			return false;
 			
 		// Check that the access token is still valid
@@ -397,6 +397,25 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		return $info['username'];
 	
+	}
+
+	public function get_facebook_friends() {
+
+		if( $data = get_user_meta( $this->user->ID, '_facebook_friends', true ) )
+			return (array) $data;
+
+		hm( $this->access_token );
+		
+		try {
+			$data = @$this->client->api('me/friends', 'GET', array( 'access_token' => $this->access_token ));
+
+			update_user_meta( $this->user->ID, '_facebook_friends', reset( $data ) );
+		} catch( Exception $e ) {
+				hm( $e );
+			$data = array();
+		}
+		
+		return $data;
 	}
 	
 	public function save_access_token() {
