@@ -1540,14 +1540,22 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
 }
 
 /**
- * Disable the admin bar and admin bar prefs for subscribers
+ * Disable the admin bar by role.
  *
- * @access public
- * @return null
+ * add them support for hm_disable_admin_bar passing an array of roles as the second param.
+ *
+ * @return [type]
  */
-function hm_disable_admin_bar_for_subscribers() {
+function hm_disable_admin_bar() {
 
-	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && in_array( 'subscriber', wp_get_current_user()->roles ) ) :
+	if( is_admin() )
+		return;
+
+	global $_wp_theme_features;
+
+	$maybe_remove = array_intersect( (array) wp_get_current_user()->roles, (array) $_wp_theme_features['hm_disable_admin_bar'][0] );
+
+	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar' ) && ! empty( $maybe_remove ) ) :
 		show_admin_bar( false );
 		remove_action( 'wp_head', '_admin_bar_bump_cb' );
 		wp_dequeue_script( 'admin-bar' );
@@ -1555,7 +1563,24 @@ function hm_disable_admin_bar_for_subscribers() {
 	endif;
 
 }
-add_action( 'init', 'hm_disable_admin_bar_for_subscribers' );
+add_action( 'init', 'hm_disable_admin_bar' );
+
+
+/**
+ * Disable the admin bar and admin bar prefs for subscribers
+ *
+ * @access public
+ * @return null
+ */
+function hm_disable_admin_bar_for_subscribers() {
+
+	if( current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) )
+		add_theme_support( 'hm_disable_admin_bar', array( 'subscriber' ) );
+
+}
+add_action( 'init', 'hm_disable_admin_bar_for_subscribers', 1 );
+
+
 
 /**
  * Gets an array of a specified property from an array of objects. Eg, returns all IDs of $wp_query->posts when passed 'ID'.
