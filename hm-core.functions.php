@@ -705,8 +705,8 @@ function hm_get_post_external_image( $post_id = null ) {
 }
 
 function hm_remote_get_file( $url, $cache = true ) {
-	
-	
+
+
 	//check for stuff
 	$upload_dir = wp_upload_dir();
 	$dest_folder = $upload_dir['basedir'] . '/remote_files/';
@@ -725,9 +725,9 @@ function hm_remote_get_file( $url, $cache = true ) {
 	if ( file_exists( $dest_file ) && file_get_contents( $dest_file ) && $cache === true ) {
 		return $dest_file;
 	}
-	
+
 	do_action( 'start_operation', $operation = ( 'Remote get file: ' . $url ) );
-	
+
 	if ( $fp = @fopen($url, 'r') ) {
    		$content = '';
    		// keep reading until there's nothing left
@@ -751,9 +751,9 @@ function hm_remote_get_file( $url, $cache = true ) {
 
 	fwrite($ptr, $image_data);
 	fclose($ptr);
-	
+
 	do_action( 'end_operation', $operation );
-	
+
 	return $dest_file;
 }
 
@@ -1672,7 +1672,7 @@ endif;
 
 /**
  * Removed all referenced to the WordPress links functioanlity - this is off by default, but generaly who wants Links?
- * 
+ *
  * @access public
  * @return null
  */
@@ -1684,20 +1684,20 @@ function hm_remove_wp_links() {
 
 /**
  * Inermal callback function used in hm-remove_wp_link
- * 
+ *
  * @access private
  */
 function _hm_remove_wp_link_callback() {
 
 	remove_menu_page( 'link-manager.php' );
-	
+
 }
 
 if ( ! function_exists( 'is_login' ) ) :
 
 /**
  * Simple way to check whether you are on the login page
- * 
+ *
  * @return bool
  */
 function is_login() {
