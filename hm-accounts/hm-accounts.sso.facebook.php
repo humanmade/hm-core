@@ -9,7 +9,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		if ( empty( self::$instance ) ) {
 			$className = __CLASS__;
-            self::$instance = new $className();
+			self::$instance = new $className();
 		}
 		
 		return self::$instance;
@@ -121,7 +121,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		$access_token = get_user_meta( $this->user->ID, '_fb_access_token', true );
 		
-		if ( !$access_token )
+		if ( ! $access_token )
 			return false;
 			
 		// Check that the access token is still valid
@@ -223,7 +223,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$fb_profile_data = $this->get_facebook_user_info();
 			
 		$userdata = array( 
- 			'user_login'	=> hma_unique_username( sanitize_title( $fb_profile_data['name'] ) ),
+			'user_login'	=> hma_unique_username( sanitize_title( $fb_profile_data['name'] ) ),
 			'first_name' 	=> $fb_profile_data['first_name'],
 			'last_name'		=> $fb_profile_data['last_name'],
 			'description'	=> $fb_profile_data['bio'],
@@ -279,6 +279,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);
+		do_action( 'wp_login', get_userdata( $user_id )->user_login );
 		do_action( 'hma_login_submitted_success' );
 		
 		return true;
@@ -324,20 +325,20 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		// Lets us skip email check from wp_insert_user()
 		define( 'WP_IMPORTING', true );
 		
-	 	$result = $user_id = hma_new_user( $userdata );
+		$result = $user_id = hma_new_user( $userdata );
 
-	 	if ( is_wp_error( $result ) )
-	 		return $result;
-	 		
-	 	// Set_user() will wide access token
-	 	$token = $this->access_token;
-	 	$user = get_userdata( $result );
-	 	$this->set_user( get_userdata( $result ) );
-	 	$this->access_token = $token;
-	 	
-	 	$this->update_user_facebook_information();
-	 	
-	 	//set the avatar to their twitter avatar if registration completed
+		if ( is_wp_error( $result ) )
+			return $result;
+			
+		// Set_user() will wide access token
+		$token = $this->access_token;
+		$user = get_userdata( $result );
+		$this->set_user( get_userdata( $result ) );
+		$this->access_token = $token;
+		
+		$this->update_user_facebook_information();
+		
+		//set the avatar to their twitter avatar if registration completed
 		if ( ! is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated() ) {
 			
 			$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
@@ -397,6 +398,22 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		return $info['username'];
 	
+	}
+
+	public function get_facebook_friends() {
+
+		if( $data = get_user_meta( $this->user->ID, '_facebook_friends', true ) )
+			return (array) $data;
+		
+		try {
+			$data = @$this->client->api('me/friends', 'GET', array( 'access_token' => $this->access_token ));
+
+			update_user_meta( $this->user->ID, '_facebook_friends', reset( $data ) );
+		} catch( Exception $e ) {
+			$data = array();
+		}
+		
+		return $data;
 	}
 	
 	public function save_access_token() {
@@ -463,15 +480,15 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 		$this->avatar_path = null;
 		
 		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
-		    $this->avatar_path = $avatar;
+			$this->avatar_path = $avatar;
 
 		} elseif ( $this->sso_provider->is_authenticated() ) {
-		    $user_info = $this->sso_provider->get_facebook_user_info();
-		    
+			$user_info = $this->sso_provider->get_facebook_user_info();
+			
 			$image_url = "http://graph.facebook.com/{$user_info['id']}/picture?type=large";			
-		    $this->avatar_path = $this->save_avatar_locally( $image_url, 'jpg' ) ;
-		    
-		    update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
+			$this->avatar_path = $this->save_avatar_locally( $image_url, 'jpg' ) ;
+			
+			update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
 		}
 		
 		return wpthumb( $this->avatar_path, $size );

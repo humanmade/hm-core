@@ -17,9 +17,9 @@ function hm_add_rewrite_rule( $rule, $query = '', $template = null, $args = arra
 	if ( is_array( $rule ) ) {
 
 		$arr 	= $rule;
-		$rule 	= $arr['rewrite'];
-		$template = $arr['template'];
-		$query 	= $arr['query'];
+		$rule 	= isset( $arr['rewrite'] ) ? $arr['rewrite'] : null;
+		$template = isset( $arr['template'] ) ? $arr['template'] : null;
+		$query 	= isset( $arr['query'] ) ? $arr['query'] : null;
 		$args 	= $arr;
 	}
 

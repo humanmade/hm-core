@@ -151,7 +151,8 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		
 		do_action( 'hma_log_user_in', $user_id);
 		do_action( 'hma_login_submitted_success' );
-
+		do_action( 'wp_login', get_userdata( $user_id )->user_login );
+		
 		return true;
 	}
 	
@@ -337,7 +338,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	
 	public function is_access_token_valid() {
 	
-			
 		$client = new TwitterOAuth( $this->api_key ,  $this->consumer_secret, $this->access_token['oauth_token'], $this->access_token['oauth_token_secret']);
 		$user_info = $client->get('account/verify_credentials');
 		
@@ -386,6 +386,14 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		}
 		
 		return null;
+	}
+
+	public function get_twitter_following() {
+
+		$twitter_uid = get_user_meta( $this->user->ID, '_twitter_uid', true );
+		$following = (array) $this->client->get( '/friends/ids', array( 'user_id' => $twitter_uid ) )->ids;
+
+		return $following;
 	}
 	
 	public function get_login_popup_url() {
