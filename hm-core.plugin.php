@@ -101,6 +101,11 @@ function hm_theme_supports() {
 	// hm cron
 	if ( current_theme_supports( 'hm-cron' ) )
 		include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
+		
+	//tlc transients
+	if ( current_theme_supports( 'tlc-transients' ) )
+		include_once( HM_CORE_PATH . 'tlc-transients/tlc-transients.php' );
+		
 
 }
 add_action( 'after_setup_theme', 'hm_theme_supports', 11 );

@@ -705,8 +705,8 @@ function hm_get_post_external_image( $post_id = null ) {
 }
 
 function hm_remote_get_file( $url, $cache = true ) {
-	
-	
+
+
 	//check for stuff
 	$upload_dir = wp_upload_dir();
 	$dest_folder = $upload_dir['basedir'] . '/remote_files/';
@@ -725,9 +725,9 @@ function hm_remote_get_file( $url, $cache = true ) {
 	if ( file_exists( $dest_file ) && file_get_contents( $dest_file ) && $cache === true ) {
 		return $dest_file;
 	}
-	
+
 	do_action( 'start_operation', $operation = ( 'Remote get file: ' . $url ) );
-	
+
 	if ( $fp = @fopen($url, 'r') ) {
    		$content = '';
    		// keep reading until there's nothing left
@@ -751,9 +751,9 @@ function hm_remote_get_file( $url, $cache = true ) {
 
 	fwrite($ptr, $image_data);
 	fclose($ptr);
-	
+
 	do_action( 'end_operation', $operation );
-	
+
 	return $dest_file;
 }
 
@@ -1540,14 +1540,22 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
 }
 
 /**
- * Disable the admin bar and admin bar prefs for subscribers
+ * Disable the admin bar by role.
  *
- * @access public
- * @return null
+ * add them support for hm_disable_admin_bar passing an array of roles as the second param.
+ *
+ * @return [type]
  */
-function hm_disable_admin_bar_for_subscribers() {
+function hm_disable_admin_bar() {
 
-	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) && in_array( 'subscriber', wp_get_current_user()->roles ) ) :
+	if( is_admin() )
+		return;
+
+	global $_wp_theme_features;
+
+	$maybe_remove = array_intersect( (array) wp_get_current_user()->roles, (array) $_wp_theme_features['hm_disable_admin_bar'][0] );
+
+	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar' ) && ! empty( $maybe_remove ) ) :
 		show_admin_bar( false );
 		remove_action( 'wp_head', '_admin_bar_bump_cb' );
 		wp_dequeue_script( 'admin-bar' );
@@ -1555,7 +1563,24 @@ function hm_disable_admin_bar_for_subscribers() {
 	endif;
 
 }
-add_action( 'init', 'hm_disable_admin_bar_for_subscribers' );
+add_action( 'init', 'hm_disable_admin_bar' );
+
+
+/**
+ * Disable the admin bar and admin bar prefs for subscribers
+ *
+ * @access public
+ * @return null
+ */
+function hm_disable_admin_bar_for_subscribers() {
+
+	if( current_theme_supports( 'hm_disable_admin_bar_for_subscribers' ) )
+		add_theme_support( 'hm_disable_admin_bar', array( 'subscriber' ) );
+
+}
+add_action( 'init', 'hm_disable_admin_bar_for_subscribers', 1 );
+
+
 
 /**
  * Gets an array of a specified property from an array of objects. Eg, returns all IDs of $wp_query->posts when passed 'ID'.
@@ -1647,7 +1672,7 @@ endif;
 
 /**
  * Removed all referenced to the WordPress links functioanlity - this is off by default, but generaly who wants Links?
- * 
+ *
  * @access public
  * @return null
  */
@@ -1659,20 +1684,20 @@ function hm_remove_wp_links() {
 
 /**
  * Inermal callback function used in hm-remove_wp_link
- * 
+ *
  * @access private
  */
 function _hm_remove_wp_link_callback() {
 
 	remove_menu_page( 'link-manager.php' );
-	
+
 }
 
 if ( ! function_exists( 'is_login' ) ) :
 
 /**
  * Simple way to check whether you are on the login page
- * 
+ *
  * @return bool
  */
 function is_login() {

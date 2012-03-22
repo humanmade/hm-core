@@ -279,6 +279,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);
+		do_action( 'wp_login', get_userdata( $user_id )->user_login );
 		do_action( 'hma_login_submitted_success' );
 		
 		return true;

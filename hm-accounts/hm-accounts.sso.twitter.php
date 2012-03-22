@@ -151,7 +151,8 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		
 		do_action( 'hma_log_user_in', $user_id);
 		do_action( 'hma_login_submitted_success' );
-
+		do_action( 'wp_login', get_userdata( $user_id )->user_login );
+		
 		return true;
 	}
 	
