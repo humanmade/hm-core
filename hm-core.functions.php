@@ -1553,7 +1553,7 @@ function hm_disable_admin_bar() {
 
 	global $_wp_theme_features;
 
-	$maybe_remove = array_intersect( (array) wp_get_current_user()->roles, (array) $_wp_theme_features['hm_disable_admin_bar'][0] );
+	$maybe_remove = array_intersect( (array) wp_get_current_user()->roles, isset( $_wp_theme_features['hm_disable_admin_bar'][0] ) ? (array) $_wp_theme_features['hm_disable_admin_bar'][0] : array() );
 
 	if ( is_user_logged_in() && current_theme_supports( 'hm_disable_admin_bar' ) && ! empty( $maybe_remove ) ) :
 		show_admin_bar( false );
@@ -1723,4 +1723,33 @@ function hm_get_template_part( $file, $template_args = array() ) {
 	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
 		require( get_template_directory() . '/' . $file . '.php' ); 
 
+}
+
+/**
+ * Checks where a given term of term from a given taxonomy was queried by in global $wp_query
+ *
+ * @param string filepart
+ * @param mixed wp_args style argument list
+ */
+function hm_is_queried_object( $term_or_taxonomy ) {
+
+	global $wp_query;
+
+	// tax
+	if ( is_string( $term_or_taxonomy ) ) {
+
+		// @todo search tax_query too
+		return ! empty( $wp_query->query_vars[$term_or_taxonomy] );
+
+	} else if ( is_object( $term_or_taxonomy ) ) {
+
+		foreach ( $wp_query->tax_query->queries as $query ) {
+
+			if ( $query['field'] == 'slug' && in_array( $term_or_taxonomy->slug, $query['terms'] ) )
+				return true;
+
+			if ( in_array( $term_or_taxonomy->term_id, $query['terms'] ) )
+				return true;
+		}
+	}
 }
