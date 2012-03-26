@@ -382,6 +382,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return true;
 	
 	}
+
+	public function get_facebook_id() {
+
+		return get_user_meta( $this->user->ID, '_fb_uid', true );
+	}
 	
 	function _get_user_id_from_sso_id( $sso_id ) {
 		global $wpdb;
@@ -467,7 +472,6 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 		parent::__construct();
 		$this->service_name = "Facebook";
 		$this->service_id = "facebook";
-
 	}
 	
 	function set_user( $user ) {
@@ -478,18 +482,29 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 	function get_avatar( $size = null ) {			
 		
 		$this->avatar_path = null;
-		
-		if ( ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
+
+		if ( get_user_meta( $this->user->ID, '_facebook_avatar_last_fetch', true ) > time() - ( 3600 * 24 ) && ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
+
 			$this->avatar_path = $avatar;
 
+			$cache = true;
+
 		} elseif ( $this->sso_provider->is_authenticated() ) {
-			$user_info = $this->sso_provider->get_facebook_user_info();
-			
-			$image_url = "http://graph.facebook.com/{$user_info['id']}/picture?type=large";			
-			$this->avatar_path = $this->save_avatar_locally( $image_url, 'jpg' ) ;
+
+			error_log( 'fetchign avatar' );
+			$id = $this->sso_provider->get_facebook_id();
+
+			$image_url = "http://graph.facebook.com/{$id}/picture?type=large";
+			$this->avatar_path = $this->save_avatar_locally( $image_url, 'jpg' );
 			
 			update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
+			update_user_meta( $this->user->ID, '_facebook_avatar_last_fetch', time() );
+
+			$cache = false;
 		}
+		
+		if ( ! $cache )
+			$size .= '&cache=0';
 		
 		return wpthumb( $this->avatar_path, $size );
 	}
