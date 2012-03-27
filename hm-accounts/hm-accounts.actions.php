@@ -270,7 +270,10 @@ function hma_profile_submitted() {
 	
 	if ( ! empty( $_POST['user_pass'] ) )
 		$user_data['user_pass'] = esc_attr( $_POST['user_pass'] );
-		
+	
+	else
+		unset( $user_data['user_pass'] );
+
 	if ( ! empty( $_POST['user_email'] ) )
 		$user_data['user_email'] = esc_attr( $_POST['user_email'] );
 
