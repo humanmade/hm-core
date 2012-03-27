@@ -285,8 +285,7 @@ function hm_restrict_access_to_rule( $template, $rule ) {
 		break;
 
 		case 'displayed_user_only' :
-
-			$redirect = get_query_var( 'author' ) != get_current_user_id();
+			$redirect = ! is_user_logged_in() || get_query_var( 'author' ) != get_current_user_id();
 
 		break;
 	}
@@ -303,6 +302,5 @@ function hm_restrict_access_to_rule( $template, $rule ) {
 	wp_redirect( $redirect );
 
 	exit;
-
 }
 add_action( 'hm_load_custom_template', 'hm_restrict_access_to_rule', 10, 2 );

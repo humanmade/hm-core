@@ -152,7 +152,7 @@ class HMA_SSO_Provider {
 	 */
 	public function register() {
 	
-		if ( !$this->check_for_provider_logged_in() )
+		if ( ! $this->check_for_provider_logged_in() )
 			return null;
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
