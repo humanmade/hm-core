@@ -24,7 +24,7 @@ function hm_add_rewrite_rule( $rule, $query = '', $template = null, $args = arra
 	}
 
 	// default to template_directory as base
-	if ( $template && strpos( $template, '/' ) !== 0 )
+	if ( $template && strpos( $template, ABSPATH ) !== 0 )
 		$template = get_template_directory() . '/' . $template;
 
 	$hm_rewrite_rules[ $rule ] = array( $rule, $query, $template, wp_parse_args( $args ) );
