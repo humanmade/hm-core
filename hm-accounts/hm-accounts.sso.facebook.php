@@ -70,7 +70,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		if ( ! is_user_logged_in() )
 			return new WP_Error( 'user-logged-in' );
-		
+
 		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
 			$this->access_token = $access_token;
 		} else {
@@ -80,7 +80,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		$info = $this->get_facebook_user_info();
 
-		//Check if this facebook account has already been connected with an account, if so log them in and dont register
+		//Check if this facebook account has already been connected with an account
 		if ( $this->_get_user_id_from_sso_id( $info->id ) ) {
 			
 			hm_error_message( 'This Facebook account is already linked with another account, please try a different one.', 'update-user' );
@@ -91,6 +91,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		update_user_meta( get_current_user_id(), '_fb_uid', $info['id'] );
 		
 		hm_success_message( 'Successfully connected the Facebook account "' . $info['name'] . '" with your profile.', 'update-user' );
+		
+		do_action( 'user_linked_facebook_account', $this );
 		
 		return true;
 	}
@@ -279,6 +281,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);
+		do_action( 'hma_log_user_in_via_facebook', $user_id);
 		do_action( 'wp_login', get_userdata( $user_id )->user_login );
 		do_action( 'hma_login_submitted_success' );
 		
@@ -345,6 +348,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 		
+		do_action( 'hma_registered_user_via_facebook', $user );
+
 		return $result;	
 	}
 	

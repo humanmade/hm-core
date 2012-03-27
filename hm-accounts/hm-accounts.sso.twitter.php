@@ -150,6 +150,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);
+		do_action( 'hma_log_user_in_via_twitter', $user_id);
 		do_action( 'hma_login_submitted_success' );
 		do_action( 'wp_login', get_userdata( $user_id )->user_login );
 		
@@ -225,7 +226,9 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		
 		wp_set_auth_cookie( $user->ID, false );
 		wp_set_current_user( $user->ID );
-				
+		
+		do_action( 'hma_registered_user_via_twitter', $user );
+
 		return $result;	
 	}
 	
@@ -299,6 +302,8 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		
 		hm_success_message( 'Successfully connected the Twitter account "' . $info->screen_name . '" with your profile.', 'update-user' );
 		
+		do_action( 'user_linked_twitter_account', $this );
+
 		return true;
 	}
 	
