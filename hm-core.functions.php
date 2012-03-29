@@ -1738,8 +1738,12 @@ function hm_is_queried_object( $term_or_taxonomy ) {
 	// tax
 	if ( is_string( $term_or_taxonomy ) ) {
 
-		// @todo search tax_query too
-		return ! empty( $wp_query->query_vars[$term_or_taxonomy] );
+		foreach ( $wp_query->tax_query->queries as $query ) {
+
+			if ( $query['taxonomy'] == $term_or_taxonomy )
+				return true;
+
+		}
 
 	} else if ( is_object( $term_or_taxonomy ) ) {
 
