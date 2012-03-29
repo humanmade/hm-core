@@ -42,7 +42,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		  'cookie' => true,
 		));
 		
-		$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
+		$this->avatar_option = new HMA_Facebook_Avatar_Option( $this );
 							
 	}
 	
@@ -302,7 +302,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			return new WP_Error( 'facebook-exception', $e->getMessage() );
 		}
 		
-		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, $_fb_profile_data, &$this );
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, $_fb_profile_data, $this );
 		
 		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
@@ -344,7 +344,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		//set the avatar to their twitter avatar if registration completed
 		if ( ! is_wp_error( $result ) && is_numeric( $result ) && $this->is_authenticated() ) {
 			
-			$this->avatar_option = new HMA_Facebook_Avatar_Option( &$this );
+			$this->avatar_option = new HMA_Facebook_Avatar_Option( $this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 		

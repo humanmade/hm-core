@@ -15,7 +15,7 @@ class HMA_SSO_Avatar_Option {
 	
 	function __construct() {
 		global $hma_sso_avatar_options;
-		$hma_sso_avatar_options->register_avatar_option( &$this );
+		$hma_sso_avatar_options->register_avatar_option( $this );
 		$this->user = wp_get_current_user();
 	}
 	
@@ -188,7 +188,7 @@ class HMA_SSO_Provider {
 			hm_clear_messages( 'register' );
 		}
 		
-		do_action( 'hma_sso_login_attempt_completed', &$this, $return );
+		do_action( 'hma_sso_login_attempt_completed', $this, $return );
 		
 		hma_do_login_redirect( $return, true );
 	}
@@ -197,7 +197,7 @@ class HMA_SSO_Provider {
 	
 		$return = $this->register();
 		
-		do_action( 'hma_sso_register_attempt_completed', &$this, $return );
+		do_action( 'hma_sso_register_attempt_completed', $this, $return );
 		
 		if ( is_wp_error( $return ) )
 			wp_redirect( wp_get_referer(), 303 );
@@ -227,7 +227,7 @@ class HMA_SSO_Provider {
 	
 		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id ) {
 			$result = $this->link();
-			do_action( 'hma_sso_connect_with_account_completed', &$this, $result );
+			do_action( 'hma_sso_connect_with_account_completed', $this, $result );
 			
 			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
 			exit;
@@ -238,7 +238,7 @@ class HMA_SSO_Provider {
 		
 		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id && wp_verify_nonce( $_GET['_wpnonce'], 'sso_unlink_from_account_' . $this->id ) ) {
 			$result = $this->unlink();
-			do_action( 'hma_sso_unlink_from_account_completed', &$this, $result );
+			do_action( 'hma_sso_unlink_from_account_completed', $this, $result );
 			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
 			exit;
 		}

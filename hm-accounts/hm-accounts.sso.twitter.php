@@ -27,7 +27,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		if ( !isset( $_SESSION ) )
 			session_start();
 		
-		$this->avatar_option = new HMA_Twitter_Avatar_Option( &$this );
+		$this->avatar_option = new HMA_Twitter_Avatar_Option( $this );
 	}
 	
 	public function set_user( $user ) {
@@ -181,7 +181,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 			return new WP_Error( 'twitter-connection-error' );
 		}
 
-		$userdata = apply_filters( 'hma_register_user_data_from_sso', $info, $_info, &$this );
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', $info, $_info, $this );
 		
 		if ( !empty( $_POST['user_login'] ) )
 			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
@@ -220,7 +220,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
  		
 		//set the avatar to their twitter avatar if registration completed
 		if ( !is_wp_error( $result ) && is_numeric( $result ) ) {
-			$this->avatar_option = new HMA_Twitter_Avatar_Option( &$this );
+			$this->avatar_option = new HMA_Twitter_Avatar_Option( $this );
 			update_user_meta( $result, 'user_avatar_option', $this->avatar_option->service_id );
 		}
 		
