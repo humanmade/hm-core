@@ -307,7 +307,7 @@ function hma_profile_submitted() {
 	}
 
 	if ( !empty( $_FILES['user_avatar']['name'] ) )
-		$user_data['user_avatar'] = esc_attr( $_FILES['user_avatar'] );
+		$user_data['user_avatar'] = $_FILES['user_avatar'];
 
 	$success = hma_update_user_info( $user_data );
 
