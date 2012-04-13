@@ -496,10 +496,15 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 
 		} elseif ( $this->sso_provider->is_authenticated() ) {
 
-			error_log( 'fetchign avatar' );
 			$id = $this->sso_provider->get_facebook_id();
 
 			$image_url = "http://graph.facebook.com/{$id}/picture?type=large";
+
+			// remove their old one
+			$this->avatar_path = get_user_meta( $this->user->ID, '_facebook_avatar', true );
+			$this->remove_local_avatar();
+			$this->avatar_path = null;
+
 			$this->avatar_path = $this->save_avatar_locally( $image_url, 'jpg' );
 			
 			update_user_meta( $this->user->ID, '_facebook_avatar', $this->avatar_path );
