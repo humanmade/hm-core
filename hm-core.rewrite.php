@@ -193,7 +193,7 @@ function hm_load_custom_templates( $template ) {
 			foreach( wp_parse_args( $hm_current_rewrite_rule[3]['post_query_properties'] ) as $property => $value )
 				$wp_query->$property = $value;
 
-			if ( $hm_current_rewrite_rule[3]['query_callback'] && is_callable( $hm_current_rewrite_rule[3]['query_callback'] ) )
+			if ( ! empty( $hm_current_rewrite_rule[3]['query_callback'] ) && is_callable( $hm_current_rewrite_rule[3]['query_callback'] ) )
 				call_user_func_array( $hm_current_rewrite_rule[3]['query_callback'], array( $wp_query ) );
 		}
 
