@@ -180,18 +180,22 @@ function hm_load_custom_templates( $template ) {
 		return;
 
 	// Allow 404's to be overridden
-	if ( is_404() && isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) && $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] == false )
+	if ( is_404() && isset( $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] ) && $hm_current_rewrite_rule[3]['post_query_properties']['is_404'] == false ) 
 		status_header('200');
 
 	// Show the correct template for the query
 	if ( isset( $hm_current_rewrite_rule ) && $hm_current_rewrite_rule[4] === $wp_query->query ) {
 
 		// Apply some post query stuff to wp_query
-		if ( isset( $hm_current_rewrite_rule[3]['post_query_properties'] ) )
-
+		if ( isset( $hm_current_rewrite_rule[3]['post_query_properties'] ) ) {
+		
 			// $post_query
 			foreach( wp_parse_args( $hm_current_rewrite_rule[3]['post_query_properties'] ) as $property => $value )
 				$wp_query->$property = $value;
+
+			if ( $hm_current_rewrite_rule[3]['query_callback'] && is_callable( $hm_current_rewrite_rule[3]['query_callback'] ) )
+				call_user_func_array( $hm_current_rewrite_rule[3]['query_callback'], array( $wp_query ) );
+		}
 
 		if ( !empty( $hm_current_rewrite_rule[2] ) ) {
 
