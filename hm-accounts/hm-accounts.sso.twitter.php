@@ -28,6 +28,8 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 			session_start();
 		
 		$this->avatar_option = new HMA_Twitter_Avatar_Option( $this );
+
+		parent::__construct();
 	}
 	
 	public function set_user( $user ) {
@@ -124,19 +126,17 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$twitter_uid = $info['_twitter_uid'];
 		
 		if ( !$twitter_uid ) {
-			hm_error_message( 'There was a problem verifying your credentials with Twitter, please try again.', 'login' );
-			return new WP_Error( 'twitter-authentication-failed' );
+			return new WP_Error( 'twitter-authentication-failed', 'There was a problem verifying your credentials with Twitter, please try again.' );
 		}
 
 		$user_id = $this->_get_user_id_from_sso_id( $twitter_uid );
 		
 		// If we don't have their twitter_uid, try twitter handle
-		if( !$user_id )
+		if( ! $user_id )
 			$user_id = $this->_get_user_id_from_sso_id( $twitter_info['screen_name'] );
 		
-		if ( !$user_id ) {
-			hm_error_message( 'This Twitter account has not been linked to an account on this site.', 'login' );
-			return new WP_Error( 'twitter-account-not-connected' );
+		if ( ! $user_id ) {
+			return new WP_Error( 'twitter-account-not-connected', 'This Twitter account has not been linked to an account on this site.' );
 		}
 		
 		$user = get_userdata( $user_id );
@@ -160,7 +160,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	public function register() {
 		
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if ( ( $result = $this->login() ) && !is_wp_error( $result ) ) {
+		if ( ( $result = $this->login() ) && ! is_wp_error( $result ) ) {
 			return $result;
 		}
 		
@@ -177,38 +177,22 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$info = $this->get_user_info();
 		
 		if ( empty( $info['_twitter_uid'] ) ) {
-			hm_error_message( 'There was a problem communication with Twitter, please try again.', 'register' );
-			return new WP_Error( 'twitter-connection-error' );
+			return new WP_Error( 'twitter-connection-error', 'There was a problem communication with Twitter, please try again.' );
 		}
 
-		$userdata = apply_filters( 'hma_register_user_data_from_sso', $info, $_info, $this );
-		
-		if ( !empty( $_POST['user_login'] ) )
-			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
-		else
-			$userdata['user_login'] = hma_unique_username( $this->user_info->screen_name );
-		
-		if (  !empty( $_POST['user_email'] ) )
-			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
-		
-		//Don't use such strict validation for registration via twitter
-		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user_for_twitter' ), 11 );
-		
-		$userdata['override_nonce'] = true;
+		$userdata['user_login'] = hma_unique_username( $this->user_info->screen_name );
 		$userdata['do_login'] = true;
 		$userdata['_twitter_access_token'] = $this->access_token;
 		$userdata['_twitter_oauth_token'] = $this->access_token['oauth_token'];
 		$userdata['_twitter_oauth_token_secret'] = $this->access_token['oauth_token_secret'];
-		$userdata['do_redirect'] = false;
 		$userdata['unique_email'] = false;
 		$userdata['send_email'] = true;
 		$userdata['location'] = $_info->location;
 		$userdata['_twitter_data'] = (array) $_info;
 		
-		// Lets us skip email check from wp_insert_user()
-		define( 'WP_IMPORTING', true );
+		$this->set_registration_data( array_merge( $userdata, $this->registration_data) );
 
-	 	$result = hma_new_user( $userdata );
+	 	$result = parent::register();
 	 	
 	 	// Set_user() will wide access token
 	 	$token = $this->access_token;
@@ -230,20 +214,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		do_action( 'hma_registered_user_via_twitter', $user );
 
 		return $result;	
-	}
-	
-	function _validate_hma_new_user_for_twitter( $result ) {
-
-		if( is_wp_error( $result ) && $result->get_error_code() == 'invalid-email' )
-			return null;
-		
-		return $result;
-	}
-	
-	public function logout( $redirect ) {
-		
-		if ( !empty( $_COOKIE['twitter_anywhere_identity'] ) )
-			setcookie( 'twitter_anywhere_identity', '', time() - 100, COOKIEPATH );
 	}
 	
 	public function update_user_twitter_information() {
@@ -559,6 +529,8 @@ class Twitter_Sign_in {
 			setcookie("twitter_oauth_token", base64_encode( serialize( $access_token ) ), 0, COOKIEPATH);
 			setcookie("twitter_oauth_token_secret", '', time()-100, COOKIEPATH);
 		}
+
+		$user_info = $twitterOAuth->get('account/verify_credentials');
 		
 		header("Status: 200");
 		
@@ -569,7 +541,7 @@ class Twitter_Sign_in {
 					//call the parent window
 					if ( typeof window.opener.TwitterSignInCompleted != 'undefined' ) {
 						
-						window.opener.TwitterSignInCompleted();
+						window.opener.TwitterSignInCompleted( <?php echo json_encode( $user_info ) ?> );
 					
 					}
 					

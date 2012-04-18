@@ -254,8 +254,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	public function login() {
 		
 		if ( ! $this->check_for_provider_logged_in() ) {
-			hm_error_message( 'You are not logged in to Facebook', 'login' );
-			return new WP_Error( 'no-logged-in-to-facebook' );
+			return new WP_Error( 'no-logged-in-to-facebook', 'You are not logged in to Facebook' );
 		}
 		
 		global $wpdb;
@@ -263,14 +262,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$fb_uid = $this->client->getUser();
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$fb_uid}'" );
 		
-		if ( !$user_id ) {
+		if ( ! $user_id ) {
 			
 			$fb_info = $this->get_facebook_user_info();
 			$user_id = $this->_get_user_id_from_sso_id( $fb_info['username'] );
 
 			if ( ! $user_id ) {
-				hm_error_message( 'This Facebook account has not been linked to an account on this site.', 'login' );
-				return new WP_Error( 'facebook-account-not-connected' );
+				return new WP_Error( 'facebook-account-not-connected', 'This Facebook account has not been linked to an account on this site.' );
 			}
 		}
 		
@@ -287,53 +285,40 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		return true;
 	}
-	
+
 	public function register() {
-				
+
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if ( ( $result = $this->login() ) && !is_wp_error( $result ) ) {
+		if ( ( $result = $this->login() ) && ! is_wp_error( $result ) ) {
 			return $result;
 		}
 		
 		try {
 			$fb_profile_data = $this->get_user_info();
 			$_fb_profile_data = $this->get_facebook_user_info();
+
 		} catch(Exception $e) {
 			return new WP_Error( 'facebook-exception', $e->getMessage() );
 		}
 		
-		$userdata = apply_filters( 'hma_register_user_data_from_sso', $fb_profile_data, $_fb_profile_data, $this );
+		$userdata = apply_filters( 'hma_register_user_data_from_sso', array_merge( $fb_profile_data, array_filter( $this->registration_data ) ), $_fb_profile_data, $this );
 		
-		if ( !empty( $_POST['user_login'] ) )
-			$userdata['user_login'] = esc_attr( $_POST['user_login'] );
-		
-		if (  !empty( $_POST['user_email'] ) )
-			$userdata['user_email'] = esc_attr( $_POST['user_email'] );
-		elseif( !empty( $this->user_info['email'] ) )
-			$userdata['user_email'] = $this->user_info['email'];
-		
-		//Don't use such strict validation for registration via facebook
-		add_action( 'hma_registration_info', array( &$this, '_validate_hma_new_user' ),11 );
-
-		$userdata['override_nonce'] = true;
 		$userdata['do_login'] 		= true;
-		$userdata['do_redirect'] 	= false;
-		$userdata['unique_email']	= false;
 		$userdata['send_email'] 	= true;
 		$userdata['gender'] 		= $_fb_profile_data['gender'];
 		$userdata['url'] 			= $_fb_profile_data['website'];
 		$userdata['location'] 		= $_fb_profile_data['location']['name'];
 		$userdata['age'] 			= ( (int) date('Y') ) - ( (int) date( 'Y', strtotime( $_fb_profile_data['birthday'] ) ) );
 		
-		// Lets us skip email check from wp_insert_user()
-		define( 'WP_IMPORTING', true );
-		
-		$result = $user_id = hma_new_user( $userdata );
+
+		$this->set_registration_data( $userdata );
+
+		$result = parent::register();
 
 		if ( is_wp_error( $result ) )
 			return $result;
-			
-		// Set_user() will wide access token
+		
+		// Set_user() will override access token
 		$token = $this->access_token;
 		$user = get_userdata( $result );
 		$this->set_user( get_userdata( $result ) );
