@@ -209,7 +209,7 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 			$result = $this->link();
 			do_action( 'hma_sso_connect_with_account_completed', $this, $result );
 			
-			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
+			wp_redirect( apply_filters( 'hma_sso_connected_account_redirect', get_bloginfo( 'edit_profile_url', 'display' ), $this ), 303 );
 			exit;
 		}
 	}
