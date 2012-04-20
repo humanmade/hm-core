@@ -120,7 +120,6 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 		$hma_sso_providers[] = &$this;
 
 		add_action( 'hm_parse_request_^login/sso/authenticated/?$', array( &$this, '_check_sso_login_submitted' ) );
-		add_action( 'hm_parse_request_^register/sso/authenticated/?$', array( &$this, '_check_sso_register_submitted' ) );
 		add_action( 'hm_parse_request_^profile/sso/authenticated/?$', array( &$this, '_check_sso_connect_with_account_submitted' ) );
 		add_action( 'hm_parse_request_^profile/sso/deauthenticate/?$', array( &$this, '_check_sso_unlink_from_account_submitted' ) );
 
@@ -168,6 +167,9 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 			hm_clear_messages( 'login' );
 			$return = $this->register();
 			hm_clear_messages( 'register' );
+		} elseif ( is_wp_error( $return ) ) {
+
+			hm_error_message( $return->get_error_message(), 'login' );
 		}
 		
 		do_action( 'hma_sso_login_attempt_completed', $this, $return );
@@ -175,32 +177,11 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 		hma_do_login_redirect( $return, true );
 	}
 	
-	function register_link_submitted() {
-	
-		$return = $this->register();
-		
-		do_action( 'hma_sso_register_attempt_completed', $this, $return );
-		
-		if ( is_wp_error( $return ) )
-			wp_redirect( wp_get_referer(), 303 );
-		
-		else
-			wp_redirect( get_bloginfo( 'edit_profile_url', 'display' ), 303 );
-		
-		exit;
-	}
-	
 	function _check_sso_login_submitted() {
 		
 		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id )
 			$this->login_link_submitted();
 		
-	}
-	
-	function _check_sso_register_submitted() {
-	
-		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id )
-			$this->register_link_submitted();
 	}
 	
 	function _check_sso_connect_with_account_submitted() {

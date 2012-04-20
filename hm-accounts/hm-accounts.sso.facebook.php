@@ -403,7 +403,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		try {
 			$data = @$this->client->api('me/friends', 'GET', array( 'access_token' => $this->access_token ));
 
-			update_user_meta( $this->user->ID, '_facebook_friends', reset( $data ) );
+			$data = reset( $data );
+			update_user_meta( $this->user->ID, '_facebook_friends', $data );
 		} catch( Exception $e ) {
 			$data = array();
 		}
