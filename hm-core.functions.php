@@ -1717,12 +1717,37 @@ function hm_get_template_part( $file, $template_args = array() ) {
 	
 	$template_args = wp_parse_args( $template_args );
 	
-	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) )
-		require( get_stylesheet_directory() . '/' . $file . '.php' );
-	
-	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
-		require( get_template_directory() . '/' . $file . '.php' ); 
+	do_action( 'start_operation', 'hm_template_part::' . $file );
 
+	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) ) {
+
+		if ( !empty( $template_args['return'] ) )
+			ob_start();
+		
+		$return = require( get_stylesheet_directory() . '/' . $file . '.php' );
+
+		if ( !empty( $template_args['return'] ) )
+			$data = ob_get_clean();
+	}
+	
+	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) ) {
+
+		if ( !empty( $template_args['return'] ) )
+			ob_start();
+		
+		$return = require( get_template_directory() . '/' . $file . '.php' );
+
+		if ( !empty( $template_args['return'] ) )
+			$data = ob_get_clean();
+	}
+
+	do_action( 'end_operation', 'hm_template_part::' . $file );
+
+	if ( !empty( $template_args['return'] ) )
+		if ( $return === false )
+			return false;
+		else
+			return $data;
 }
 
 /**

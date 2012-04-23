@@ -218,9 +218,7 @@ add_action( 'init', function() {
 					'use_password' 	=> true,
 					'user_pass'		=> $_POST['user_pass'],
 					'user_pass2'	=> $_POST['user_pass_1'],
-					'unique_email'	=> true,
-					'send_email'	=> true,
-					'override_nonce'=> true
+					'unique_email'	=> true
 				) )
 			);
 
