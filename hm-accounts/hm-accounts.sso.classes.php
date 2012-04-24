@@ -117,7 +117,13 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 	function __construct() {
 		
 		global $hma_sso_providers;
-		$hma_sso_providers[] = &$this;
+
+		if ( ! empty( $hma_sso_providers ) )
+			foreach ( $hma_sso_providers as $sso_provider )
+				$isset = $sso_provider->id == $this->id ? true : $isset;
+
+		if ( empty( $isset ) )
+			$hma_sso_providers[] = &$this;
 
 		add_action( 'hm_parse_request_^login/sso/authenticated/?$', array( &$this, '_check_sso_login_submitted' ) );
 		add_action( 'hm_parse_request_^profile/sso/authenticated/?$', array( &$this, '_check_sso_connect_with_account_submitted' ) );
