@@ -41,7 +41,7 @@ class HMA_SSO_Avatar_Option {
 		if ( !$ext )
 			$ext = strtolower( end( explode( '.', $url ) ) );
 		
-		$image_path = $avatar_dir . '/' . $this->user->ID . '-' . $this->service_id . '.' . $ext;
+		$image_path = $avatar_dir . '/' . $this->user->ID . '-' . $this->service_id  . '-' . time() . '.' . $ext;
 		
 		// Remove old one if was there
 		if ( file_exists( $image_path ) )
