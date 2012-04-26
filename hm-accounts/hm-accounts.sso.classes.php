@@ -118,6 +118,8 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 		
 		global $hma_sso_providers;
 
+		$isset = false;
+
 		if ( ! empty( $hma_sso_providers ) )
 			foreach ( $hma_sso_providers as $sso_provider )
 				$isset = $sso_provider->id == $this->id ? true : $isset;
