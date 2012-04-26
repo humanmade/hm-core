@@ -197,6 +197,10 @@ function hm_load_custom_templates( $template ) {
 				call_user_func_array( $hm_current_rewrite_rule[3]['query_callback'], array( $wp_query ) );
 		}
 
+		// setup the title hook
+		if ( ! empty( $hm_current_rewrite_rule[3]['title_callback'] ) )
+			add_filter( 'wp_title', $hm_current_rewrite_rule[3]['title_callback'], 10, 3 );
+
 		if ( !empty( $hm_current_rewrite_rule[2] ) ) {
 
 			do_action( 'hm_load_custom_template', $hm_current_rewrite_rule[2], $hm_current_rewrite_rule );
