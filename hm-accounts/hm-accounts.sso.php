@@ -64,7 +64,7 @@ function hma_get_sso_providers() {
  * Gets an SSO provider object for a given SSO provider ID.
  * 
  * @param int $sso_provider_id
- * @return object | null on not found
+ * @return HMA_SSO_Provider|null on not found
  */
 function hma_get_sso_provider( $sso_provider_id ) {
 	
