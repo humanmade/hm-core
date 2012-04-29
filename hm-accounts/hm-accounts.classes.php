@@ -66,6 +66,7 @@ class HM_Accounts {
 		// Merge arrays overwritting defaults, remove any non-standard keys keys with empty values.
 		$user_vars = array_filter( array( 'user_login' => $args['user_login'], 'user_pass' => $args['user_pass'], 'user_email' => $args['user_email'], 'display_name' => $args['display_name'] ) );
 
+		$user_vars = apply_filters( 'hma_register_user_data', $user_vars, $this );
 		$user_id = wp_insert_user( $user_vars );
 
 		if ( ! $user_id || is_wp_error( $user_id ) )
