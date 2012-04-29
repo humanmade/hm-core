@@ -304,7 +304,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$userdata = apply_filters( 'hma_register_user_data_from_sso', array_merge( $fb_profile_data, array_filter( $this->registration_data ) ), $_fb_profile_data, $this );
 		
 		$userdata['do_login'] 		= true;
-		$userdata['send_email'] 	= true;
 		$userdata['gender'] 		= $_fb_profile_data['gender'];
 		$userdata['url'] 			= $_fb_profile_data['website'];
 		$userdata['location'] 		= $_fb_profile_data['location']['name'];

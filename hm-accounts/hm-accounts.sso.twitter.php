@@ -186,7 +186,6 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$userdata['_twitter_oauth_token'] = $this->access_token['oauth_token'];
 		$userdata['_twitter_oauth_token_secret'] = $this->access_token['oauth_token_secret'];
 		$userdata['unique_email'] = false;
-		$userdata['send_email'] = true;
 		$userdata['location'] = $_info->location;
 		$userdata['_twitter_data'] = (array) $_info;
 		
