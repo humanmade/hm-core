@@ -5,6 +5,13 @@ class HM_Accounts {
 	public $registration_data;
 	public $id = 'manual';
 
+	/**
+	 * Get the account class, twitter / FB alternativly
+	 *
+	 * @static
+	 * @param string $id
+	 * @return HM_Accounts|HMA_SSO_Twitter|HMA_SSO_Facebook
+	 */
 	public static function get_instance( $id = 'manual' ) {
 
 		$classes = array( 'maunal' => 'HM_Accounts', 'twitter' => 'HMA_SSO_Twitter', 'facebook' => 'HMA_SSO_Facebook' );
@@ -13,29 +20,32 @@ class HM_Accounts {
 		return new $class();
 	}
 
-	public function __construct() {
-
-	}
-
+	/**
+	 * Set the data to be used for registration. Registering a using is 2 stop. 1: set registration data, 2: register()
+	 *
+	 * @param array $data - user_login, user_email... etc
+	 */
 	public function set_registration_data( $data ) {
 
 		$this->registration_data = $data;
 	}
 
+	/**
+	 * Register an account based of registration data. Will perform validatino on the registration data
+	 *
+	 * @return int|WP_Error
+	 */
 	public function register() {
 
 		$user_data = $this->registration_data;
 
-		$checks = array(
+		$defaults = array(
 			'use_password' => false,
 			'tos' => '',
 			'use_tos' => true,
 			'unique_email' => false,
 			'do_login' => false,
-			'send_email' => false
-		);
-
-		$defaults = array(
+			'send_email' => false,
 			'user_login' => '',
 			'user_email' => '',
 			'user_pass' => false,
@@ -44,10 +54,7 @@ class HM_Accounts {
 
 		$original_args = $user_data;
 
-		$default_args = array_merge( $defaults, $checks );
-
-		$args = wp_parse_args( $user_data, $default_args );
-		extract( $args, EXTR_SKIP );
+		$args = wp_parse_args( $user_data, $defaults );
 
 		unset( $args['user_pass2'] );
 		unset( $original_args['user_pass2'] );
@@ -57,20 +64,21 @@ class HM_Accounts {
 			return $err;
 
 		// Merge arrays overwritting defaults, remove any non-standard keys keys with empty values.
-		$user_vars = array_filter( array( 'user_login' => $user_login, 'user_pass' => $user_pass, 'user_email' => $user_email, 'display_name' => $display_name ) );
+		$user_vars = array_filter( array( 'user_login' => $args['user_login'], 'user_pass' => $args['user_pass'], 'user_email' => $args['user_email'], 'display_name' => $args['display_name'] ) );
+
 		$user_id = wp_insert_user( $user_vars );
 
 		if ( ! $user_id || is_wp_error( $user_id ) )
 			return $user_id;
 
 		// Setup the users role
-		if ( $role ) {
+		if ( $args['role'] ) {
 			$user = new WP_User( $user_id );
-			$user->set_role( $role );
+			$user->set_role( $args['role'] );
 		}
 
 		// Get any remaining variable that were passed
-		$meta_vars = array_diff_key( $original_args, $defaults, $checks, $user_vars );
+		$meta_vars = array_diff_key( $original_args, $defaults, $user_vars );
 		
 		foreach ( (array) $meta_vars as $key => $value ) {
 
@@ -82,16 +90,16 @@ class HM_Accounts {
 		$user = get_userdata( $user_id );
 
 		// Send Notifcation email if specified
-		if ( $send_email )
-			$email = hma_email_registration_success( $user, $user_pass );
+		if ( $args['send_email'] )
+			$email = hma_email_registration_success( $user, $args['user_pass'] );
 
 		// If they chose a password, login them in
-		if ( ( $use_password == 'true' || $do_login == true ) && !empty( $user->ID ) ) :
+		if ( ( $args['use_password ']== 'true' || $args['do_login'] == true ) && !empty( $user->ID ) ) :
 
-			wp_login( $user->user_login, $user_pass );
+			wp_login( $user->user_login, $args['user_pass'] );
 
 			wp_clearcookie();
-			wp_setcookie($user->user_login, $user_pass, false);
+			wp_setcookie($user->user_login, $args['user_pass'], false);
 
 			do_action( 'wp_login', $user->user_login );
 
@@ -107,7 +115,7 @@ class HM_Accounts {
 	/**
 	 * Validation the registration data
 	 * 
-	 * @return true on success, WP_error on fail
+	 * @return bool|WP_error on fail
 	 */
 	public function validate_registration_data() {
 
@@ -120,7 +128,7 @@ class HM_Accounts {
 		}
 
 		// Valid email?
-		if ( !empty( $user->ID ) && !is_email( $args['user_email'] ) ) {
+		if ( ! is_email( $args['user_email'] ) ) {
 			return new WP_Error( 'invalid-email', 'Invalid email address.');
 		}
 
@@ -138,7 +146,13 @@ class HM_Accounts {
 		return true;
 	}
 
-	public function login() {
+	/**
+	 * Log a user in
+	 *
+	 * @param string|array|null $args
+	 * @return bool|WP_Error
+	 */
+	public function login( $args = null ) {
 
 		$args = apply_filters( 'hma_log_user_in_args', $args );
 
@@ -146,7 +160,7 @@ class HM_Accounts {
 			return new WP_Error( 'no-username', 'Please enter your username' );
 		}
 
-		$user = hma_parse_user( $args['username'] );
+		$user = get_user_by( 'login', $args['username'] );
 
 		$defaults = array(
 			'remember' => false,
@@ -155,7 +169,6 @@ class HM_Accounts {
 		);
 
 		// Strip any tags then may have been put into the array
-		// TODO array_map?
 		foreach( $args as $i => $a ) {
 			if ( is_string( $a ) )
 				$args[$i] = strip_tags( $a );
@@ -163,29 +176,28 @@ class HM_Accounts {
 
 
 		$args = wp_parse_args( $args, $defaults );
-		extract( $args, EXTR_SKIP );
 
 		if ( !is_numeric( $user->ID ) ) {
 			return new WP_Error( 'unrecognized-username', 'The username you entered was not recognized');
 		}
 
-		if ( $password_hashed != true ) {
+		if ( $args['password_hashed'] != true ) {
 
-			if ( !wp_check_password( $password, $user->user_pass ) ) {
+			if ( ! wp_check_password( $args['password'], $user->user_pass ) ) {
 
 				return new WP_Error('incorrect-password', 'The password you entered is incorrect');
 			}
 
 		} else {
 
-			if ( $password != $user->user_pass ) {
+			if ( $args['password'] != $user->user_pass ) {
 
 				return new WP_Error('incorrect-password', 'The password you entered is incorrect');
 			}
 
 		}
 
-		wp_set_auth_cookie( $user->ID, $remember );
+		wp_set_auth_cookie( $user->ID, $args['remember'] );
 		wp_set_current_user( $user->ID );
 
 		do_action( 'wp_login', $user->user_login );
@@ -195,11 +207,19 @@ class HM_Accounts {
 
 	}
 
+	/**
+	 * Get the URL to submit the registration form to
+	 *
+	 * @return string
+	 */
 	public function get_register_submit_url() {
 		return add_query_arg( 'type', $this->id, get_bloginfo( 'url' ) . '/register/submit/' );
 	}
 }
 
+/**
+ * Controller to catch the registration submitting
+ */
 add_action( 'init', function() {
 
 	hm_add_rewrite_rule( array(

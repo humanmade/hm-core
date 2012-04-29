@@ -18,13 +18,23 @@ class HMA_SSO_Avatar_Option {
 		$hma_sso_avatar_options->register_avatar_option( $this );
 		$this->user = wp_get_current_user();
 	}
-	
+
+	/**
+	 * Set the user the avatar option is to use
+	 * @param WP_User $user
+	 */
 	function set_user( $user ) {
 		$this->avatar_path = null;
 		$this->avatar_url = null;
 		$this->user = $user;
 	}
-	
+
+	/**
+	 * Get the avatar for the avatar option
+	 *
+	 * @param string|array|null $size
+	 * @return string
+	 */
 	function get_avatar( $size = null ) {
 		return $this->avatar_url;
 	}
@@ -132,13 +142,23 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 		add_action( 'hm_parse_request_^profile/sso/deauthenticate/?$', array( &$this, '_check_sso_unlink_from_account_submitted' ) );
 
 	}
-	
+
+	/**
+	 * Set the user (if any, register etc will not apply)
+	 *
+	 * @param WP_User $user
+	 */
 	function set_user( $user ) {
 		$this->user = $user;
 		$this->user_info = null;
 		$this->access_token = $this->get_access_token();
 	}
-	
+
+	/**
+	 * Get the unlink this SSO from yoru account URL
+	 *
+	 * @return string
+	 */
 	function get_unlink_from_account_url() {
 		
 		if ( !is_user_logged_in() )
@@ -157,7 +177,12 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 	 * @return bool
 	 */
 	function is_authenticated() {}
-	
+
+	/**
+	 * Check if this SSO provides an avatar option
+	 *
+	 * @return bool
+	 */
 	function has_avatar_option() {
 		
 		return !empty( $this->avatar_option );
@@ -183,6 +208,14 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 		do_action( 'hma_sso_login_attempt_completed', $this, $return );
 		
 		hma_do_login_redirect( $return, true );
+	}
+
+	public function register() {
+
+		$result = parent::register();
+		do_action( 'hma_sso_register_attempt_completed', $this, $result );
+
+		return $result;
 	}
 	
 	function _check_sso_login_submitted() {
@@ -232,30 +265,15 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 	function get_connect_with_account_submit_url() {
 		return add_query_arg( 'id', $this->id, get_bloginfo( 'edit_profile_url', 'display' ) . 'sso/authenticated/' );
 	}
-	
-	function _get_sso_register_submit_url() {
-		
-		$url = add_query_arg( 'id', $this->id, get_bloginfo( 'register_url', 'display' ) . 'sso/authenticated/' );
-		$url = add_query_arg( $_GET, $url );
-		
-		return $url;		
-	}
-	
-	function _get_provider_authentication_completed_register_redirect_url() {
-		return html_entity_decode( wp_nonce_url( add_query_arg( 'sso_registrar_authorized', $this->id, get_bloginfo( 'register_url', 'display' ) ), 'sso_registrar_authorized_' . $this->id ) );
-	}
-	
-	
-	//Puishing
+
+	/**
+	 * Checks if the connected sso can publish. I.e. write to wall, tweet etc
+	 * @return bool
+	 */
 	function can_publish() {	
 		return $this->supports_publishing && $this->user && $this->is_authenticated();
 	}
-	
-	
-	function log( $var ) {
-		error_log( $var );
-	}
-	
+
 }
 
 /**

@@ -56,54 +56,6 @@ function hma_do_login_redirect( $return, $do_redirect_on_error = false ) {
 }
 
 /**
- * Check that the user who logged in with SSO
- *
- * @todo same as hma_login_in_user_from_sso_providers()?
- * @return bool
- */
-function hma_check_for_sso_providers_logged_in() {
-
-	foreach ( hma_get_sso_providers() as $sso_provider )
-		if ( $sso_provider->check_for_provider_logged_in() )
-			if ( $sso_provider->login() )
-				return true;
-
-}
-
-/**
- * hma_check_for_sso_providers_registered function.
- *
- * @access public
- * @return null
- */
-function hma_check_for_sso_providers_registered() {
-
-	foreach( hma_get_sso_providers() as $sso_provider )
-		if ( $sso_provider->check_for_provider_logged_in() )
-			return $sso_provider;
-
-}
-
-/**
- * hma_login_in_user_from_sso_providers function.
- *
- * @access public
- * @return null | bool
- */
-function hma_login_in_user_from_sso_providers() {
-
-	if ( is_user_logged_in() )
-		return null;
-
-	foreach ( hma_get_sso_providers() as $sso_provider )
-		if ( $sso_provider->check_for_provider_logged_in() )
-			if ( $sso_provider->login() )
-				return true;
-
-}
-//add_action( 'init', 'hma_login_in_user_from_sso_providers' );
-
-/**
  * Parse the redirect string and replace _user_login_ with
  * the users login.
  *
@@ -188,54 +140,6 @@ function hma_lost_password_submitted() {
 	}
 }
 add_action( 'hma_lost_password_submitted', 'hma_lost_password_submitted' );
-
-/**
- * Process the registration form submission
- *
- * @return null
- */
-function hma_register_submitted() {
-
-	$hm_return = hma_new_user( apply_filters( 'hma_register_args', array(
-	    'user_login' 	=> $_POST['user_login'],
-	    'user_email'	=> $_POST['user_email'],
-	    'use_password' 	=> true,
-	    'user_pass'		=> $_POST['user_pass'],
-	    'user_pass2'	=> $_POST['user_pass_1'],
-	    'use_tos'		=> false,
-	    'unique_email'	=> true,
-	    'do_redirect'	=> false,
-	    'send_email'	=> true,
-	    'override_nonce'=> true
-	) ) );
-
-	if ( is_wp_error( $hm_return ) ) {
-
-		do_action( 'hma_register_submitted_error', $hm_return );
-		return;
-
-	} else {
-
-		do_action( 'hma_register_completed', $hm_return );
-
-		if ( $_POST['redirect_to'] )
-			$redirect = $_POST['redirect_to'];
-
-		elseif ( $_POST['referer'] )
-			$redirect = $_POST['referer'];
-
-		elseif ( wp_get_referer() )
-			$redirect = wp_get_referer();
-
-		else
-			$redirect = get_bloginfo( 'edit_profile_url', 'display' );
-
-		wp_redirect( $redirect );
-		exit;
-	}
-
-}
-add_action( 'hma_register_submitted', 'hma_register_submitted' );
 
 /**
  * Process the edit profile form submission
