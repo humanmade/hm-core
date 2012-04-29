@@ -213,6 +213,8 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		
 		do_action( 'hma_registered_user_via_twitter', $user );
 
+		do_action( 'hma_sso_register_attempt_completed', $this, $result );
+		
 		return $result;	
 	}
 	

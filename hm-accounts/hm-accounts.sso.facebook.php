@@ -335,6 +335,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		do_action( 'hma_registered_user_via_facebook', $user );
 
+		do_action( 'hma_sso_register_attempt_completed', $this, $result );
+
 		return $result;	
 	}
 	

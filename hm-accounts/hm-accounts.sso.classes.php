@@ -209,14 +209,6 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 		
 		hma_do_login_redirect( $return, true );
 	}
-
-	public function register() {
-
-		$result = parent::register();
-		do_action( 'hma_sso_register_attempt_completed', $this, $result );
-
-		return $result;
-	}
 	
 	function _check_sso_login_submitted() {
 		
