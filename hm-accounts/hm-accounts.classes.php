@@ -10,11 +10,15 @@ class HM_Accounts {
 	 *
 	 * @static
 	 * @param string $id
-	 * @return HM_Accounts|HMA_SSO_Twitter|HMA_SSO_Facebook
+	 * @return HM_Accounts|HMA_SSO_Twitter|HMA_SSO_Facebook|null
 	 */
 	public static function get_instance( $id = 'manual' ) {
 
-		$classes = array( 'maunal' => 'HM_Accounts', 'twitter' => 'HMA_SSO_Twitter', 'facebook' => 'HMA_SSO_Facebook' );
+		$classes = array( 'manual' => 'HM_Accounts', 'twitter' => 'HMA_SSO_Twitter', 'facebook' => 'HMA_SSO_Facebook' );
+
+		if ( ! isset( $classes[$class] ) )
+			return null;
+
 		$class = $classes[$id];
 
 		return new $class();
@@ -175,7 +179,6 @@ class HM_Accounts {
 				$args[$i] = strip_tags( $a );
 		}
 
-
 		$args = wp_parse_args( $args, $defaults );
 
 		if ( !is_numeric( $user->ID ) ) {
@@ -205,7 +208,6 @@ class HM_Accounts {
 		do_action( 'hma_log_user_in', $user);
 
 		return true;
-
 	}
 
 	/**
@@ -215,6 +217,15 @@ class HM_Accounts {
 	 */
 	public function get_register_submit_url() {
 		return add_query_arg( 'type', $this->id, get_bloginfo( 'url' ) . '/register/submit/' );
+	}
+
+	/**
+	 * Get the URL to submit the login form to
+	 *
+	 * @return string
+	 */
+	public function get_login_submit_url() {
+		return add_query_arg( 'type', $this->id, get_bloginfo( 'url' ) . '/login/submit/' );
 	}
 }
 
@@ -268,6 +279,33 @@ add_action( 'init', function() {
 				wp_redirect( $redirect );
 				exit;
 			}
+		}
+	) );
+} );
+
+
+/**
+ * Controller to catch the registration submitting
+ */
+add_action( 'init', function() {
+
+	hm_add_rewrite_rule( array(
+		'rewrite' => '^login/submit/?$',
+		'request_callback' => function() {
+
+			$type = ! empty( $_GET['type'] ) ? $_GET['type']  : 'manual';
+
+			$hm_accounts = HM_Accounts::get_instance( $type );
+
+			$details = isset( $_POST['user_pass'] ) ? array( 'password' => $_POST['user_pass'], 'username' => $_POST['user_login'], 'remember' => $_POST['remember'] ) : array();
+
+			$status = $hm_accounts->login( $details );
+
+			if ( is_wp_error( $status ) )
+				hm_error_message( $status->get_error_message() ? $status->get_error_message() : 'Something went wrong, error code: ' . $status->get_error_code(), 'login' );
+
+
+			hma_do_login_redirect( $status, true );
 		}
 	) );
 } );

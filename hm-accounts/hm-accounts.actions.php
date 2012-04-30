@@ -1,20 +1,6 @@
 <?php
 
 /**
- * Catch the submitted login form and log the user in.
- *
- * @return null
- */
-function hma_login_submitted() {
-
-	$return = hma_log_user_in( array( 'username' => $_POST['user_login'], 'password' => $_POST['user_pass'], 'remember' => ( !empty( $_POST['remember'] ) ? true : false ) ) );
-
-	hma_do_login_redirect( $return );
-
-}
-add_action( 'hma_login_submitted', 'hma_login_submitted' );
-
-/**
  * Redirect the user after they login
  *
  * @param mixed $return

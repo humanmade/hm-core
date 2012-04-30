@@ -250,7 +250,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->user_info;
 	}
 	
-	
+	/**
+	 * Log a user into the site via Facebook
+	 * 
+	 * @return WP_Error|bool
+	 */
 	public function login() {
 		
 		if ( ! $this->check_for_provider_logged_in() ) {

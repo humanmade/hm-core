@@ -17,47 +17,6 @@ function hma_check_for_pages() {
 add_action( 'init', 'hma_check_for_pages' );
 
 /**
- * Output the registration form fields
- *
- * @access public
- * @return null
- */
-function hma_add_register_inputs() {
-	hma_add_form_fields( 'register', false );
-	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n";
-}
-add_action( 'hma_register_form', 'hma_add_register_inputs' );
-
-/**
- * Output the SSO registration form fields fields
- *
- * @access public
- * @return null
- */
-function hma_add_sso_register_inputs() {
-	hma_add_form_fields( 'sso_register', false );
-	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n";
-}
-add_action( 'hma_sso_register_form', 'hma_add_sso_register_inputs' );
-
-/**
- * Output the login form fields
- *
- * @return null
- */
-function hma_add_login_inputs() {
-
-	hma_add_form_fields( 'login', false );
-
-	if ( !empty( $_REQUEST['redirect_to'] ) )
-		echo '<input type="hidden" name="redirect_to" value="' . ($_REQUEST['redirect_to'] ) . '" />' . "\n";
-
-	echo '<input type="hidden" name="referer" value="' . ( !empty( $_REQUEST['referer'] ) ? $_REQUEST['referer'] : wp_get_referer()) . '" />' . "\n";
-
-}
-add_action( 'hma_login_form', 'hma_add_login_inputs' );
-
-/**
  * Output the lost password form fields
  *
  * @access public
