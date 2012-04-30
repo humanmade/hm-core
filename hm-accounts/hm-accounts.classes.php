@@ -16,7 +16,7 @@ class HM_Accounts {
 
 		$classes = array( 'manual' => 'HM_Accounts', 'twitter' => 'HMA_SSO_Twitter', 'facebook' => 'HMA_SSO_Facebook' );
 
-		if ( ! isset( $classes[$class] ) )
+		if ( ! isset( $classes[$id] ) )
 			return null;
 
 		$class = $classes[$id];
