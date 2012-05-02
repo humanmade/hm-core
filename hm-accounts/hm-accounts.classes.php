@@ -297,7 +297,19 @@ add_action( 'init', function() {
 
 			$hm_accounts = HM_Accounts::get_instance( $type );
 
-			$details = isset( $_POST['user_pass'] ) ? array( 'password' => $_POST['user_pass'], 'username' => $_POST['user_login'], 'remember' => $_POST['remember'] ) : array();
+			if ( $_POST['user_pass'] ) {
+
+				$details = array( 
+					'password' => $_POST['user_pass'], 
+					'username' => $_POST['user_login'], 
+					'remember' => $_POST['remember'] 
+				);
+
+			} else {
+				$details = array();	
+			}
+			
+			$details = apply_filters( 'hma_login_args', $details );
 
 			$status = $hm_accounts->login( $details );
 

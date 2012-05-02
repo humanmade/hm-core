@@ -109,8 +109,10 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		return $user_id;
 	}
 	
-	public function login() {
+	public function login( $details = array() ) {
 		
+		$details = wp_parse_args( $details, array( 'remember' => false ) );
+
 		//we are in the popup were (seperate window)
 		if ( $this->usingSession ) {
 			$this->access_token = $_SESSION['twitter_oauth_token'];
@@ -146,7 +148,7 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 	 	
 		$this->update_user_twitter_information();
 		
-		wp_set_auth_cookie( $user_id, false );
+		wp_set_auth_cookie( $user_id, $details['remember'] );
 		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);

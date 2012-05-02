@@ -190,12 +190,6 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return true;
 	}
 	
-	//internal
-	
-	function _get_oauth_login_url() {
-		return 'https://graph.facebook.com/oauth/authorize?client_id=' . $this->api_key . '&redirect_uri=' . $this->_get_oauth_redirect_url();
-	}
-	
 	public function check_for_provider_logged_in() {
 		
 		if ( $access_token = $this->get_access_token_from_cookie_session() ) {
@@ -255,8 +249,10 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	 * 
 	 * @return WP_Error|bool
 	 */
-	public function login() {
+	public function login( $details = array() ) {
 		
+		$details = wp_parse_args( $details, array( 'remember' => false ) );
+
 		if ( ! $this->check_for_provider_logged_in() ) {
 			return new WP_Error( 'no-logged-in-to-facebook', 'You are not logged in to Facebook' );
 		}
@@ -279,7 +275,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		//Update their access token incase it has changed
 		update_user_meta( $user_id, '_fb_access_token', $this->get_access_token_from_cookie_session() );		
 		
-		wp_set_auth_cookie( $user_id, false );
+		wp_set_auth_cookie( $user_id, $details['remember'] );
 		wp_set_current_user( $user_id );
 		
 		do_action( 'hma_log_user_in', $user_id);
