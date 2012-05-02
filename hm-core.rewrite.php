@@ -242,6 +242,18 @@ function hm_custom_rewrite_rule_body_class( $classes ) {
 }
 add_filter( 'body_class', 'hm_custom_rewrite_rule_body_class' );
 
+function hm_custom_rewrite_rule_admin_bar() {
+
+	global $hm_current_rewrite_rule;
+	if ( empty( $hm_current_rewrite_rule[3]['admin_bar_callback'] ) )
+		return;
+
+	global $wp_admin_bar;
+
+	call_user_func( $hm_current_rewrite_rule[3]['admin_bar_callback'], $wp_admin_bar );
+}
+add_action( 'admin_bar_menu', 'hm_custom_rewrite_rule_admin_bar', 100 );
+
 /**
  * TODO Docblock
  *
