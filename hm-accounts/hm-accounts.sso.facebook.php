@@ -132,6 +132,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		} catch( Exception $e ) {
 			
 			// They key is dead, or somethign else is wrong, clean up so this doesnt happen again.
+			add_user_meta( $this->user->ID, '_fb_access_token_deleted', $e->getCode() . '::' . $e->getMessage() );
 			delete_user_meta( $this->user->ID, '_fb_access_token' );
 		}
 		
@@ -141,7 +142,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	function get_user_for_access_token() {
 		
-		if( !$this->access_token )
+		if( ! $this->access_token )
 			return false;
 		
 		global $wpdb;
@@ -341,6 +342,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	private function update_user_facebook_information() {
 		
+
 		$info = $this->get_facebook_user_info();
 		$user_id = $this->user->ID;
 		update_user_meta( $user_id, '_fb_access_token', $this->access_token );
@@ -348,7 +350,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		update_user_meta( $user_id, '_facebook_data', $this->get_facebook_user_info() );
 		update_user_meta( $user_id, '_fb_uid', $info['id'] );
 		update_user_meta( $user_id, 'facebook_username', $info['username'] );
-	
+
 	}
 	
 	public function _validate_hma_new_user( $result ) {
@@ -473,6 +475,7 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 	
 	function get_avatar( $size = null ) {			
 		
+
 		$this->avatar_path = null;
 
 		if ( get_user_meta( $this->user->ID, '_facebook_avatar_last_fetch', true ) > time() - ( 3600 * 24 ) && ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
