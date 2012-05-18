@@ -87,7 +87,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			return new WP_Error( 'sso-provider-already-linked' );
 		}
 		
-		update_user_meta( get_current_user_id(), '_fb_access_token', $this->access_token );
+		update_user_meta( get_current_user_id(), '_fb_access_token', $this->get_offline_access_token( $this->access_token ) );
 		update_user_meta( get_current_user_id(), '_fb_uid', $info['id'] );
 		
 		hm_success_message( 'Successfully connected the Facebook account "' . $info['name'] . '" with your profile.', 'update-user' );
@@ -173,6 +173,22 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			$wp_user_id = get_current_user_id();
 		
 		return get_user_meta( $wp_user_id, '_fb_access_token', true );
+	}
+
+	private function get_offline_access_token() {
+
+		try {
+			$res = wp_remote_get( add_query_arg( array( 'fb_exchange_token' => $this->access_token, 'grant_type' => 'fb_exchange_token', 'client_id' => $this->app_id, 'client_secret' => $this->application_secret ), 'https://graph.facebook.com/oauth/access_token' ) );
+			$res = wp_remote_retrieve_body( $res );
+			$res = wp_parse_args( $res, array( 'access_token' => '' ) );
+
+		} catch( Exception $e ) {
+			
+			return false;
+			
+		}
+
+		return $res['access_token'];
 	}
 	
 	public function is_acccess_token_valid() {
@@ -274,8 +290,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		}
 		
 		//Update their access token incase it has changed
-		update_user_meta( $user_id, '_fb_access_token', $this->get_access_token_from_cookie_session() );		
-		
+		$this->save_access_token();
 		wp_set_auth_cookie( $user_id, $details['remember'] );
 		wp_set_current_user( $user_id );
 		
@@ -345,8 +360,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 
 		$info = $this->get_facebook_user_info();
 		$user_id = $this->user->ID;
+		$this->access_token = $this->get_offline_access_token();
 		update_user_meta( $user_id, '_fb_access_token', $this->access_token );
-		update_user_meta( $user_id, 'facebook_url', $this->access_token );
 		update_user_meta( $user_id, '_facebook_data', $this->get_facebook_user_info() );
 		update_user_meta( $user_id, '_fb_uid', $info['id'] );
 		update_user_meta( $user_id, 'facebook_username', $info['username'] );
@@ -417,7 +432,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	public function save_access_token() {
 	
-		update_user_meta( $this->user->ID, '_fb_access_token', $this->access_token );
+		update_user_meta( $this->user->ID, '_fb_access_token', $this->get_offline_access_token( $this->access_token ) );
 	
 	}
 	
