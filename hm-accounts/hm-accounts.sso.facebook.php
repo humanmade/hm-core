@@ -499,9 +499,7 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 
 			$cache = true;
 
-		} elseif ( $this->sso_provider->is_authenticated() ) {
-
-			$id = $this->sso_provider->get_facebook_id();
+		} elseif ( $id = $this->sso_provider->get_facebook_id() ) {
 
 			$image_url = "http://graph.facebook.com/{$id}/picture?type=large";
 
