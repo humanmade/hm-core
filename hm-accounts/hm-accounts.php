@@ -28,5 +28,14 @@ function hma_init() {
 add_action( 'init', 'hma_init', 9 );
 
 function hma_default_profile_fields() {
-	return array( 'user_avatar_path', 'user_avatar_option' );
+	return array( 
+		'user_avatar_path', 
+		'user_avatar_option',
+		'first_name',
+		'last_name',
+		'description',
+		'display_name_preference',
+		'url',
+		'location'
+	);
 }

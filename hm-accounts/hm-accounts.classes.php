@@ -84,7 +84,9 @@ class HM_Accounts {
 
 		// Get any remaining variable that were passed
 		$meta_vars = array_diff_key( $original_args, $defaults, $user_vars );
-		
+
+		$meta_vars = apply_filters( 'hma_register_user_meta', $meta_vars, $this );
+
 		foreach ( (array) $meta_vars as $key => $value ) {
 
 			if ( hma_is_profile_field( $key ) || ! hma_custom_profile_fields() ) {
