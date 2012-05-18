@@ -190,8 +190,11 @@ class HMA_SSO_Twitter extends HMA_SSO_Provider {
 		$userdata['unique_email'] = false;
 		$userdata['location'] = $_info->location;
 		$userdata['_twitter_data'] = (array) $_info;
-		
-		$this->set_registration_data( array_merge( $userdata, $this->registration_data) );
+		$userdata['first_name'] = $_info->name ? $_info->name : $_info->screen_name;
+		$userdata['display_name_preference'] = 'first_name last_name';
+		$userdata['display_name'] = $userdata['first_name'];
+
+		$this->set_registration_data( array_merge( $this->registration_data, $userdata ) );
 
 	 	$result = parent::register();
 	 	
