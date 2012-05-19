@@ -141,7 +141,7 @@ class HM_Accounts {
 
 		// Unique email?
 		// TODO whats wrong with email_exists?
-		if ( !empty( $args['unique_email'] ) && !empty( $args['user_email'] ) && get_user_by_email( $args['user_email'] ) ) {
+		if ( !empty( $args['unique_email'] ) && !empty( $args['user_email'] ) && get_user_by( 'email', $args['user_email'] ) ) {
 			return new WP_Error( 'email-in-use', 'That email is already in use.');
 		}
 
@@ -243,18 +243,27 @@ add_action( 'init', function() {
 			$type = ! empty( $_GET['type'] ) ? $_GET['type']  : 'manual';
 
 			$hm_accounts = HM_Accounts::get_instance( $type );
+			 
+			$details = array(
 
-			$hm_accounts->set_registration_data( 
-				apply_filters( 'hma_register_args', array(
-
-					'user_login' 	=> $_POST['user_login'],
-					'user_email'	=> $_POST['user_email'],
-					'use_password' 	=> true,
-					'user_pass'		=> $_POST['user_pass'],
-					'user_pass2'	=> $_POST['user_pass_1'],
-					'unique_email'	=> true
-				) )
+				'user_login' 	=> $_POST['user_login'],
+				'user_email'	=> $_POST['user_email'],
+				'use_password' 	=> true,
+				'user_pass'		=> $_POST['user_pass'],
+				'user_pass2'	=> $_POST['user_pass_1'],
+				'unique_email'	=> true,
+				'do_login' 		=> true
 			);
+
+			// also pass any registered profile fields
+			foreach ( hma_get_profile_fields() as $field ) {
+				if ( isset( $_POST[$field] ) )
+					$details[$field] = $_POST[$field];
+			}
+
+			$details = apply_filters( 'hma_register_args', $details );
+
+			$hm_accounts->set_registration_data( $details );
 
 			$hm_return = $hm_accounts->register();
 
@@ -269,10 +278,10 @@ add_action( 'init', function() {
 
 				do_action( 'hma_register_completed', $hm_return );
 
-				if ( $_POST['redirect_to'] )
+				if ( ! empty( $_POST['redirect_to'] ) )
 					$redirect = $_POST['redirect_to'];
 
-				elseif ( $_POST['referer'] )
+				elseif ( ! empty( $_POST['referer'] ) )
 					$redirect = $_POST['referer'];
 
 				else
@@ -284,7 +293,6 @@ add_action( 'init', function() {
 		}
 	) );
 } );
-
 
 /**
  * Controller to catch the registration submitting
@@ -304,7 +312,7 @@ add_action( 'init', function() {
 				$details = array( 
 					'password' => $_POST['user_pass'], 
 					'username' => $_POST['user_login'], 
-					'remember' => $_POST['remember'] 
+					'remember' => $_POST['remember']
 				);
 
 			} else {
