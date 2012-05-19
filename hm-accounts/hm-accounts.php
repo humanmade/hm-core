@@ -36,6 +36,7 @@ function hma_default_profile_fields() {
 		'description',
 		'display_name_preference',
 		'url',
-		'location'
+		'location',
+		'gender'
 	);
 }
