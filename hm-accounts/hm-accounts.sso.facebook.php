@@ -158,7 +158,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	
 	public static function get_user_for_uid( $uid, $access_token = null, $flush = false ) {
 
-		if ( ! $flash && ( $id = wp_cache_get( $uid . $access_token, 'user_for_uid' ) ) !== false )
+		if ( ! $flush && ( $id = wp_cache_get( $uid . $access_token, 'user_for_uid' ) ) !== false )
 			return $id ? $id : null;
 
 		global $wpdb;
