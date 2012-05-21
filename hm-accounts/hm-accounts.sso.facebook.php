@@ -290,6 +290,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		}
 		
 		//Update their access token incase it has changed
+		$this->set_user( get_userdata( $user_id ) );
 		$this->access_token = $this->get_access_token_from_cookie_session();
 		$this->save_access_token();
 		wp_set_auth_cookie( $user_id, $details['remember'] );
