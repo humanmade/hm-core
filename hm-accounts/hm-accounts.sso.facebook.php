@@ -116,7 +116,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $this->logout( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
 	}
 	
-	public function is_authenticated() {
+	public function is_authenticated( $check_valid_token = false ) {
 		
 		if( ! $this->user )
 			return false;
@@ -125,6 +125,9 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		if ( ! $access_token )
 			return false;
+
+		if ( $check_valid_token == false )
+			return true;
 			
 		// Check that the access token is still valid
 		try {
