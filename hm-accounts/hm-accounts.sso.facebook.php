@@ -149,24 +149,33 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 			return false;
 		
 		global $wpdb;
-		
+
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_access_token' AND meta_value = '{$this->access_token}'" );
 		
+
 		return $user_id;
 	}
 	
-	public static function get_user_for_uid( $uid, $access_token = null ) {
-		
+	public static function get_user_for_uid( $uid, $access_token = null, $flush = false ) {
+
+		if ( ! $flash && ( $id = wp_cache_get( $uid . $access_token, 'user_for_uid' ) ) !== false )
+			return $id ? $id : null;
+
 		global $wpdb;
-		
+
 		$user_id = $wpdb->get_var( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_fb_uid' AND meta_value = '{$uid}'" );
 		
-		if( !$user_id )
+		if( ! $user_id ) {
+			wp_cache_set( $uid . $access_token, 0, 'user_for_uid', 3600 );
 			return null;
+		}
 		
-		if( $access_token )
+		if( $access_token ) {
+			wp_cache_set( $uid . $access_token, 0, 'user_for_uid', 3600 );
 			return $this->get_user_access_token( $user_id ) == $access_token ? $user_id : null;
+		}
 		
+		wp_cache_set( $uid . $access_token, $user_id, 'user_for_uid', 3600 );
 		return $user_id;
 	}
 	
@@ -296,6 +305,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		$this->set_user( get_userdata( $user_id ) );
 		$this->access_token = $this->get_access_token_from_cookie_session();
 		$this->save_access_token();
+
 		wp_set_auth_cookie( $user_id, $details['remember'] );
 		wp_set_current_user( $user_id );
 		
@@ -368,6 +378,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		update_user_meta( $user_id, '_facebook_data', $this->get_facebook_user_info() );
 		update_user_meta( $user_id, '_fb_uid', $info['id'] );
 		update_user_meta( $user_id, 'facebook_username', $info['username'] );
+		$this->get_user_for_uid( $user_id, null, true );
 
 	}
 	
@@ -441,7 +452,8 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	}
 	
 	public function save_access_token() {
-	
+		
+		$this->_get_user_id_from_sso_id( $this->user->ID, null, true );
 		update_user_meta( $this->user->ID, '_fb_access_token', $this->get_offline_access_token( $this->access_token ) );
 	
 	}
