@@ -223,7 +223,12 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 			$result = $this->link();
 			do_action( 'hma_sso_connect_with_account_completed', $this, $result );
 			
-			wp_redirect( apply_filters( 'hma_sso_connected_account_redirect', get_bloginfo( 'edit_profile_url', 'display' ), $this ), 303 );
+			if ( ! empty( $_GET['redirect_to'] ) )
+				$redirect = $_GET['redirect_to'];
+			else
+				$redirect = get_bloginfo( 'edit_profile_url', 'display' );
+
+			wp_redirect( apply_filters( 'hma_sso_connected_account_redirect', $redirect, $this ), 303 );
 			exit;
 		}
 	}
@@ -254,8 +259,8 @@ abstract class HMA_SSO_Provider extends HM_Accounts {
 		return $url;
 	}
 	
-	function get_connect_with_account_submit_url() {
-		return add_query_arg( 'id', $this->id, get_bloginfo( 'edit_profile_url', 'display' ) . 'sso/authenticated/' );
+	function get_connect_with_account_submit_url( $redirect_to = '' ) {
+		return add_query_arg( array( 'id' => $this->id, 'redirect_to' => $redirect_to ), get_bloginfo( 'edit_profile_url', 'display' ) . 'sso/authenticated/' );
 	}
 
 	/**
