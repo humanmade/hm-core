@@ -152,7 +152,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		return $user_id;
 	}
 	
-	function get_user_for_uid( $uid, $access_token = null ) {
+	public static function get_user_for_uid( $uid, $access_token = null ) {
 		
 		global $wpdb;
 		
@@ -413,18 +413,25 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 
 	public function get_facebook_friends() {
 
-		if( $data = get_user_meta( $this->user->ID, '_facebook_friends', true ) )
-			return (array) $data;
-		
-		try {
-			$data = @$this->client->api('me/friends', 'GET', array( 'access_token' => $this->access_token ));
+		if( ! $data = get_user_meta( $this->user->ID, '_facebook_friends', true ) ) {
+			
+			try {
+				$data = @$this->client->api('me/friends', 'GET', array( 'access_token' => $this->access_token ));
 
-			$data = reset( $data );
-			update_user_meta( $this->user->ID, '_facebook_friends', $data );
-		} catch( Exception $e ) {
-			$data = array();
+				$data = reset( $data );
+				update_user_meta( $this->user->ID, '_facebook_friends', $data );
+			} catch( Exception $e ) {
+				$data = array();
+			}
 		}
-		
+
+		foreach ( $data as &$fb_user )
+			$fb_user['picture_small'] = 'https://graph.facebook.com/' . $fb_user['id'] . '/picture?type=square';
+
+		usort( $data, function( array $a, array $b) {
+			return $a['name'] > $b['name'];
+		} );
+
 		return $data;
 	}
 	
