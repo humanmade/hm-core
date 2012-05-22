@@ -31,6 +31,8 @@ add_filter( 'parse_query', function( WP_Query $wp_query ) {
 
 	unset( $wp_query->query_vars['post_parent'] );
 
+	$wp_query->_post_parent_query = $query;
+	
 	$sql = str_replace( 'ORDER BY wp_posts.post_date DESC LIMIT 0, 1' , '', $query->request );
 
 	add_filter( 'posts_where_request', function( $where, $query ) use ( $sql, $wp_query ) {

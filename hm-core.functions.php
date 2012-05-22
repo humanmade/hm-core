@@ -1650,6 +1650,15 @@ function hm_is_queried_object( $term_or_taxonomy ) {
 
 		}
 
+		if ( ! empty( $wp_query->_post_parent_query ) ) {
+			foreach ( $wp_query->_post_parent_query->tax_query->queries as $query ) {
+
+				if ( $query['taxonomy'] == $term_or_taxonomy )
+					return true;
+
+			}
+		}
+
 	} else if ( is_object( $term_or_taxonomy ) ) {
 
 		foreach ( $wp_query->tax_query->queries as $query ) {
