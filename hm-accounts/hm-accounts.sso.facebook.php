@@ -322,7 +322,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 
 		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
 		if ( ( $result = $this->login() ) && ! is_wp_error( $result ) ) {
-			return $result;
+			return $this->user->ID;
 		}
 		
 		try {
