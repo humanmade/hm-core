@@ -2,7 +2,7 @@
 
 class HM_Accounts {
 
-	public $registration_data;
+	public $registration_data = array();
 	public $id = 'manual';
 
 	/**

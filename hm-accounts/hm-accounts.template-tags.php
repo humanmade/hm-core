@@ -291,7 +291,7 @@ function hma_is_facebook_user( $user ) {
  */
 function hma_get_user_url( $authordata = null ) {
 
-	if ( !$authordata )
+	if ( ! $authordata )
 		global $authordata;
 
 	$authordata = hma_parse_user( $authordata );

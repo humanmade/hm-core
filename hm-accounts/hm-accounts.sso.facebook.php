@@ -172,7 +172,7 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		
 		if( $access_token ) {
 			wp_cache_set( 'fb-uid' . $uid . $access_token, 0, 'user_for_uid', 3600 );
-			return $this->get_user_access_token( $user_id ) == $access_token ? $user_id : null;
+			return self::get_user_access_token( $user_id ) == $access_token ? $user_id : null;
 		}
 		
 		wp_cache_set( 'fb-uid' . $uid . $access_token, $user_id, 'user_for_uid', 3600 );
@@ -246,12 +246,13 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 	protected function get_user_info() {
 
 		$fb_profile_data = $this->get_facebook_user_info();
-			
+
 		$userdata = array( 
 			'user_login'	=> hma_unique_username( sanitize_title( $fb_profile_data['name'] ) ),
+			'user_email'	=> isset( $fb_profile_data['email'] ) ? $fb_profile_data['email'] : '',
 			'first_name' 	=> $fb_profile_data['first_name'],
 			'last_name'		=> $fb_profile_data['last_name'],
-			'description'	=> $fb_profile_data['bio'],
+			'description'	=> isset( $fb_profile_data['bio'] ) ? $fb_profile_data['bio'] : '',
 			'display_name'	=> $fb_profile_data['name'],
 			'display_name_preference' => 'first_name last_name',
 			'_fb_uid'		=> $fb_profile_data['id']
@@ -333,9 +334,11 @@ class HMA_SSO_Facebook extends HMA_SSO_Provider {
 		}
 		
 		$fb_profile_data['gender'] 		= $_fb_profile_data['gender'];
-		$fb_profile_data['url'] 		= $_fb_profile_data['website'];
+		$fb_profile_data['url'] 		= isset( $_fb_profile_data['website'] ) ? $_fb_profile_data['website'] : '';
 		$fb_profile_data['location'] 	= $_fb_profile_data['location']['name'];
-		$fb_profile_data['age'] 		= ( (int) date('Y') ) - ( (int) date( 'Y', strtotime( $_fb_profile_data['birthday'] ) ) );
+
+		if ( isset( $_fb_profile_data['birthday'] ) )
+			$fb_profile_data['age'] 		= ( (int) date('Y') ) - ( (int) date( 'Y', strtotime( $_fb_profile_data['birthday'] ) ) );
 
 		$userdata = apply_filters( 'hma_register_user_data_from_sso', array_merge( $fb_profile_data, array_filter( $this->registration_data ) ), $_fb_profile_data, $this );		
 
