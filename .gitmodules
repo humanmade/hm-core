@@ -1,6 +1,3 @@
 [submodule "hm-accounts/facebook-sdk"]
 	path = hm-accounts/facebook-sdk
 	url = https://github.com/facebook/php-sdk.git
-[submodule "Custom-Metaboxes-and-Fields-for-WordPress"]
-	path = Custom-Metaboxes-and-Fields-for-WordPress
-	url = git@github.com:humanmade/Custom-Metaboxes-and-Fields-for-WordPress.git
