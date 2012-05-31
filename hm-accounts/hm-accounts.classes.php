@@ -307,7 +307,8 @@ add_action( 'init', function() {
 
 			$hm_accounts = HM_Accounts::get_instance( $type );
 
-			if ( $_POST['user_pass'] ) {
+			// normal login form authentication
+			if ( isset( $_POST['user_pass'] ) ) {
 
 				$details = array( 
 					'password' => $_POST['user_pass'], 

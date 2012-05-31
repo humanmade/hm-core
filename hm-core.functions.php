@@ -1428,7 +1428,7 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
  */
 function hm_disable_admin_bar() {
 
-	if( is_admin() )
+	if( is_admin() || ! is_user_logged_in() )
 		return;
 
 	global $_wp_theme_features;
@@ -1643,13 +1643,15 @@ function hm_is_queried_object( $term_or_taxonomy ) {
 	// tax
 	if ( is_string( $term_or_taxonomy ) ) {
 
-		foreach ( $wp_query->tax_query->queries as $query ) {
+		if ( $wp_query->tax_query ) {
+			foreach ( $wp_query->tax_query->queries as $query ) {
 
-			if ( $query['taxonomy'] == $term_or_taxonomy )
-				return true;
+				if ( $query['taxonomy'] == $term_or_taxonomy )
+					return true;
 
+			}
 		}
-
+		
 		if ( ! empty( $wp_query->_post_parent_query ) ) {
 			foreach ( $wp_query->_post_parent_query->tax_query->queries as $query ) {
 
