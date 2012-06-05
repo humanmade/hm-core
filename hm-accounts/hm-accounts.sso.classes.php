@@ -40,7 +40,9 @@ class HMA_SSO_Avatar_Option {
 	}
 	
 	function save_avatar_locally( $url, $ext = null ) {
-	
+		
+		do_action( 'start_operation', __FUNCTION__ );
+
 		$upload_dir = wp_upload_dir();
 		$upload_dir_base = $upload_dir['basedir'];
 		$avatar_dir = $upload_dir_base . '/avatars';
@@ -56,14 +58,19 @@ class HMA_SSO_Avatar_Option {
 		// Remove old one if was there
 		if ( file_exists( $image_path ) )
 			unlink( $image_path );
+
+		do_action( 'add_event', $image_path );
 		
 		file_put_contents( $image_path, file_get_contents( $url ) );
 		
 		//check that the image saved ok, if not then remove it and return null
-		if ( !getimagesize( $image_path ) ) {
+		if ( ! getimagesize( $image_path ) ) {
 			unlink( $image_path );
 			$image_path = null;
 		}
+		do_action( 'add_event', $image_path );
+
+		do_action( 'end_operation', __FUNCTION__ );
 		
 		return $image_path;
 	}
@@ -92,7 +99,10 @@ class HMA_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 		if ( ! hma_get_avatar_upload_path( $this->user ) )
 			return null;
 		
-		return wpthumb( hma_get_avatar_upload_path( $this->user ), $size );
+		do_action( 'start_operation', __FUNCTION__ );
+		$img = wpthumb( hma_get_avatar_upload_path( $this->user ), $size );
+		do_action( 'end_operation', __FUNCTION__ );
+		return $img;
 	}
 }
 

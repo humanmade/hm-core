@@ -440,13 +440,16 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 			$this->avatar_path = $this->save_avatar_locally( $image_url, 'png' ) ;
 			
 			// saving teh image failed
-			if ( !$this->avatar_path )
+			if ( ! $this->avatar_path )
 				return null;
 			
 			update_user_meta( $this->user->ID, '_twitter_avatar', $this->avatar_path );
 		}
 		
-		return wpthumb( $this->avatar_path, $size );
+		do_action( 'start_operation', __FUNCTION__ );
+		$img =  wpthumb( $this->avatar_path, $size );
+		do_action( 'end_operation', __FUNCTION__ );
+		return $img;
 	}
 	
 	function remove_local_avatar() {
