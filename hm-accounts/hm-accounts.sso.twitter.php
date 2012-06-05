@@ -435,7 +435,7 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 			if ( empty( $user_info['screen_name'] ) )
 				return null;
 				
-			$image_url = "http://img.tweetimag.es/i/{$user_info['screen_name']}_o";
+			$image_url = "http://api.twitter.com/1/users/profile_image?screen_name={$user_info['screen_name']}&size=original";
 
 			$this->avatar_path = $this->save_avatar_locally( $image_url, 'png' ) ;
 			
