@@ -6,7 +6,7 @@
 	url = https://github.com/facebook/php-sdk.git
 [submodule "Custom-Metaboxes-and-Fields-for-WordPress"]
 	path = Custom-Metaboxes-and-Fields-for-WordPress
-	url = git@github.com:humanmade/Custom-Metaboxes-and-Fields-for-WordPress.git
+	url = git@github.com:humanmade/Custom-Meta-Boxes.git
 [submodule "tlc-transients"]
 	path = tlc-transients
 	url = https://github.com/markjaquith/WP-TLC-Transients.git
