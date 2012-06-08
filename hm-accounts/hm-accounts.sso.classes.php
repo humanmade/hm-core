@@ -35,10 +35,10 @@ class HMA_SSO_Avatar_Option {
 		$upload_dir_base = $upload_dir['basedir'];
 		$avatar_dir = $upload_dir_base . '/avatars';
 			
-		if ( !is_dir($avatar_dir) )
+		if ( ! is_dir($avatar_dir) )
 			mkdir( $avatar_dir, 0775, true );
 		
-		if ( !$ext )
+		if ( ! $ext )
 			$ext = strtolower( end( explode( '.', $url ) ) );
 		
 		$image_path = $avatar_dir . '/' . $this->user->ID . '-' . $this->service_id  . '-' . time() . '.' . $ext;
@@ -107,7 +107,7 @@ class HMA_Gravatar_Avatar_Option extends HMA_SSO_Avatar_Option {
  * Absstract class for new SSO provider (e.g. Facebook, Twitter etc)
  * 
  */
-class HMA_SSO_Provider {
+abstract class HMA_SSO_Provider extends HM_Accounts {
 	
 	public $id;
 	public $name;
@@ -143,27 +143,6 @@ class HMA_SSO_Provider {
 	function get_access_token_string() {
 		return $this->access_token;
 	}
-
-	/**
-	 * Creates a new user based off the SSO provider details (must be check_for_provider_logged_in() = true)
-	 * If the provider credentials have already been used, just log them in
-	 *
-	 * @return bool
-	 */
-	public function register() {
-	
-		if ( ! $this->check_for_provider_logged_in() )
-			return null;
-		
-		// Check if the SSO has already been registered with a WP account, if so then login them in and be done
-		if ( $result = $this->login() ) {
-			wp_redirect( get_bloginfo('edit_profile_url', 'display') );
-			exit;
-		}
-		
-	}
-	
-	//is functions
 	
 	/**
 	 * Checks if the user has linked their account with the SSO provider.
@@ -181,7 +160,10 @@ class HMA_SSO_Provider {
 		$return = $this->login();
 
 		// If ther account was not connected, and we have register on login enabled, do that
-		if( is_wp_error( $return ) && in_array( $return->get_error_code(), array( 'twitter-account-not-connected', 'facebook-account-not-connected' ) ) && defined( 'HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN' ) && HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN ) {
+		if( is_wp_error( $return )
+			&& in_array( $return->get_error_code(), array( 'twitter-account-not-connected', 'facebook-account-not-connected' ) ) 
+			&& defined( 'HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN' )
+			&& HMA_SSO_REGISTER_ACCOUNT_ON_LOGIN ) {
 
 			hm_clear_messages( 'login' );
 			$return = $this->register();
@@ -219,8 +201,6 @@ class HMA_SSO_Provider {
 	
 		if ( isset( $_GET['id'] ) && $_GET['id'] == $this->id )
 			$this->register_link_submitted();
-		
-		
 	}
 	
 	function _check_sso_connect_with_account_submitted() {
