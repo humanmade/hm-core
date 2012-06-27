@@ -555,13 +555,13 @@ function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = n
 	$id = $id ? $id : hm_get_post_image_id( $post );
 
 	if ( $id )
-		return wpthumb( get_attached_file( $id ), $w, $h, $crop, true, wm_get_options( $id ) );
+		return wpthumb( get_attached_file( $id ), $w, $h, $crop, true, wpthumb_wm_get_options( $id ) );
 
 	$att_id = hm_get_post_attached_image_id( $post );
 	if ( $att_id )
-		return wpthumb( get_attached_file( $att_id ), $w, $h, $crop, true, wm_get_options( $id ) );
+		return wpthumb( get_attached_file( $att_id ), $w, $h, $crop, true, wpthumb_wm_get_options( $id ) );
 	//if there is no id, then try search the content for an image
-	if ( $return = wpthumb(hm_get_post_internal_image($post), $w, $h, $crop, true, wm_get_options( $id )) )
+	if ( $return = wpthumb(hm_get_post_internal_image($post), $w, $h, $crop, true, wpthumb_wm_get_options( $id )) )
 		return $return;
 
 	if ( $reutrn = hm_get_post_external_image($post) )
