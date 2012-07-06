@@ -518,7 +518,7 @@ class HMA_Facebook_Avatar_Option extends HMA_SSO_Avatar_Option {
 
 		$this->avatar_path = null;
 
-		if ( get_user_meta( $this->user->ID, '_facebook_avatar_last_fetch', true ) > time() - ( 3600 * 24 ) && ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
+		if ( get_user_meta( $this->user->ID, '_facebook_avatar_last_fetch', true ) > time() - ( 3600 * 24 * 4 ) && ( $avatar = get_user_meta( $this->user->ID, '_facebook_avatar', true ) ) && file_exists( $avatar ) ) {
 
 			$this->avatar_path = $avatar;
 
