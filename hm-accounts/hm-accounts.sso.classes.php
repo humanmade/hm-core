@@ -99,9 +99,7 @@ class HMA_Uploaded_Avatar_Option extends hma_SSO_Avatar_Option {
 		if ( ! hma_get_avatar_upload_path( $this->user ) )
 			return null;
 		
-		do_action( 'start_operation', __FUNCTION__ );
 		$img = wpthumb( hma_get_avatar_upload_path( $this->user ), $size );
-		do_action( 'end_operation', __FUNCTION__ );
 		return $img;
 	}
 }
