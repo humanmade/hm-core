@@ -111,8 +111,11 @@ function hm_set_custom_rewrite_rule_current_page( $request ) {
 
 		$hm_current_rewrite_rule = $hm_rewrite_rules[$request->matched_rule];
 		
-		if ( ! empty( $hm_current_rewrite_rule[3]['request_callback'] ) && is_callable( $hm_current_rewrite_rule[3]['request_callback'] ) )
+		if ( ! empty( $hm_current_rewrite_rule[3]['request_callback'] ) && is_callable( $hm_current_rewrite_rule[3]['request_callback'] ) ) {
+			do_action( 'start_operation', 'request_callback' );
 			call_user_func( $hm_current_rewrite_rule[3]['request_callback'], $request );
+			do_action( 'end_operation', 'request_callback' );
+		}
 		
 		do_action_ref_array( 'hm_parse_request_' . $request->matched_rule, array( &$request ) );
 
@@ -209,8 +212,11 @@ function hm_load_custom_templates( $template ) {
 				redirect_canonical();
 
 			include( $hm_current_rewrite_rule[2] );
-			exit;
 
+			add_filter( 'template_include', function() {
+				return null;
+			}) ;
+			
 		// Allow redirect_canonical to be disabled
 		} else if ( !empty( $hm_current_rewrite_rule[3]['disable_canonical'] ) ) {
 			remove_action( 'template_redirect', 'redirect_canonical', 10 );
