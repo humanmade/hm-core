@@ -446,9 +446,8 @@ class HMA_Twitter_Avatar_Option extends HMA_SSO_Avatar_Option {
 			update_user_meta( $this->user->ID, '_twitter_avatar', $this->avatar_path );
 		}
 		
-		do_action( 'start_operation', __FUNCTION__ );
 		$img =  wpthumb( $this->avatar_path, $size );
-		do_action( 'end_operation', __FUNCTION__ );
+
 		return $img;
 	}
 	
