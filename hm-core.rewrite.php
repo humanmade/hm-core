@@ -196,6 +196,8 @@ class HM_Rewrite_Rule {
 		
 		global $wp;
 
+		do_action( 'hm_parse_request_' . $this->get_regex(), $wp );
+		
 		foreach ( $this->request_callbacks as $callback )
 			call_user_func_array( $callback, array( $wp ) );
 
