@@ -25,6 +25,7 @@ include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
 include_once( HM_CORE_PATH . 'hm-core.classes.php' );
+include_once( HM_CORE_PATH . 'hm-core.wp-query-additions.php' );
 
 // Load the custom media button support unless it's specifically disabled
 if ( ! defined( 'HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS' ) || HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS )

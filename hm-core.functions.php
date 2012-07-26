@@ -972,126 +972,6 @@ function hm_breadcrumbs() {
 
 }
 
-// Multiple meta value hackkks
-add_filter( 'posts_join_paged', 'hm_add_multiple_meta_joins_to_wp_query', 10, 2 );
-function hm_add_multiple_meta_joins_to_wp_query( $join, $wp_query ) {
-
-	global $wpdb;
-
-	if ( !is_array( $wp_query->query_vars['meta_key'] ) || count( $wp_query->query_vars['meta_key'] ) == 1 || empty( $wp_query->query_vars['meta_value'] ) )
-		return $join;
-
-	$meta_value_count = count( $wp_query->query_vars['meta_key'] ) - 1;
-
-	for( $i = 0; $i < $meta_value_count; $i++ ) {
-		$join .= " JOIN $wpdb->postmeta as hm_extra_meta_{$i} ON $wpdb->posts.ID = hm_extra_meta_{$i}.post_id";
-	}
-
-	return $join;
-}
-
-
-function hm_add_multiple_meta_to_wp_query( $where, $wp_query ) {
-
-	global $wpdb;
-
-	if ( !is_array( $wp_query->query_vars['meta_key'] ) )
-		return $where;
-
-	$meta_value_count = count( $wp_query->query_vars['meta_key'] ) - 1;
-
-	$compare = $wp_query->query['meta_compare'][0];
-	$conjuction = $wp_query->query_vars['meta_conjunction'] ? $wp_query->query_vars['meta_conjunction'] : 'AND';
-
-	// Replace the first meta_compare in the normal where because wordpress cant handle an array
-	$where = str_replace( " $wpdb->postmeta.meta_value = ", " $wpdb->postmeta.meta_value $compare ", $where );
-
-	if ( $wp_query->query_vars['meta_key'] && empty( $wp_query->query_vars['meta_value'] ) ) {
-		$where = str_replace( " AND $wpdb->postmeta.meta_key = '" . reset( $wp_query->query_vars['meta_key'] ) . "'", "", $where );
-		return $where .= " AND meta_key IN ( '" . implode( '\' , \'', $wp_query->query_vars['meta_key'] ) . "' )";
-	}
-
-	for( $i = 0; $i < $meta_value_count; $i++ ) {
-		$table = "hm_extra_meta_{$i}";
-		$key = $wp_query->query_vars['meta_key'][$i + 1];
-		$value = $wp_query->query_vars['meta_value'][$i + 1];
-		$compare = $wp_query->query['meta_compare'][$i + 1];
-
-		if ( $key && $value && $compare )
-			$where .= "AND ( $table.meta_key = '$key' $conjuction $table.meta_value" . ( is_numeric( $value ) ? " + 0" : "" ) . " $compare " . ( is_numeric( $value ) ? "$value" : "'$value'" ) . " )";
-	}
-
-	return $where;
-
-}
-
-add_filter( 'posts_where', 'hm_add_multiple_meta_to_wp_query', 10, 2 );
-
-/**
- * Allows the user of orderby=post__in to oder the posts in the order you queried by
- *
- * @access public
- * @param string $sortby
- * @param object $thequery
- * @return string
- */
-function hma_sort_query_by_post_in( $sortby, $thequery ) {
-	if ( !empty($thequery->query['post__in']) && isset($thequery->query['orderby']) && $thequery->query['orderby'] == 'post__in' )
-		$sortby = "find_in_set(ID, '" . implode( ',', $thequery->query['post__in'] ) . "')";
-
-	return $sortby;
-}
-add_filter( 'posts_orderby', 'hma_sort_query_by_post_in', 10, 2 );
-
-function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
-
-	global $wpdb;
-	$query = wp_parse_args( $wp_query->query );
-	$orders = explode( ' ', isset( $query['orderby'] ) ? $query['orderby'] : '' );
-
-	if( count( $orders ) <= 1  )
-		return $orderby;
-
-	// Some internal WordPress queries incorrectly add DESC or ASC to the orderby instead of order
-	foreach( $orders as $key => $order ) :
-		$order = rtrim( $order, ',' );
-		if ( in_array( strtoupper( $order ), array( 'DESC', 'ASC' ) ) ) :
-			$orders[$key - 1] .= ' ' . strtoupper( $order );
-			unset( $orders[$key] );
-		endif;
-	endforeach;
-
-	$one_before = '';
-
-	foreach( $orders as $key => $order ) {
-
-		$order = str_replace( $wpdb->posts . '.post_', '', $order );
-
-		$table_column = in_array( reset( explode( ' ', $order ) ), array( 'menu_order', 'ID' ) ) ? $order : 'post_' . $order;
-
-		if( strpos( $orderby, $wpdb->posts . '.' . $table_column ) !== false ) {
-			$one_before = $order;
-			continue;
-		}
-
-		if( strpos( $orderby, $wpdb->posts . '.post_' . $order ) === false ) {
-			if( $one_before )
-				$orderby = str_replace( $wpdb->posts . '.' . $one_before,  $wpdb->posts . '.post_' . $one_before . ', ' . $wpdb->posts . '.' . $table_column, $orderby );
-			else
-				$orderby =  $wpdb->posts . '.' . $table_column . ', ' . $orderby;
-		}
-	}
-
-	while( strpos( $orderby, ', ,' ) !== false )
-		$orderby = str_replace( ', ,', ', ', $orderby );
-
-	while( strpos( $orderby, ',,' ) !== false )
-	$orderby = str_replace( ',,', ', ', $orderby );
-
-	return $orderby;
-}
-add_filter( 'posts_orderby_request', 'hm_allow_any_orderby_to_wp_query', 10, 2 );
-
 function hm_time_to_local( $time = null ) {
 
 	if ( is_null( $time ) )
@@ -1548,7 +1428,7 @@ function hm_touch_time_get_time_from_data( $name, $data ) {
  */
 function hm_disable_admin_bar() {
 
-	if( is_admin() )
+	if( is_admin() || ! is_user_logged_in() )
 		return;
 
 	global $_wp_theme_features;
@@ -1717,12 +1597,37 @@ function hm_get_template_part( $file, $template_args = array() ) {
 	
 	$template_args = wp_parse_args( $template_args );
 	
-	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) )
-		require( get_stylesheet_directory() . '/' . $file . '.php' );
+	do_action( 'start_operation', 'hm_template_part::' . $file );
 	
-	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
-		require( get_template_directory() . '/' . $file . '.php' ); 
+	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) ) {
 
+		if ( !empty( $template_args['return'] ) )
+			ob_start();
+		
+		$return = require( get_stylesheet_directory() . '/' . $file . '.php' );
+
+		if ( !empty( $template_args['return'] ) )
+			$data = ob_get_clean();
+	}
+	
+	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) ) {
+
+		if ( !empty( $template_args['return'] ) )
+			ob_start();
+		
+		$return = require( get_template_directory() . '/' . $file . '.php' );
+
+		if ( !empty( $template_args['return'] ) )
+			$data = ob_get_clean();
+	}
+
+	do_action( 'end_operation', 'hm_template_part::' . $file );
+
+	if ( !empty( $template_args['return'] ) )
+		if ( $return === false )
+			return false;
+		else
+			return $data;
 }
 
 /**
@@ -1738,11 +1643,22 @@ function hm_is_queried_object( $term_or_taxonomy ) {
 	// tax
 	if ( is_string( $term_or_taxonomy ) ) {
 
+		if ( $wp_query->tax_query ) {
 		foreach ( $wp_query->tax_query->queries as $query ) {
 
 			if ( $query['taxonomy'] == $term_or_taxonomy )
 				return true;
 
+		}
+		}
+		
+		if ( ! empty( $wp_query->_post_parent_query ) ) {
+			foreach ( $wp_query->_post_parent_query->tax_query->queries as $query ) {
+
+				if ( $query['taxonomy'] == $term_or_taxonomy )
+					return true;
+
+			}
 		}
 
 	} else if ( is_object( $term_or_taxonomy ) ) {
