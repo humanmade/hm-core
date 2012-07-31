@@ -188,6 +188,11 @@ class HM_Rewrite_Rule {
 		return $this->query_args;
 	}
 
+	public function get_public_query_var_exports() {
+
+		return array_keys( wp_parse_args( $this->get_wp_query_args() ) );
+	}
+
 	/**
 	 * Called when this rule is matched for the page load
 	 * 
@@ -492,5 +497,20 @@ add_filter( 'parse_request', function( WP $request ) {
 	$matched_regex = $request->matched_rule;
 
 	HM_Rewrite::matched_regex( $matched_regex );
+
+} );
+
+/**
+ * Add custom query vars from all rewrite rules automatically
+ */
+add_filter( 'query_vars', function( $query_vars ) {
+
+	$new_vars = array();
+
+	foreach ( HM_Rewrite::get_rules() as $rule )
+		$query_vars = array_merge( $rule->get_public_query_var_exports(), $query_vars );
+
+
+	return $query_vars;
 
 } );
