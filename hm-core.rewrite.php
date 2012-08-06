@@ -212,7 +212,7 @@ class HM_Rewrite_Rule {
 		add_action( 'template_redirect', function( $template ) use ( $t ) {
 
 			global $wp_query;
-
+			
 			// check permissions
 			$permission = $t->access_rule;
 			$redirect = '';
@@ -440,6 +440,9 @@ function hm_add_rewrite_rule( $args = array() ) {
 
 	if ( ! empty( $args['query'] ) )
 		$rule->set_wp_query_args( $args['query'] );
+
+	if ( ! empty( $args['permission'] ) )
+		$rule->set_access_rule( $args['permission'] );
 
 	// some convenenience properties. These are done here because they are not very nice
 	if ( ! empty( $args['body_class'] ) )
