@@ -6,7 +6,7 @@
  * @access public
  * @param mixed $code
  * @param bool $output. (default: true)
- * @return void
+ * @return $code
  */
 function hm( $code, $output = true ) {
 
@@ -42,6 +42,8 @@ function hm( $code, $output = true ) {
 
 	if ( $output )
 		echo '</pre><br />';
+
+	return $code;
 
 }
 
