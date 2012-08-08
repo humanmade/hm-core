@@ -1608,7 +1608,7 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 
 		if ( ( $cache = wp_cache_get( $file, serialize( $cache_args ) ) ) !== false ) {
 
-			if ( $template_args['return'])
+			if ( ! empty( $template_args['return'] ) )
 				return $cache;
 
 			echo $cache;
