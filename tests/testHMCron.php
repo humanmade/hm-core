@@ -1,5 +1,6 @@
 <?php
 
+if ( class_exists( 'HM_Cron' ) ) :
 class HMCronTestCase extends WP_UnitTestCase {
 
 	function testTableExists() {
@@ -53,3 +54,4 @@ class HMCronTestCase extends WP_UnitTestCase {
 		$this->assertTrue( $passed );
 	}
 }
+endif;
