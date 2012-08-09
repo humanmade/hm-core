@@ -1600,11 +1600,13 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 
 	if ( $cache_args ) {
 
-		foreach ( $template_args as $key => $value )
-			if ( is_scalar( $value ) )
+		foreach ( $template_args as $key => $value ) {
+			if ( is_scalar( $value ) || is_array( $value ) ) {
 				$cache_args[$key] = $value;
-			else if ( is_object( $value ) && method_exists( $value, 'get_id' ) )
+			} else if ( is_object( $value ) && method_exists( $value, 'get_id' ) ) {
 				$cache_args[$key] = call_user_method( 'get_id', $value );
+			}
+		}
 
 		if ( ( $cache = wp_cache_get( $file, serialize( $cache_args ) ) ) !== false ) {
 
