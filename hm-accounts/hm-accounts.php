@@ -1,6 +1,5 @@
 <?php
 
-include_once( 'hm-accounts.classes.php' );
 include_once( 'hm-accounts.functions.php' );
 include_once( 'hm-accounts.template-tags.php' );
 include_once( 'hm-accounts.rewrite.php' );
