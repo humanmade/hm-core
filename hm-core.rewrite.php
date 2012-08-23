@@ -300,7 +300,7 @@ class HM_Rewrite_Rule {
 	 */
 	public function set_template( $template ) {
 
-		if ( strpos( $template, ABSPATH ) !== 0 )
+		if ( ! file_exists( $template ) )
 			$template = get_template_directory() . '/' . $template;
 
 		$this->template = $template;
