@@ -30,10 +30,6 @@ include_once( HM_CORE_PATH . 'hm-core.wp-query-additions.php' );
 if ( ! defined( 'HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS' ) || HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS )
     include_once( HM_CORE_PATH . 'media-uploader.extensions.php' );
 
-// Load the Paypal class if enabled
-if ( defined( 'HM_ENABLE_PAYPAL' ) && HM_ENABLE_PAYPAL !== false )
-    include_once( HM_CORE_PATH . 'paypal/paypal.functions.php' );
-
 // Load the js functions unless specifically disabled
 if ( ! defined( 'HM_ENABLE_SCRIPTS' ) || HM_ENABLE_SCRIPTS ) {
 
