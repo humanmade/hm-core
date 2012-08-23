@@ -3,7 +3,7 @@
 /*
 Plugin Name: HM Core
 Description: A set of helpful frameworks, functions, classes.
-Version: 1.0
+Version: 1.1
 Author: Human Made Limited
 Author URI: http://hmn.md/
 */
@@ -20,6 +20,7 @@ define( 'HM_CORE_PATH', dirname( __FILE__ ) . '/' );
 define( 'HM_CORE_URL', str_replace( ABSPATH, site_url( '/' ), HM_CORE_PATH ) );
 
 // Load core files
+include_once( HM_CORE_PATH . 'hm-core.deprecated.php' );
 include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
