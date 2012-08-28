@@ -444,6 +444,10 @@ function hm_add_rewrite_rule( $args = array() ) {
 	if ( ! empty( $args['permission'] ) )
 		$rule->set_access_rule( $args['permission'] );
 
+	if ( ! empty( $args['admin_bar_callback'] ) )
+		$rule->add_admin_bar_callback( $args['admin_bar_callback'] );
+
+
 	// some convenenience properties. These are done here because they are not very nice
 	if ( ! empty( $args['body_class'] ) )
 		$rule->add_body_class_callback( function( $classes ) use ( $args ) {
