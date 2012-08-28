@@ -3,7 +3,7 @@
 /*
 Plugin Name: HM Core
 Description: A set of helpful frameworks, functions, classes.
-Version: 1.0
+Version: 1.1
 Author: Human Made Limited
 Author URI: http://hmn.md/
 */
@@ -20,7 +20,7 @@ define( 'HM_CORE_PATH', dirname( __FILE__ ) . '/' );
 define( 'HM_CORE_URL', str_replace( ABSPATH, site_url( '/' ), HM_CORE_PATH ) );
 
 // Load core files
-include_once( HM_CORE_PATH . 'hm-core.debug.php' );
+include_once( HM_CORE_PATH . 'hm-core.deprecated.php' );
 include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
@@ -30,10 +30,6 @@ include_once( HM_CORE_PATH . 'hm-core.wp-query-additions.php' );
 // Load the custom media button support unless it's specifically disabled
 if ( ! defined( 'HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS' ) || HM_ENABLE_MEDIA_UPLOAD_EXTENSIONS )
     include_once( HM_CORE_PATH . 'media-uploader.extensions.php' );
-
-// Load the Paypal class if enabled
-if ( defined( 'HM_ENABLE_PAYPAL' ) && HM_ENABLE_PAYPAL !== false )
-    include_once( HM_CORE_PATH . 'paypal/paypal.functions.php' );
 
 // Load the js functions unless specifically disabled
 if ( ! defined( 'HM_ENABLE_SCRIPTS' ) || HM_ENABLE_SCRIPTS ) {
@@ -68,7 +64,7 @@ function hm_theme_supports() {
 
 	// hm cron
 	if ( current_theme_supports( 'hm-cron' ) )
-		include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );		
+		include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
 
 }
 add_action( 'after_setup_theme', 'hm_theme_supports', 11 );

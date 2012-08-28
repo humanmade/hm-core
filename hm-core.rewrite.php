@@ -2,26 +2,26 @@
 
 /**
  * HM_Rewrite and HM_Rewrite_Rule are wrappers for the WordPress rewrite / wp query system
- * 
+ *
  * The goal of HM_Rewrite and associated fuctions / classes is to make it very easy to add new routing points
  * with new pages (as in dynamic pages, post_type_archive etc). It basically wrapps a few tasks into a nice API.
- * 
+ *
  * Everything (almost) you need for setting up a new routing page can be done all at once, relying heavily on PHP
  * Closures. It essentially wrapps adding to the rewrite_rules, adding your template file to template_redirect,
  * wp_title hook, body_class hook, parse_query hook etc. Also also provides some callbacks for conveniance.
- * 
- * Each rewrite rule is an instance of HM_Rewrite_Rule. Here you add the regex / wp_query vars and any other 
+ *
+ * Each rewrite rule is an instance of HM_Rewrite_Rule. Here you add the regex / wp_query vars and any other
  * options for the "page". For example a callback function to parse_request to add additional query vars, or a callback
  * body_class.
- * 
+ *
  * There is also a wrapper function for all of this in one call hm_rewrite_rule(). hm_rewrite_rule() is generally the
  * recommended interface, you can interact with the underlying objects for more advanced stuff (and also tacking onto
  * other rewrite rules)
- * 
+ *
  * Simple use case example:
- * 
- * hm_rewrite_rule( array( 
- * 
+ *
+ * hm_rewrite_rule( array(
+ *
  * 		'regex' 	=> '^users/([^/]+)/?',
  *   	'query'		=> 'author_name=$matches[1]&',
  *    	'template'	=> 'user-archive.php',
@@ -34,24 +34,24 @@
  *      	return get_query_var( 'author_name' ) . ' ' . $seperator . ' ' . $title;
  *      }
  * ) );
- * 
- * 
- * 
+ *
+ *
+ *
  * A more advanced example using more callbacks
- * 
- *  * hm_rewrite_rule( array( 
- * 
+ *
+ *  * hm_rewrite_rule( array(
+ *
  * 		'regex' 	=> '^reviews/([^/]+)/?', // a review category page
  *   	'query'		=> 'review_category=$matches[1]&',
  *    	'template'	=> 'review-category.php',
  *     	'request_callback' => function( WP $wp ) {
- * 
+ *
  *      	// if the review category is "laptops" then only show items in draft
  *       	if ( $wp->query_vars['review_category'] == 'laptops' )
  *        		$wp->query_vars['post_status'] = 'draft';
  *      },
  *      'query_callback' => function( WP_Query $query ) {
- * 
+ *
  *      	//overwrite is_home because WordPress gets it wrong here
  *       	$query->is_home = false;
  *      },
@@ -63,8 +63,8 @@
  *      	return review_category . ' ' . $seperator . ' ' . $title;
  *      }
  * ) );
- * 
- * 
+ *
+ *
  */
 
 class HM_Rewrite {
@@ -76,7 +76,7 @@ class HM_Rewrite {
 
 	/**
 	 * Add a rewrite rule, this should be called on `init`
-	 * 
+	 *
 	 * @param HM_Rewrite_Rule $rule [description]
 	 */
 	public static function add_rule( HM_Rewrite_Rule $rule ) {
@@ -85,7 +85,7 @@ class HM_Rewrite {
 
 	/**
 	 * Get all the rewrite rules added
-	 * 
+	 *
 	 * @return HM_Rewrite_Rule[]
 	 */
 	public static function get_rules() {
@@ -93,8 +93,8 @@ class HM_Rewrite {
 	}
 
 	/**
-	 * Remove a rule 
-	 * 
+	 * Remove a rule
+	 *
 	 * @param  string $id the identifier for the rule (regex or id if specific in the rule)
 	 */
 	public static function remove_rule( $id ) {
@@ -109,7 +109,7 @@ class HM_Rewrite {
 
 	/**
 	 * Get the rewrite rule for a given id (regex or id if specificed in the rule)
-	 * 
+	 *
 	 * @param  string $id
 	 * @return HM_Rewrite_Rule
 	 */
@@ -125,8 +125,8 @@ class HM_Rewrite {
 
 	/**
 	 * Called when a regex is matched on page load, will call the rewrite rule responsible for it (if any)
-	 * 
-	 * @param  string $regex 
+	 *
+	 * @param  string $regex
 	 */
 	public static function matched_regex( $regex ) {
 
@@ -155,14 +155,14 @@ class HM_Rewrite_Rule {
 	public $access_rule = '';
 
 	public function __construct( $regex, $id = null ) {
-		
+
 		$this->regex = $regex;
 		$this->id = $id ? $id : $regex;
 	}
 
 	/**
 	 * Get the regex for the rewrite rule
-	 * 
+	 *
 	 * @return string
 	 */
 	public function get_regex() {
@@ -195,14 +195,14 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Called when this rule is matched for the page load
-	 * 
+	 *
 	 */
 	public function matched_rule() {
-		
+
 		global $wp;
 
 		do_action( 'hm_parse_request_' . $this->get_regex(), $wp );
-		
+
 		foreach ( $this->request_callbacks as $callback )
 			call_user_func_array( $callback, array( $wp ) );
 
@@ -212,7 +212,7 @@ class HM_Rewrite_Rule {
 		add_action( 'template_redirect', function( $template ) use ( $t ) {
 
 			global $wp_query;
-			
+
 			// check permissions
 			$permission = $t->access_rule;
 			$redirect = '';
@@ -277,7 +277,7 @@ class HM_Rewrite_Rule {
 		} );
 
 		add_filter( 'wp_title', function( $title, $sep = '' ) use ( $t ) {
-			
+
 			foreach ( $t->title_callbacks as $callback )
 				$title = call_user_func_array( $callback, array( $title ) );
 
@@ -295,12 +295,12 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Set the template file to render this request
-	 * 
+	 *
 	 * @param string $template
 	 */
 	public function set_template( $template ) {
 
-		if ( strpos( $template, ABSPATH ) !== 0 )
+		if ( ! file_exists( $template ) )
 			$template = get_template_directory() . '/' . $template;
 
 		$this->template = $template;
@@ -312,9 +312,9 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Add a callback for when the request is mached
-	 * 
+	 *
 	 * The callback will be called with the WP object
-	 * 
+	 *
 	 * @param function $callback
 	 */
 	public function add_request_callback( $callback ) {
@@ -323,9 +323,9 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Add a callback for when the WP_Query's parse_query is fired
-	 * 
+	 *
 	 * The callback will be called with the WP_Query object, before the query is done, after parse_args
-	 * 
+	 *
 	 * @param function $callback
 	 */
 	public function add_parse_query_callback( $callback ) {
@@ -334,9 +334,9 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Add a callback for when the WP_Query is being set up
-	 * 
+	 *
 	 * The callback will be called with the WP_Query object, after the query is done, after parse_args
-	 * 
+	 *
 	 * @param function $callback
 	 */
 	public function add_query_callback( $callback ) {
@@ -345,9 +345,9 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Add a callback for when the wp_title hook is fired
-	 * 
+	 *
 	 * The callback will be called with the title of the page
-	 * 
+	 *
 	 * @param function $callback
 	 */
 	public function add_title_callback( $callback ) {
@@ -356,9 +356,9 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Add a callback for when the body_class hook is fired
-	 * 
+	 *
 	 * The callback will be called with the classes added so far
-	 * 
+	 *
 	 * @param function $callback
 	 */
 	public function add_body_class_callback( $callback ) {
@@ -367,7 +367,7 @@ class HM_Rewrite_Rule {
 
 	/**
 	 * Add a callback for the admin_bar hooks fire
-	 * 
+	 *
 	 * @param function $callback
 	 */
 	public function add_admin_bar_callback( $callback ) {
@@ -377,12 +377,12 @@ class HM_Rewrite_Rule {
 
 /**
  * The main wrapper function for the HM_Rewrite API. Use this to add new rewrite rules
- * 
+ *
  * Create a new rewrite with the arguments listed below. The only required argument is 'regex'
- * 
+ *
  * @param  string 		$regex 		The rewrite regex, start / end delimter not required. Eg: '^people/([^/]+)/?'
  * @param  mixed 		$query 		The WP_Query args to be used on this "page"
- * @param  string 		$template 	The template file used to render the request. Not required, will use 
+ * @param  string 		$template 	The template file used to render the request. Not required, will use
  *                             		the template file for the WP_Query if not set. Relative to template_directory() or absolute.
  * @param  string 		$body_class A class to be added to body_class in the rendered template
  * @param  function 	$body_class_callback A callback that will be hooked into body_class
@@ -391,7 +391,7 @@ class HM_Rewrite_Rule {
  * @param  function 	$parse_query_callback A callback taht will be hooked into 'parse_query'. Use this to modify query vars
  *                                         	  in the main WP_Query
  * @param  function 	$title_callback A callback that will be hooked into wp_title
- * @param  function 	$query_callback A callback taht will be called once the WP_Query has finished. Use to overrite any 
+ * @param  function 	$query_callback A callback taht will be called once the WP_Query has finished. Use to overrite any
  *                                   	annoying is_404, is_home etc that you custom query may not match to.
  * @param  function 	$access_rule An access rule for restriciton to logged-in-users only for example.
  */

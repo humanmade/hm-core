@@ -19,42 +19,6 @@ function hm_human_post_time( $timestamp = 'current' ) {
 }
 
 /**
- * hm_parse_user function.
- *
- * @access public
- * @param mixed $user. (default: null)
- * @return void
- */
-function hm_parse_user( $user = null ) {
-
-	// We're we passed an object with ID
-	if ( is_object( $user ) && is_numeric( $user->ID ) )
-		return get_userdata( $user->ID );
-
-	// We're we passed an object with user_id
-	if ( is_object( $user ) && is_numeric( $user->user_id ) )
-		return get_userdata( $user->user_id );
-
-	// We're we passed an array
-	if ( is_array( $user ) && is_numeric( $user['ID'] ) )
-		return get_userdata( $user['ID'] );
-
-	// ID
-	if ( is_numeric( $user ) )
-		return get_userdata( $user );
-
-	// username
-	if ( is_string( $user ) )
-		return get_userdatabylogin( $user );
-
-	// null
-	global $current_user;
-
-	return get_userdata( $current_user->ID );
-
-}
-
-/**
  * hm_parse_post function.
  *
  * @access public
@@ -1588,13 +1552,13 @@ endif;
 
 
 /**
- * Like get_template_part() put lets you pass args to the template file 
+ * Like get_template_part() put lets you pass args to the template file
  * Args are available in the tempalte as $template_args array
  * @param string filepart
  * @param mixed wp_args style argument list
  */
 function hm_get_template_part( $file, $template_args = array(), $cache_args = array() ) {
-	
+
 	$template_args = wp_parse_args( $template_args );
 	$cache_args = wp_parse_args( $cache_args );
 
@@ -1618,16 +1582,16 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 		}
 
 	}
-	
+
 	do_action( 'start_operation', 'hm_template_part::' . $file );
-	
+
 	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) )
 		$file_path = get_stylesheet_directory() . '/' . $file . '.php';
 
 	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
 		$file_path = get_template_directory() . '/' . $file . '.php';
 
-	ob_start();	
+	ob_start();
 	$return = require( $file_path );
 	$data = ob_get_clean();
 
@@ -1667,7 +1631,7 @@ function hm_is_queried_object( $term_or_taxonomy ) {
 
 		}
 		}
-		
+
 		if ( ! empty( $wp_query->_post_parent_query ) ) {
 			foreach ( $wp_query->_post_parent_query->tax_query->queries as $query ) {
 
