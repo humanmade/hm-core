@@ -528,7 +528,7 @@ function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = n
 	if ( $return = wpthumb(hm_get_post_internal_image($post), $w, $h, $crop, true, wpthumb_wm_get_options( $id )) )
 		return $return;
 
-	if ( $reutrn = hm_get_post_external_image($post) )
+	if ( $return = hm_get_post_external_image($post) )
 		return $return;
 
 	if ( $default ) {
