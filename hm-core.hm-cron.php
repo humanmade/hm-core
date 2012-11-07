@@ -92,9 +92,6 @@ class HM_Cron {
 		$result = null;
 		
 		$result = apply_filters( $item->handle, $result, (array) json_decode( $item->args ) );
-		
-		error_log( print_r( $result, true ) );
-		
 		if ( is_wp_error( $result ) ) {
 		
 			error_log( $this->DB->update( $this->table, array( 'next' => time() + 1, 'last_message' => json_encode( $result ), 'running' => 0 ), array( 'cron_id' => $item->cron_id ) ) );
