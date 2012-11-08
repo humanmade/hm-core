@@ -3,12 +3,10 @@
 /*
 Plugin Name: HM Core
 Description: A set of helpful frameworks, functions, classes.
-Version: 1.1
+Version: 1.2
 Author: Human Made Limited
 Author URI: http://hmn.md/
 */
-
-// TODO We should use theme_supports for the loading
 
 // Don't load if there is another version loaded
 // TODO we shouldn't even activate
@@ -22,6 +20,7 @@ define( 'HM_CORE_URL', str_replace( ABSPATH, site_url( '/' ), HM_CORE_PATH ) );
 // Load core files
 include_once( HM_CORE_PATH . 'hm-core.deprecated.php' );
 include_once( HM_CORE_PATH . 'hm-core.functions.php' );
+include_once( HM_CORE_PATH . 'hm-core.termmeta.php' );
 include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
 include_once( HM_CORE_PATH . 'hm-core.classes.php' );
@@ -61,10 +60,6 @@ function hm_theme_supports() {
 		}
 
 	}
-
-	// hm cron
-	if ( current_theme_supports( 'hm-cron' ) )
-		include_once( HM_CORE_PATH . 'hm-core.hm-cron.php' );
 
 }
 add_action( 'after_setup_theme', 'hm_theme_supports', 11 );

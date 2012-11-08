@@ -19,36 +19,6 @@ function hm_human_post_time( $timestamp = 'current' ) {
 }
 
 /**
- * hm_parse_post function.
- *
- * @access public
- * @param mixed $post. (default: null)
- * @return void
- */
-function hm_parse_post( $post = null ) {
-
-	if ( is_object( $post ) || is_array( $post ) )
-		return (object) $post;
-
-	if ( is_numeric( $post ) )
-		return get_post( $post );
-
-	if ( is_null( $post ) )
-		return get_post( $post );
-
-	if ( is_string( $post ) && get_page_by_title( $post ) )
-		return get_page_by_title( $post );
-
-	if ( is_string( $post ) && get_page_by_path( $post ) )
-		return get_page_by_path( $post );
-
-	if ( is_string( $post ) ) :
-		global $wpdb;
-		return get_post( $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_name = '$post'" ) );
-	endif;
-}
-
-/**
  * recursive_in_array function.
  *
  * @access public
@@ -115,59 +85,6 @@ function hm_shorten_string( $string, $length ) {
 	return $string;
 }
 
-/**
- * Sorts a 2 dimentional array by a given 2nd level array key.
- *
- * @param array &$data
- * @param string $sortby - array key
- * @return array
- */
-function masort($array, $id, $sort_ascending = true) {
-
-   	$temp_array = array();
-
-   	$original_array = $array;
-   	foreach( $array as $key => $value ) {
-   		$original_keys[] = $key;
-   	}
-
-   	$array = array_values( $array );
-
-	while(count($array)>0) {
-	    $lowest_id = 0;
-	    $index=0;
-	    $index_to_keys = array();
-	    foreach ($array as $key => $item) {
-	        if ( isset($item[$id]) ) {
-				if ($array[$lowest_id][$id]) {
-
-					if ( is_numeric( $item[$id] ) ) {
-						if ( $item[$id] < $array[$lowest_id][$id] ) {
-							$lowest_id = $index;
-							$index_to_keys[$index] = $key;
-						}
-					} else {
-	           			if (strtolower($item[$id]) < strtolower($array[$lowest_id][$id])) {
-	                		$lowest_id = $index;
-	                		$index_to_keys[$index] = $key;
-	            		}
-	            	}
-	            }
-        	}
-	        $index++;
-	    }
-
-       	$temp_array[ array_search( $array[$lowest_id], $original_array ) ] = $array[$lowest_id];
-	    $array = array_merge(array_slice($array, 0,$lowest_id), array_slice($array, $lowest_id+1));
-       }
-
-	if ($sort_ascending) {
-		return $temp_array;
-   } else {
-		return array_reverse($temp_array);
-   }
-}
-
 function hm_sort_array_by_object_key( $array, $object_key ) {
 
 	global $hm_sort_array_by_object_key;
@@ -220,64 +137,6 @@ function array_map_preserve_keys($callback,$arr1) {
        }
    }
     return $results;
-}
-
-/**
- * is_odd function.
- *
- * @param int
- * @return bool
- */
-function is_odd( $int ) {
-	return  $int & 1;
-}
-
-/**
- * in_array_multi function.
- *
- * @param mixed $needle array value
- * @param array $haystack
- * @return array - found results
- */
-function in_array_multi( $needle, $haystack ) {
-
-	foreach( (array) $haystack as $key => $stack ) {
-
-		if ( is_array( $stack ) && in_array_multi( $needle, $stack ) )
-			return true;
-
-		if ( $stack === $needle )
-			return true;
-	}
-
-	return false;
-}
-
-/**
- * multi_array_key_exists function.
- *
- * @param mixed $needle The key you want to check for
- * @param mixed $haystack The array you want to search
- * @return bool
- */
-function multi_array_key_exists( $needle, $haystack ) {
-
-	foreach ( $haystack as $key => $value ) :
-
-		if ( $needle === $key ) {
-			return true;
-		}
-
-		if ( is_array( $value ) ) :
-		 	if ( multi_array_key_exists( $needle, $value ) == true )
-				return true;
-		 	else
-		 		continue;
-		endif;
-
-	endforeach;
-
-	return false;
 }
 
 function hm_count( $count, $none, $one, $more = null ) {
@@ -338,7 +197,7 @@ function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
  */
 function hm_get_term_children( $parent, $taxonomy = null ) {
 
-	if ( !is_numeric( $parent ) )
+	if ( ! is_numeric( $parent ) )
 		return false;
 
 	global $wpdb;
@@ -356,157 +215,6 @@ function hm_get_term_children( $parent, $taxonomy = null ) {
 }
 
 
-// term meta functions
-//
-
-function hm_add_term_meta_table() {
-	global $wpdb;
-
-	if ( !current_theme_supports( 'term-meta' ) )
-		return false;
-
-	//only creates if needed
-	hm_create_term_meta_table();
-
-	$wpdb->tables[] = 'termmeta';
-	$wpdb->termmeta = $wpdb->prefix . 'termmeta';
-
-}
-add_action( 'init', 'hm_add_term_meta_table' );
-
-/**
- * Creates the termmeta table if it deos not exist
- *
- * @todo this causes database error on sites which have termmeta already
- */
-function hm_create_term_meta_table() {
-	global $wpdb;
-
-	// check if the table is already exists
-	if ( get_option( 'hm_created_term_meta_table' ) )
-		return;
-
-	$wpdb->query( "
-		CREATE TABLE `{$wpdb->prefix}termmeta` (
-		  `meta_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-		  `term_id` bigint(20) unsigned NOT NULL DEFAULT '0',
-		  `meta_key` varchar(255) DEFAULT NULL,
-		  `meta_value` longtext,
-		  PRIMARY KEY (`meta_id`),
-		  KEY `term_id` (`term_id`),
-		  KEY `meta_key` (`meta_key`)
-		) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;" );
-
-	update_option( 'hm_created_term_meta_table', true );
-
-	return true;
-}
-
-if ( !function_exists( 'add_term_meta' ) ) :
-/**
- * Add meta data field to a term.
- *
- * @param int $term_id term ID.
- * @param string $key Metadata name.
- * @param mixed $value Metadata value.
- * @param bool $unique Optional, default is false. Whether the same key should not be added.
- * @return bool False for failure. True for success.
- */
-function add_term_meta($term_id, $meta_key, $meta_value, $unique = false) {
-    return add_metadata('term', $term_id, $meta_key, $meta_value, $unique);
-}
-endif;
-
-if ( !function_exists( 'delete_term_meta' ) ) :
-/**
- * Remove metadata matching criteria from a term.
- *
- * You can match based on the key, or key and value. Removing based on key and
- * value, will keep from removing duplicate metadata with the same key. It also
- * allows removing all metadata matching key, if needed.
- *
- * @param int $term_id term ID
- * @param string $meta_key Metadata name.
- * @param mixed $meta_value Optional. Metadata value.
- * @return bool False for failure. True for success.
- */
-function delete_term_meta($term_id, $meta_key, $meta_value = '') {
-    return delete_metadata('term', $term_id, $meta_key, $meta_value);
-}
-endif;
-
-if ( !function_exists( 'get_term_meta' ) ) :
-/**
- * Retrieve term meta field for a term.
- *
- * @param int $term_id term ID.
- * @param string $key The meta key to retrieve.
- * @param bool $single Whether to return a single value.
- * @return mixed Will be an array if $single is false. Will be value of meta data field if $single
- *  is true.
- */
-function get_term_meta($term_id, $key, $single = false) {
-    return get_metadata('term', $term_id, $key, $single);
-}
-endif;
-
-if ( !function_exists( 'update_term_meta' ) ) :
-/**
- * Update term meta field based on term ID.
- *
- * Use the $prev_value parameter to differentiate between meta fields with the
- * same key and term ID.
- *
- * If the meta field for the term does not exist, it will be added.
- *
- * @param int $term_id term ID.
- * @param string $key Metadata key.
- * @param mixed $value Metadata value.
- * @param mixed $prev_value Optional. Previous value to check before removing.
- * @return bool False on failure, true if success.
- */
-function update_term_meta($term_id, $meta_key, $meta_value, $prev_value = '') {
-    return update_metadata('term', $term_id, $meta_key, $meta_value, $prev_value);
-}
-endif;
-
-if ( !function_exists( 'get_term_custom' ) ) :
-/**
- * Retrieve term meta fields, based on post ID.
- *
- * The term meta fields are retrieved from the cache, so the function is
- * optimized to be called more than once. It also applies to the functions, that
- * use this function.
- *
- * @param int $term_id term ID
- * @return array
- */
- function get_term_custom($term_id = 0) {
-
-    $term_id = (int) $term_id;
-
-    if ( ! wp_cache_get($term_id, 'term_meta') )
-        update_termmeta_cache($term_id);
-
-    return wp_cache_get($term_id, 'term_meta');
-}
-endif;
-
-if ( !function_exists( 'update_termmeta_cache' ) ) :
-/**
-* Updates metadata cache for list of term_ids.
-*
-* Performs SQL query to retrieve the metadata for the term_idss and updates the
-* metadata cache for the terms. Therefore, the functions, which call this
-* function, do not need to perform SQL queries on their own.
-*
-* @param array $term_ids List of term_idss.
-* @return bool|array Returns false if there is nothing to update or an array of metadata.
-*/
-function update_termmeta_cache($term_ids) {
-    return update_meta_cache('term', $term_ids);
-}
-endif;
 
 function hm_get_post_image( $post = null, $w = 0, $h = 0, $crop = false, $id = null, $default = null ) {
 
@@ -926,16 +634,6 @@ function hm_get_countries( $popular = null ) {
 
 }
 
-function hm_get_breadcrumb_tree() {
-
-}
-
-function hm_breadcrumbs() {
-
-
-
-}
-
 function hm_time_to_local( $time = null ) {
 
 	if ( is_null( $time ) )
@@ -1036,25 +734,13 @@ function hm_multi_implode( $array, $separator = ', ', $last_separator = ' &amp; 
 }
 
 /**
- * r_implode function. a recursive version of implode
- *
- * @access public
- * @param string $glue
- * @param array $pieces
- * @return string
+ * Take into account draft posts when you specify hide_empty in get_terms()
+ * 
+ * @param  StdClass[] $terms
+ * @param  string $taxonomies
+ * @param  array $args
+ * @return StdClass[]
  */
-function r_implode( $glue, $pieces ) {
-
-	foreach ( $pieces as $piece )
-	    if ( is_array( $piece ) )
-			$return[] = r_implode( $glue, $piece );
-    	else
-			$return[] = $piece;
-
-	return implode( $glue, $return );
-
-}
-
 function hm_add_exclude_draft_to_get_terms_hide_empty( $terms, $taxonomies, $args ) {
 
 	if ( $args['hide_empty'] == false || ( $args['hide_empty'] == true && empty( $args['hide_empty_exclude_drafts'] ) ) )
@@ -1076,7 +762,6 @@ function hm_add_exclude_draft_to_get_terms_hide_empty( $terms, $taxonomies, $arg
 
 }
 add_filter( 'get_terms', 'hm_add_exclude_draft_to_get_terms_hide_empty', 1, 3 );
-
 
 
 /**
@@ -1315,7 +1000,7 @@ function hm_submenu_class( $classes, $item ) {
     return $classes;
 }
 
-add_filter( 'nav_menu_css_class', 'hm_submenu_class', 10, 2);
+add_filter( 'nav_menu_css_class', 'hm_submenu_class', 10, 2 );
 
 /**
  * hm_touch_time function.
@@ -1624,12 +1309,12 @@ function hm_is_queried_object( $term_or_taxonomy ) {
 	if ( is_string( $term_or_taxonomy ) ) {
 
 		if ( $wp_query->tax_query ) {
-		foreach ( $wp_query->tax_query->queries as $query ) {
+			foreach ( $wp_query->tax_query->queries as $query ) {
 
-			if ( $query['taxonomy'] == $term_or_taxonomy )
-				return true;
+				if ( $query['taxonomy'] == $term_or_taxonomy )
+					return true;
 
-		}
+			}
 		}
 
 		if ( ! empty( $wp_query->_post_parent_query ) ) {
