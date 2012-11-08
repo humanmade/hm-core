@@ -153,6 +153,7 @@ class HM_Rewrite_Rule {
 	public $admin_bar_callbacks = array();
 	public $template = '';
 	public $access_rule = '';
+	public $request_methods = array();
 
 	public function __construct( $regex, $id = null ) {
 
@@ -200,6 +201,12 @@ class HM_Rewrite_Rule {
 	public function matched_rule() {
 
 		global $wp;
+
+		// check request methods match
+		if ( $this->request_methods && ! in_array( strtolower( $_SERVER['REQUEST_METHOD'] ), $this->request_methods ) ) {
+			header( 'HTTP/1.1 403 Forbidden' );
+			exit;
+		}
 
 		do_action( 'hm_parse_request_' . $this->get_regex(), $wp );
 
@@ -373,6 +380,13 @@ class HM_Rewrite_Rule {
 	public function add_admin_bar_callback( $callback ) {
 		$this->admin_bar_callbacks[] = $callback;
 	}
+
+	/**
+	 * Set the request methods, e.g. PUT/POST
+	 */
+	public function set_request_methods( $methods ) {
+		$this->request_methods = array_map( 'strtolower', $methods );
+	}
 }
 
 /**
@@ -394,6 +408,7 @@ class HM_Rewrite_Rule {
  * @param  function 	$query_callback A callback taht will be called once the WP_Query has finished. Use to overrite any
  *                                   	annoying is_404, is_home etc that you custom query may not match to.
  * @param  function 	$access_rule An access rule for restriciton to logged-in-users only for example.
+ * @param  array 		$request_methods An array of request methods, e.g. PUT, POST
  */
 function hm_add_rewrite_rule( $args = array() ) {
 
@@ -470,6 +485,14 @@ function hm_add_rewrite_rule( $args = array() ) {
 				$query->$property = $value;
 
 		} );
+
+	if ( ! empty( $args['request_methods'] ) ) {
+		$rule->set_request_methods( $args['request_methods'] );
+	}
+
+	if ( ! empty( $args['request_method'] ) ) {
+		$rule->set_request_methods( array( $args['request_method'] ) );
+	}
 
 	HM_Rewrite::add_rule( $rule );
 }
