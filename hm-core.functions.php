@@ -168,6 +168,15 @@ function get_term_meta_by( $field = 'term_id', $value ) {
 
 }
 
+/**
+ * Get meta data by any given fields / values. For example, get all meta entries with a meta_value of '_featured'
+ * 
+ * @param  array $fields the fields you want to select by
+ * @param  array $values the values for the fields specified above
+ * @param  string $type  the type of meta data, example post|comment etc
+ * @param  string $col   the column to select
+ * @return mixed
+ */
 function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
