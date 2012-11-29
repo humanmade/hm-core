@@ -87,6 +87,7 @@ class HM_Rewrite_Rule {
 	public $template = '';
 	public $access_rule = '';
 	public $request_methods = array();
+	public $disable_canonical = false;
 
 	public function __construct( $regex, $id = null ) {
 
@@ -207,6 +208,13 @@ class HM_Rewrite_Rule {
 			foreach ( $t->parse_query_callbacks as $callback )
 				call_user_func_array( $callback, array( $query ) );
 		} );
+
+		add_filter( 'redirect_canonical', function( $redirect_to ) use ( $t ) {
+			if ( $t->disable_canonical )
+				return null;
+
+			return $redirect_to;
+		});
 
 		add_filter( 'body_class', function( $classes ) use ( $t ) {
 
@@ -395,6 +403,8 @@ function hm_add_rewrite_rule( $args = array() ) {
 	if ( ! empty( $args['admin_bar_callback'] ) )
 		$rule->add_admin_bar_callback( $args['admin_bar_callback'] );
 
+	if ( ! empty( $args['disable_canonical'] ) )
+		$rule->disable_canonical = true;
 
 	// some convenenience properties. These are done here because they are not very nice
 	if ( ! empty( $args['body_class'] ) )

@@ -1280,13 +1280,13 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 	do_action( 'start_operation', 'hm_template_part::' . $file );
 
 	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) )
-		$file_path = get_stylesheet_directory() . '/' . $file . '.php';
+		$file = get_stylesheet_directory() . '/' . $file . '.php';
 
 	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
-		$file_path = get_template_directory() . '/' . $file . '.php';
+		$file = get_template_directory() . '/' . $file . '.php';
 
 	ob_start();
-	$return = require( $file_path );
+	$return = require( $file );
 	$data = ob_get_clean();
 
 	do_action( 'end_operation', 'hm_template_part::' . $file );
