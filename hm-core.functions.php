@@ -79,10 +79,18 @@ function hm_get_permalink( $post ) {
  */
 function hm_shorten_string( $string, $length ) {
 
-	if ( strlen( $string ) > (int)$length )
-		return substr( $string, 0, $length - 3 ) . '...';
+	// convert string to chars, as if we have somethign like &quot; what we really want is that to be a count of 1
+	$string = html_entity_decode( $old_string = $string, ENT_COMPAT, 'UTF-8' );
 
-	return $string;
+	if ( $string !== $old_string )
+		$had_entities = true;
+	else
+		$had_entities = false;
+
+	if ( mb_strlen( $string, 'UTF-8' ) > (int)$length )
+		return mb_substr( $string, 0, $length - 3, 'UTF-8' ) . '...';
+
+	return $had_entities ? htmlentities( $string, ENT_COMPAT, 'UTF-8' ) : $string;
 }
 
 function hm_sort_array_by_object_key( $array, $object_key ) {
