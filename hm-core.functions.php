@@ -176,6 +176,15 @@ function get_term_meta_by( $field = 'term_id', $value ) {
 
 }
 
+/**
+ * Get meta data by any given fields / values. For example, get all meta entries with a meta_value of '_featured'
+ * 
+ * @param  array $fields the fields you want to select by
+ * @param  array $values the values for the fields specified above
+ * @param  string $type  the type of meta data, example post|comment etc
+ * @param  string $col   the column to select
+ * @return mixed
+ */
 function get_metadata_by( $fields, $values, $type = 'post', $col = '*' ) {
 
 	global $wpdb;
@@ -1279,13 +1288,13 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 	do_action( 'start_operation', 'hm_template_part::' . $file );
 
 	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) )
-		$file_path = get_stylesheet_directory() . '/' . $file . '.php';
+		$file = get_stylesheet_directory() . '/' . $file . '.php';
 
 	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
-		$file_path = get_template_directory() . '/' . $file . '.php';
+		$file = get_template_directory() . '/' . $file . '.php';
 
 	ob_start();
-	$return = require( $file_path );
+	$return = require( $file );
 	$data = ob_get_clean();
 
 	do_action( 'end_operation', 'hm_template_part::' . $file );

@@ -80,8 +80,10 @@ function hm_get_messages( $context = null, $clear_message = true ) {
 			$hm_messages = '';
 	}
 	
-	if ( $clear_message )
+	if ( $clear_message ) {
 		add_action( 'wp_footer', 'hm_setcookie_js' );
+		add_action( 'admin_footer', 'hm_setcookie_js' );
+	}
 
 	return $all_messages;
 }
