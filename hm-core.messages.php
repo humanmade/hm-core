@@ -85,7 +85,7 @@ function hm_get_messages( $context = null, $clear_message = true ) {
 		add_action( 'admin_footer', 'hm_setcookie_js' );
 	}
 
-	return $all_messages;
+	return array_filter( $all_messages );
 }
 
 /**
