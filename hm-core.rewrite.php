@@ -194,8 +194,19 @@ class HM_Rewrite_Rule {
 			foreach ( $t->query_callbacks as $callback )
 				call_user_func_array( $callback, array( $wp_query ) );
 
+			
+
 			if ( $t->template ) {
-				include( $t->template );
+
+				$template = $t->template;
+
+				if ( ! file_exists( $template ) )
+					$template = get_stylesheet_directory() . '/' . $t->template;
+
+				if ( ! file_exists( $template ) )
+					$template = get_template_directory() . '/' . $t->template;
+
+				include( $template );
 				exit;
 			}
 		});
@@ -227,7 +238,7 @@ class HM_Rewrite_Rule {
 		add_filter( 'wp_title', function( $title, $sep = '' ) use ( $t ) {
 
 			foreach ( $t->title_callbacks as $callback )
-				$title = call_user_func_array( $callback, array( $title ) );
+				$title = call_user_func_array( $callback, array( $title, $sep ) );
 
 			return $title;
 
@@ -247,9 +258,6 @@ class HM_Rewrite_Rule {
 	 * @param string $template
 	 */
 	public function set_template( $template ) {
-
-		if ( ! file_exists( $template ) )
-			$template = get_template_directory() . '/' . $template;
 
 		$this->template = $template;
 	}
@@ -466,7 +474,7 @@ add_filter( 'rewrite_rules_array', function( $rules ) {
  * @return null
  */
 add_filter( 'parse_request', function( WP $request ) {
-
+	
 	$matched_regex = $request->matched_rule;
 
 	HM_Rewrite::matched_regex( $matched_regex );
