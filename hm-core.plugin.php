@@ -3,7 +3,7 @@
 /*
 Plugin Name: HM Core
 Description: A set of helpful frameworks, functions, classes.
-Version: 1.2
+Version: 1.3
 Author: Human Made Limited
 Author URI: http://hmn.md/
 */
