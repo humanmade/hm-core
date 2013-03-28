@@ -21,7 +21,6 @@ define( 'HM_CORE_URL', str_replace( ABSPATH, site_url( '/' ), HM_CORE_PATH ) );
 include_once( HM_CORE_PATH . 'hm-core.deprecated.php' );
 include_once( HM_CORE_PATH . 'hm-core.functions.php' );
 include_once( HM_CORE_PATH . 'hm-core.termmeta.php' );
-include_once( HM_CORE_PATH . 'hm-core.rewrite.php' );
 include_once( HM_CORE_PATH . 'hm-core.messages.php' );
 include_once( HM_CORE_PATH . 'hm-core.classes.php' );
 include_once( HM_CORE_PATH . 'hm-core.wp-query-additions.php' );
