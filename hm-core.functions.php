@@ -35,6 +35,29 @@ function recursive_in_array($needle, $haystack) {
     return false;
 }
 
+
+/**
+ * r_implode function. a recursive version of implode
+ * 
+ * @access public
+ * @param string $glue
+ * @param array $pieces
+ * @return string
+ */
+function r_implode( $glue, $pieces ) { 
+	
+	$return = array();
+	foreach ( $pieces as $piece ) 
+	    if ( is_array( $piece ) ) 
+			$return[] = r_implode( $glue, $piece ); 
+		elseif( is_object( $piece ) )
+			$return[] = r_implode( $glue, (array) $piece );
+    	else 
+			$return[] = $piece; 
+
+	return implode( $glue, $return ); 
+}
+
 /**
  * Teh same as array_filter(), but will recursilvy traverse arrays.
  *
