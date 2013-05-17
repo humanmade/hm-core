@@ -1572,6 +1572,9 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 	elseif ( file_exists( get_template_directory() . '/' . $file . '.php' ) )
 		$file_path = get_template_directory() . '/' . $file . '.php';
 
+	elseif ( file_exists( $file ) )
+		$file_path = $file;
+
 	ob_start();
 	$return = require( $file_path );
 	$data = ob_get_clean();
