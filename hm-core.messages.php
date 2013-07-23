@@ -42,6 +42,8 @@ function hm_add_message( $message, $context = null, $type = 'success' ) {
 	
 	$hm_messages[$context][] = array( 'message' => $message, 'type' => $type );
 
+	do_action( 'hm_message_added', $message, $type );
+
 	setcookie( 'hm_messages', json_encode( $hm_messages ), 0, COOKIEPATH );
 
 }
