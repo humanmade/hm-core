@@ -170,20 +170,3 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 	return $orderby;
 }
 add_filter( 'posts_orderby_request', 'hm_allow_any_orderby_to_wp_query', 10, 2 );
-
-/**
- * Adds support for query mutlieple authors by using a MySQL IN () which is often faster than an OR list
- * 
- * @param  [type] $query [description]
- * @return [type]        [description]
- */
-function hm_add_author__in_to_wp_query( $where, $query ) {
-
-	global $wpdb;
-
-	if ( isset( $query->query_vars['author__in'] ) && is_array( $query->query_vars['author__in'] ) )
-		$where .= " AND $wpdb->posts.post_author IN (" . implode( ', ', $query->query_vars['author__in'] ) . ")";
-
-	return $where;
-}
-add_filter( 'posts_where', 'hm_add_author__in_to_wp_query', 10, 2 );
