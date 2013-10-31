@@ -2,13 +2,14 @@
 
 /**
  * Advanced parent querying with WP_Query
- *
- * I.e. get all attachments that have post_parents that are prodicts in a given taxonomy.
+ * 
+ * I.e. get all attachments that have post_parents that are prodicts in a given taxonomy. 
  * Basically, nested queries for post_parent
- *
+ * 
  * Below is the hook. Work in progress :)
  */
-function hm_advanced_parent_queries ( WP_Query $wp_query ) {
+
+add_filter( 'parse_query', function( WP_Query $wp_query ) {
 
 	if ( empty( $wp_query->query_vars['post_parent'] ) || ! is_array( $wp_query->query_vars['post_parent'] ) )
 		return;
@@ -24,14 +25,14 @@ function hm_advanced_parent_queries ( WP_Query $wp_query ) {
 
 	// only select IDs as it's used in a subquery
 	$wp_query->query_vars['post_parent']['fields'] = 'ids';
-
+	
 	// WP_Query is crap, so doesn't let you get the query without actually running it (which is why we set showposts = 1 above)
 	$query = new WP_Query( $wp_query->query_vars['post_parent'] );
 
 	unset( $wp_query->query_vars['post_parent'] );
 
 	$wp_query->_post_parent_query = $query;
-
+	
 	$sql = str_replace( 'ORDER BY wp_posts.post_date DESC LIMIT 0, 1' , '', $query->request );
 
 	add_filter( 'posts_where_request', function( $where, $query ) use ( $sql, $wp_query ) {
@@ -47,8 +48,8 @@ function hm_advanced_parent_queries ( WP_Query $wp_query ) {
 		return $where;
 	}, 10, 2 );
 
-}
-add_filter( 'parse_query', 'hm_advanced_parent_queries' );
+} );
+
 
 // Multiple meta value hackkks
 add_filter( 'posts_join_paged', 'hm_add_multiple_meta_joins_to_wp_query', 10, 2 );
