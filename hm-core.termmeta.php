@@ -41,7 +41,7 @@ function hm_create_term_meta_table() {
 		  PRIMARY KEY (`meta_id`),
 		  KEY `term_id` (`term_id`),
 		  KEY `meta_key` (`meta_key`)
-		) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;" );
+		) ENGINE=`DEFAULT` AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;" );
 
 	update_option( 'hm_created_term_meta_table', true );
 
