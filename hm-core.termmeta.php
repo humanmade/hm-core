@@ -33,7 +33,7 @@ function hm_create_term_meta_table() {
 		return;
 
 	$wpdb->query( "
-		CREATE TABLE `{$wpdb->prefix}termmeta` (
+		CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}termmeta` (
 		  `meta_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		  `term_id` bigint(20) unsigned NOT NULL DEFAULT '0',
 		  `meta_key` varchar(255) DEFAULT NULL,
