@@ -8,7 +8,7 @@ function hm_add_term_meta_table() {
 	global $wpdb;
 
 	if ( ! current_theme_supports( 'term-meta' ) )
-		return false;
+		return;
 
 	// Create the table if it doesn't already exist
 	hm_create_term_meta_table();
