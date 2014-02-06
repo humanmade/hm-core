@@ -1,16 +1,16 @@
-<?php 
+<?php
 
-
-// term meta functions
-//
-
+/**
+ * Hook in on init and setup the termmeta table
+ */
 function hm_add_term_meta_table() {
+
 	global $wpdb;
 
 	if ( ! current_theme_supports( 'term-meta' ) )
 		return false;
 
-	//only creates if needed
+	// Create the table if it doesn't already exist
 	hm_create_term_meta_table();
 
 	$wpdb->tables[] = 'termmeta';
@@ -22,12 +22,13 @@ add_action( 'init', 'hm_add_term_meta_table' );
 /**
  * Creates the termmeta table if it deos not exist
  *
- * @todo this causes database error on sites which have termmeta already
+ * @todo should we be specifying MyISAM, can't it just use default?
  */
 function hm_create_term_meta_table() {
+
 	global $wpdb;
 
-	// check if the table is already exists
+	// Check if the table is already exists
 	if ( get_option( 'hm_created_term_meta_table' ) )
 		return;
 
@@ -45,9 +46,10 @@ function hm_create_term_meta_table() {
 	update_option( 'hm_created_term_meta_table', true );
 
 	return true;
+
 }
 
-if ( !function_exists( 'add_term_meta' ) ) :
+if ( ! function_exists( 'add_term_meta' ) ) :
 /**
  * Add meta data field to a term.
  *
@@ -57,12 +59,12 @@ if ( !function_exists( 'add_term_meta' ) ) :
  * @param bool $unique Optional, default is false. Whether the same key should not be added.
  * @return bool False for failure. True for success.
  */
-function add_term_meta($term_id, $meta_key, $meta_value, $unique = false) {
-    return add_metadata('term', $term_id, $meta_key, $meta_value, $unique);
+function add_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
+    return add_metadata( 'term', $term_id, $meta_key, $meta_value, $unique );
 }
 endif;
 
-if ( !function_exists( 'delete_term_meta' ) ) :
+if ( ! function_exists( 'delete_term_meta' ) ) :
 /**
  * Remove metadata matching criteria from a term.
  *
@@ -75,12 +77,12 @@ if ( !function_exists( 'delete_term_meta' ) ) :
  * @param mixed $meta_value Optional. Metadata value.
  * @return bool False for failure. True for success.
  */
-function delete_term_meta($term_id, $meta_key, $meta_value = '') {
-    return delete_metadata('term', $term_id, $meta_key, $meta_value);
+function delete_term_meta( $term_id, $meta_key, $meta_value = '' ) {
+    return delete_metadata( 'term', $term_id, $meta_key, $meta_value );
 }
 endif;
 
-if ( !function_exists( 'get_term_meta' ) ) :
+if ( ! function_exists( 'get_term_meta' ) ) :
 /**
  * Retrieve term meta field for a term.
  *
@@ -90,12 +92,12 @@ if ( !function_exists( 'get_term_meta' ) ) :
  * @return mixed Will be an array if $single is false. Will be value of meta data field if $single
  *  is true.
  */
-function get_term_meta($term_id, $key, $single = false) {
-    return get_metadata('term', $term_id, $key, $single);
+function get_term_meta( $term_id, $key, $single = false ) {
+    return get_metadata( 'term', $term_id, $key, $single );
 }
 endif;
 
-if ( !function_exists( 'update_term_meta' ) ) :
+if ( ! function_exists( 'update_term_meta' ) ) :
 /**
  * Update term meta field based on term ID.
  *
@@ -110,12 +112,12 @@ if ( !function_exists( 'update_term_meta' ) ) :
  * @param mixed $prev_value Optional. Previous value to check before removing.
  * @return bool False on failure, true if success.
  */
-function update_term_meta($term_id, $meta_key, $meta_value, $prev_value = '') {
-    return update_metadata('term', $term_id, $meta_key, $meta_value, $prev_value);
+function update_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
+    return update_metadata( 'term', $term_id, $meta_key, $meta_value, $prev_value );
 }
 endif;
 
-if ( !function_exists( 'get_term_custom' ) ) :
+if ( ! function_exists( 'get_term_custom' ) ) :
 /**
  * Retrieve term meta fields, based on post ID.
  *
@@ -126,18 +128,18 @@ if ( !function_exists( 'get_term_custom' ) ) :
  * @param int $term_id term ID
  * @return array
  */
- function get_term_custom($term_id = 0) {
+function get_term_custom($term_id = 0) {
 
     $term_id = (int) $term_id;
 
-    if ( ! wp_cache_get($term_id, 'term_meta') )
-        update_termmeta_cache($term_id);
+    if ( ! wp_cache_get( $term_id, 'term_meta' ) )
+        update_termmeta_cache( $term_id );
 
-    return wp_cache_get($term_id, 'term_meta');
+    return wp_cache_get( $term_id, 'term_meta' );
 }
 endif;
 
-if ( !function_exists( 'update_termmeta_cache' ) ) :
+if ( ! function_exists( 'update_termmeta_cache' ) ) :
 /**
 * Updates metadata cache for list of term_ids.
 *
@@ -148,7 +150,7 @@ if ( !function_exists( 'update_termmeta_cache' ) ) :
 * @param array $term_ids List of term_idss.
 * @return bool|array Returns false if there is nothing to update or an array of metadata.
 */
-function update_termmeta_cache($term_ids) {
-    return update_meta_cache('term', $term_ids);
+function update_termmeta_cache( $term_ids ) {
+    return update_meta_cache( 'term', $term_ids );
 }
 endif;
