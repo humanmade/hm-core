@@ -82,6 +82,22 @@ function delete_term_meta( $term_id, $meta_key, $meta_value = '' ) {
 }
 endif;
 
+/**
+ * Hook into the delete_term action and make sure any meta is also delete
+ * @param int $term_id
+ */
+function delete_term_meta_when_term_is_deleted( $term_id ) {
+
+	global $wpdb;
+
+	$term_meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM $wpdb->termmeta WHERE term_id = %d ", $term_id ) );
+
+	foreach ( $term_meta_ids as $mid )
+		delete_metadata_by_mid( 'term', $mid );
+
+}
+add_action ( 'delete_term', 'delete_term_meta_when_term_is_deleted' );
+
 if ( ! function_exists( 'get_term_meta' ) ) :
 /**
  * Retrieve term meta field for a term.
