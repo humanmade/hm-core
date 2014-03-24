@@ -1265,9 +1265,9 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 
 	}
 
-	$file_handle = md5( uniqid (rand(), true ) ) . $file;
+	$file_handle = $file;
 
-	do_action( 'start_operation', 'hm_template_part::' . $file_handle . '::' );
+	do_action( 'start_operation', 'hm_template_part::' . $file_handle );
 
 	if ( file_exists( get_stylesheet_directory() . '/' . $file . '.php' ) )
 		$file = get_stylesheet_directory() . '/' . $file . '.php';
@@ -1279,7 +1279,7 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 	$return = require( $file );
 	$data = ob_get_clean();
 
-	do_action( 'end_operation', 'hm_template_part::' . $file_handle . '::' );
+	do_action( 'end_operation', 'hm_template_part::' . $file_handle );
 
 	if ( $cache_args ) {
 		wp_cache_set( $file, $data, serialize( $cache_args ), 3600 );
