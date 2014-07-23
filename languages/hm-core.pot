@@ -1,0 +1,64 @@
+# Copyright (C) 2014 
+# This file is distributed under the same license as the  package.
+msgid ""
+msgstr ""
+"Project-Id-Version:  \n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/hm-core\n"
+"POT-Creation-Date: 2014-07-23 12:38:07+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: hm-core.functions.php:812 hm-core.functions.php:915
+msgid "Next &raquo;"
+msgstr ""
+
+#: hm-core.functions.php:813 hm-core.functions.php:916
+msgid "&laquo; Prev"
+msgstr ""
+
+#. translators: 1: month input, 2: day input, 3: year input, 4: hour input, 5:
+#. minute input
+
+#: hm-core.functions.php:1047
+msgid "%1$s%2$s, %3$s @ %4$s : %5$s"
+msgstr ""
+
+#: media-uploader.extensions.php:153 media-uploader.extensions.php:164
+msgid "Insert into Post"
+msgstr ""
+
+#: media-uploader.extensions.php:171
+msgid "Delete Permanently"
+msgstr ""
+
+#: media-uploader.extensions.php:173
+msgid "Delete"
+msgstr ""
+
+#: media-uploader.extensions.php:173
+msgid "You are about to delete <strong>%s</strong>."
+msgstr ""
+
+#: media-uploader.extensions.php:173
+msgid "Continue"
+msgstr ""
+
+#: media-uploader.extensions.php:173
+msgid "Cancel"
+msgstr ""
+
+#: media-uploader.extensions.php:175
+msgid "Move to Trash"
+msgstr ""
+
+#: media-uploader.extensions.php:175
+msgid "Undo"
+msgstr ""
+
+#: media-uploader.extensions.php:184
+msgid "Use as thumbnail"
+msgstr ""
