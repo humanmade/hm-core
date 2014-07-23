@@ -62,3 +62,9 @@ function hm_theme_supports() {
 
 }
 add_action( 'after_setup_theme', 'hm_theme_supports', 11 );
+
+function hm_core_load_textdomain() {
+	
+	load_muplugin_textdomain( 'hm-core', '/hm-core/languages' );
+}
+add_action( 'init', 'hm_core_load_textdomain' );

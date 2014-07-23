@@ -809,8 +809,8 @@ function hm_get_pagination( $wp_query = null, $current_page = null, $ppp = null,
 	$current_page = $current_page ? $current_page : 1;
 
 	$defaults = array(
-		'next_text' => 'Next &raquo;',
-		'prev_text' => '&laquo; Prev',
+		'next_text' => __( 'Next &raquo;', 'hm-core' ),
+		'prev_text' => __( '&laquo; Prev', 'hm-core' ),
 		'show_all' => false
 	);
 
