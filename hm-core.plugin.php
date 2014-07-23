@@ -64,20 +64,7 @@ function hm_theme_supports() {
 add_action( 'after_setup_theme', 'hm_theme_supports', 11 );
 
 function hm_core_load_textdomain() {
-
-	/** The 'plugin_locale' filter is also used by default in load_plugin_textdomain() */
-	$locale = apply_filters( 'plugin_locale', get_locale(), 'hm-core' );
-
-	/** Set filter for WordPress languages directory */
-	$hm_core_wp_lang_dir = apply_filters(
-		'hm_core_wp_lang_dir',
-		trailingslashit( WP_LANG_DIR ) . 'hm-core/hm-core-' . $locale . '.mo'
-	);
-
-	/** Translations: First, look in WordPress' "languages" folder = custom & update-secure! */
-	load_textdomain( 'hm-core', $hm_core_wp_lang_dir );
-
-	/** Translations: Secondly, look in plugin's "languages" folder = default */
+	
 	load_muplugin_textdomain( 'hm-core', '/hm-core/languages' );
 }
 add_action( 'init', 'hm_core_load_textdomain' );
