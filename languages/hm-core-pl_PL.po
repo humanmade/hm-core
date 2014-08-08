@@ -8,18 +8,18 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-07-24 07:53+0100\n"
+"PO-Revision-Date: 2014-08-08 11:31-0300\n"
 "Last-Translator: Human Made Limited <hello@hmn.md>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: Poedit 1.5.7\n"
 
 #: hm-core.functions.php:812 hm-core.functions.php:915
 msgid "Next &raquo;"
-msgstr "następny &raquo;"
+msgstr "następna &raquo;"
 
 #: hm-core.functions.php:813 hm-core.functions.php:916
 msgid "&laquo; Prev"
-msgstr "&laquo; poprzedni"
+msgstr "&laquo; poprzednia"
 
 #. translators: 1: month input, 2: day input, 3: year input, 4: hour input, 5:
 #. minute input
