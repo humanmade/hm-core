@@ -2,10 +2,10 @@
 
 /**
  * Advanced parent querying with WP_Query
- * 
- * I.e. get all attachments that have post_parents that are prodicts in a given taxonomy. 
+ *
+ * I.e. get all attachments that have post_parents that are prodicts in a given taxonomy.
  * Basically, nested queries for post_parent
- * 
+ *
  * Below is the hook. Work in progress :)
  */
 
@@ -25,14 +25,14 @@ add_filter( 'parse_query', function( WP_Query $wp_query ) {
 
 	// only select IDs as it's used in a subquery
 	$wp_query->query_vars['post_parent']['fields'] = 'ids';
-	
+
 	// WP_Query is crap, so doesn't let you get the query without actually running it (which is why we set showposts = 1 above)
 	$query = new WP_Query( $wp_query->query_vars['post_parent'] );
 
 	unset( $wp_query->query_vars['post_parent'] );
 
 	$wp_query->_post_parent_query = $query;
-	
+
 	$sql = str_replace( 'ORDER BY wp_posts.post_date DESC LIMIT 0, 1' , '', $query->request );
 
 	add_filter( 'posts_where_request', function( $where, $query ) use ( $sql, $wp_query ) {
@@ -146,7 +146,8 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
 		$order = str_replace( $wpdb->posts . '.post_', '', $order );
 
-		$table_column = in_array( reset( explode( ' ', $order ) ), array( 'menu_order', 'ID' ) ) ? $order : 'post_' . $order;
+		$bits = explode( ' ', $order );
+		$table_column = in_array( reset( $bits ), array( 'menu_order', 'ID' ) ) ? $order : 'post_' . $order;
 
 		if( strpos( $orderby, $wpdb->posts . '.' . $table_column ) !== false ) {
 			$one_before = $order;
