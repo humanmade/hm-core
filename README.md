@@ -1,3 +1,5 @@
+##*Archived, don't use.*##
+
 hm-core
 =======
 
