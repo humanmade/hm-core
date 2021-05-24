@@ -178,7 +178,7 @@ function get_term_meta_by( $field = 'term_id', $value ) {
 
 /**
  * Get meta data by any given fields / values. For example, get all meta entries with a meta_value of '_featured'
- * 
+ *
  * @param  array $fields the fields you want to select by
  * @param  array $values the values for the fields specified above
  * @param  string $type  the type of meta data, example post|comment etc
@@ -752,7 +752,7 @@ function hm_multi_implode( $array, $separator = ', ', $last_separator = ' &amp; 
 
 /**
  * Take into account draft posts when you specify hide_empty in get_terms()
- * 
+ *
  * @param  StdClass[] $terms
  * @param  string $taxonomies
  * @param  array $args
@@ -1250,7 +1250,7 @@ function hm_get_template_part( $file, $template_args = array(), $cache_args = ar
 			if ( is_scalar( $value ) || is_array( $value ) ) {
 				$cache_args[$key] = $value;
 			} else if ( is_object( $value ) && method_exists( $value, 'get_id' ) ) {
-				$cache_args[$key] = call_user_method( 'get_id', $value );
+				$cache_args[$key] = call_user_func( 'get_id', $value );
 			}
 		}
 
