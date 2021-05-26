@@ -19,9 +19,9 @@ function hm_get_related_posts( $limit = 10, $post_types = array( 'post' ), $taxo
 		'related_post_taxonomies' => $taxonomies
 	);
 
-	$args = wp_parse_args( $args, $default_args );
+	$new_args = wp_parse_args( $args, $default_args );
 
-	extract( $args );
+	extract( $new_args );
 
 	foreach( $related_post_taxonomies as &$related_post_taxonomy )
 		$related_post_taxonomy = "'" . $related_post_taxonomy . "'";
