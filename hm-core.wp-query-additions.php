@@ -176,4 +176,4 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
 	return $orderby;
 }
-add_filter( 'posts_orderby_request', 'hm_allow_any_orderby_to_wp_query', 10, 2 );
+// add_filter( 'posts_orderby_request', 'hm_allow_any_orderby_to_wp_query', 10, 2 );
