@@ -164,18 +164,6 @@ function hm_unsanitize_title( $title ) {
 	return ucwords( str_replace( '_', ' ', $title ) );
 }
 
-function get_post_meta_by( $field = 'post_id', $value ) {
-
-	return get_metadata_by( $field, $value, 'post' );
-
-}
-
-function get_term_meta_by( $field = 'term_id', $value ) {
-
-	return get_metadata_by( $field, $value, 'term' );
-
-}
-
 /**
  * Get meta data by any given fields / values. For example, get all meta entries with a meta_value of '_featured'
  *
@@ -991,7 +979,7 @@ function hm_post_pagination() {
  */
 function hm_submenu_class( $classes, $item ) {
 
-    if ( get_post_meta_by( array( 'meta_value', 'meta_key' ), array( $item->ID, '_menu_item_menu_item_parent' ) ) )
+	if ( get_metadata_by( array( 'meta_value', 'meta_key' ), array( $item->ID, '_menu_item_menu_item_parent' ), 'post' ) )
         $classes[] = 'menu_parent';
 
     return $classes;
