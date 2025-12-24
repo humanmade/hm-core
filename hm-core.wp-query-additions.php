@@ -126,7 +126,13 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
 	global $wpdb;
 	$query = wp_parse_args( $wp_query->query );
-	$orders = explode( ' ', isset( $query['orderby'] ) ? $query['orderby'] : '' );
+	if ( is_array( $query['orderby'] ?? null ) ) {
+		$orders = $query['orderby'];
+	} elseif ( is_string( $query['orderby'] ?? null ) ) {
+		$orders = explode( ' ', $query['orderby'] );
+	} else {
+		$orders = [];
+	}
 
 	if( count( $orders ) <= 1  )
 		return $orderby;
@@ -170,4 +176,4 @@ function hm_allow_any_orderby_to_wp_query( $orderby, $wp_query ) {
 
 	return $orderby;
 }
-add_filter( 'posts_orderby_request', 'hm_allow_any_orderby_to_wp_query', 10, 2 );
+// add_filter( 'posts_orderby_request', 'hm_allow_any_orderby_to_wp_query', 10, 2 );
